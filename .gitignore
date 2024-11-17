@@ -1,0 +1,8 @@
+# Folders
+/.idea
+/build
+/.gradle
+/.kotlin
+
+# Files
+/local.properties
