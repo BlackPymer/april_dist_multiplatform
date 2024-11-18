@@ -1,5 +1,12 @@
 [versions]
 agp = "8.5.2"
+java = "17"
+kotlin = "2.0.21"
+
+compileSdk = "34"
+minSdk = "24"
+targetSdk = "34"
+
 android-compileSdk = "34"
 android-minSdk = "24"
 android-targetSdk = "34"
@@ -13,7 +20,6 @@ androidx-material = "1.12.0"
 androidx-test-junit = "1.2.1"
 compose-multiplatform = "1.7.0"
 junit = "4.13.2"
-kotlin = "2.0.21"
 kotlinx-coroutines = "1.9.0"
 
 [libraries]

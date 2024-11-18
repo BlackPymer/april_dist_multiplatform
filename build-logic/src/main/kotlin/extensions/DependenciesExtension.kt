@@ -22,14 +22,14 @@ fun Project.iosMainDependencies(block: KotlinDependencyHandler.() -> Unit) =
         sourceSets.iosMain.dependencies(block)
     }
 
-fun Project.jvmMainDependencies(block: KotlinDependencyHandler.() -> Unit) =
+fun Project.desktopMainDependencies(block: KotlinDependencyHandler.() -> Unit) =
     with(kotlinMultiplatform) {
         sourceSets.jvmMain.dependencies(block)
     }
 
-fun Project.jsMainDependencies(block: KotlinDependencyHandler.() -> Unit) =
+fun Project.wasmJsMainDependencies(block: KotlinDependencyHandler.() -> Unit) =
     with(kotlinMultiplatform) {
-        sourceSets.jsMain.dependencies(block)
+        sourceSets.wasmJsMain.dependencies(block)
     }
 
 fun Project.commonTestDependencies(block: KotlinDependencyHandler.() -> Unit) =
@@ -47,12 +47,12 @@ fun Project.iosTestDependencies(block: KotlinDependencyHandler.() -> Unit) =
         sourceSets.iosTest.dependencies(block)
     }
 
-fun Project.jvmTestDependencies(block: KotlinDependencyHandler.() -> Unit) =
+fun Project.desktopTestDependencies(block: KotlinDependencyHandler.() -> Unit) =
     with(kotlinMultiplatform) {
         sourceSets.jvmTest.dependencies(block)
     }
 
-fun Project.jsTestDependencies(block: KotlinDependencyHandler.() -> Unit) =
+fun Project.wasmJsTestDependencies(block: KotlinDependencyHandler.() -> Unit) =
     with(kotlinMultiplatform) {
-        sourceSets.jsTest.dependencies(block)
+        sourceSets.wasmJsTest.dependencies(block)
     }
