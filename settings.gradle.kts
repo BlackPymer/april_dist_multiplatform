@@ -36,5 +36,8 @@ include(":androidApp")
 include(":desktopApp")
 include(":webApp")
 
-include(":feature:main")
+include(":core:language")
+include(":core:compose")
+
+include(":feature:camera")
 include(":feature:app")
