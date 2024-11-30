@@ -33,8 +33,6 @@ dependencyResolutionManagement {
 includeBuild("build-logic")
 
 include(":androidApp")
-include(":desktopApp")
-include(":webApp")
 
 include(":core:language")
 include(":core:compose")
