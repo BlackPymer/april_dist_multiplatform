@@ -16,10 +16,6 @@ class CommonLanguagePlugin: Plugin<Project> {
                 apply(AndroidSetup::class.java)
             }
             with(extensions.getByType(KotlinMultiplatformExtension::class.java)) {
-                jvm()
-                wasmJs{
-                    browser()
-                }
                 androidTarget()
                 iosX64()
                 iosArm64()
