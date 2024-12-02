@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinDependencyHandler
 
 internal val Project.kotlinMultiplatform: KotlinMultiplatformExtension
-    get() = extensions.getByName("kotlin") as KotlinMultiplatformExtension
+    get() = extensions.getByType(KotlinMultiplatformExtension::class.java)
 
 fun Project.commonMainDependencies(block: KotlinDependencyHandler.() -> Unit) =
     with(kotlinMultiplatform) {

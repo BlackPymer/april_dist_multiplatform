@@ -7,12 +7,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.mohamedrejeb.calf.permissions.ExperimentalPermissionsApi
-import com.mohamedrejeb.calf.permissions.Permission
-import com.mohamedrejeb.calf.permissions.PermissionStatus
-import com.mohamedrejeb.calf.permissions.rememberPermissionState
+import androidx.lifecycle.viewmodel.compose.viewModel
+import dev.yarobot.shirmaz.core.compose.base.LocalPermissionsController
 import org.jetbrains.compose.resources.stringResource
 import shirmaz.feature.camera.generated.resources.Res
 import shirmaz.feature.camera.generated.resources.camera_not_granted
@@ -20,23 +21,30 @@ import shirmaz.feature.camera.generated.resources.camera_request
 
 @Composable
 fun CameraScreen() {
-    ScreenContent()
+    val viewModel = viewModel { CameraViewModel() }
+    val state by viewModel.state.collectAsState()
+    viewModel.onIntent(CameraIntent.RequestCamera(LocalPermissionsController.current))
+    ScreenContent(
+        onIntent = { viewModel.onIntent(it) },
+        state = remember(state) { state }
+    )
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
-private fun ScreenContent() {
-    val cameraPermissionState = rememberPermissionState(
-        Permission.Camera
-    )
+private fun ScreenContent(
+    onIntent: (CameraIntent) -> Unit,
+    state: CameraScreenState
+) {
+    val permissionsController = LocalPermissionsController.current
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ){
-        when(cameraPermissionState.status){
-            is PermissionStatus.Granted -> {
-                    ModelView()
+        when (state.cameraProvideState) {
+            is CameraProvideState.Granted -> {
+                CameraView()
             }
+
             else -> {
                 Column(
                     modifier = Modifier,
@@ -45,8 +53,8 @@ private fun ScreenContent() {
                 ) {
                     Text(text = stringResource(Res.string.camera_not_granted))
                     TextButton(
-                        onClick = { cameraPermissionState.launchPermissionRequest() }
-                    ){
+                        onClick = { onIntent(CameraIntent.RequestCamera(permissionsController)) }
+                    ) {
                         Text(text = stringResource(Res.string.camera_request))
                     }
                 }
