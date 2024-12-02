@@ -2,7 +2,6 @@ package plugins
 
 import extensions.androidMainDependencies
 import extensions.compose
-import extensions.desktopMainDependencies
 import extensions.kotlinMultiplatform
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -18,9 +17,6 @@ class CommonComposePlugin: Plugin<Project> {
                 apply(BaseComposeSetup::class.java)
             }
             with(kotlinMultiplatform) {
-                desktopMainDependencies {
-                    implementation(compose.uiTooling)
-                }
                 androidMainDependencies {
                     implementation(compose.uiTooling)
                 }

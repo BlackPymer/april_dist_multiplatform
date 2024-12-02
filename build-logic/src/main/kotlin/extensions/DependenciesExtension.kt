@@ -22,15 +22,6 @@ fun Project.iosMainDependencies(block: KotlinDependencyHandler.() -> Unit) =
         sourceSets.iosMain.dependencies(block)
     }
 
-fun Project.desktopMainDependencies(block: KotlinDependencyHandler.() -> Unit) =
-    with(kotlinMultiplatform) {
-        sourceSets.jvmMain.dependencies(block)
-    }
-
-fun Project.wasmJsMainDependencies(block: KotlinDependencyHandler.() -> Unit) =
-    with(kotlinMultiplatform) {
-        sourceSets.wasmJsMain.dependencies(block)
-    }
 
 fun Project.commonTestDependencies(block: KotlinDependencyHandler.() -> Unit) =
     with(kotlinMultiplatform) {
@@ -45,14 +36,4 @@ fun Project.androidTestDependencies(block: KotlinDependencyHandler.() -> Unit) =
 fun Project.iosTestDependencies(block: KotlinDependencyHandler.() -> Unit) =
     with(kotlinMultiplatform) {
         sourceSets.iosTest.dependencies(block)
-    }
-
-fun Project.desktopTestDependencies(block: KotlinDependencyHandler.() -> Unit) =
-    with(kotlinMultiplatform) {
-        sourceSets.jvmTest.dependencies(block)
-    }
-
-fun Project.wasmJsTestDependencies(block: KotlinDependencyHandler.() -> Unit) =
-    with(kotlinMultiplatform) {
-        sourceSets.wasmJsTest.dependencies(block)
     }
