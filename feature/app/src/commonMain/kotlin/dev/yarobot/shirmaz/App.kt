@@ -9,13 +9,11 @@ import androidx.compose.ui.Modifier
 import dev.yarobot.shirmaz.camera.CameraScreen
 
 @Composable
-fun App() {
-    MaterialTheme {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            CameraScreen()
-        }
+fun App() = MaterialTheme {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CameraScreen()
     }
 }
