@@ -9,6 +9,5 @@ android{
 }
 
 commonMainDependencies {
-    api(libs.calf.permissions)
-    api(libs.calf.ui)
+    api(libs.moko.permissions)
 }
