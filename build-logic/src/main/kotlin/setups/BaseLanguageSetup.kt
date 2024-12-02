@@ -1,14 +1,14 @@
 package setups
 
 import extensions.commonTestDependencies
+import extensions.kotlinMultiplatform
 import extensions.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
-class BaseLanguageSetup: Plugin<Project> {
+class BaseLanguageSetup : Plugin<Project> {
     @OptIn(ExperimentalKotlinGradlePluginApi::class)
     override fun apply(project: Project) {
         with(project) {
@@ -16,7 +16,7 @@ class BaseLanguageSetup: Plugin<Project> {
                 apply(libs.plugins.kotlinMultiplatform.get().pluginId)
             }
 
-            with(extensions.getByType(KotlinMultiplatformExtension::class.java)) {
+            with(kotlinMultiplatform) {
                 compilerOptions {
                     apiVersion.set(KotlinVersion.KOTLIN_2_0)
                 }
