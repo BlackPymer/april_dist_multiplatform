@@ -21,14 +21,6 @@ gradlePlugin{
             id = "android.app"
             implementationClass = "plugins.AndroidAppPlugin"
         }
-        register("desktop.app"){
-            id = "desktop.app"
-            implementationClass = "plugins.DesktopAppPlugin"
-        }
-        register("web.app"){
-            id = "web.app"
-            implementationClass = "plugins.WebAppPlugin"
-        }
         register("ios.entry"){
             id = "ios.entry"
             implementationClass = "plugins.IOSEntryPlugin"
