@@ -1,22 +1,24 @@
 package setups
 
+import extensions.androidMainDependencies
 import extensions.commonMainDependencies
 import extensions.compose
 import extensions.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.getByType
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 class BaseComposeSetup : Plugin<Project> {
     override fun apply(project: Project) {
         with(project){
             with(pluginManager){
-                apply(BaseLanguageSetup::class.java)
+                apply(BaseLanguageSetup::class)
                 apply(libs.plugins.composeCompiler.get().pluginId)
                 apply(libs.plugins.composeMultiplatform.get().pluginId)
             }
-            with(extensions.getByType(KotlinMultiplatformExtension::class.java)) {
-
+            with(extensions.getByType(KotlinMultiplatformExtension::class)) {
                 commonMainDependencies {
                     implementation(compose.animation)
                     implementation(compose.runtime)
@@ -26,6 +28,9 @@ class BaseComposeSetup : Plugin<Project> {
                     implementation(compose.components.resources)
                     implementation(compose.uiUtil)
                     implementation(compose.ui)
+                }
+                androidMainDependencies {
+                    implementation(compose.uiTooling)
                 }
             }
         }

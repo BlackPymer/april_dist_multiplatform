@@ -35,7 +35,7 @@ private fun ScreenContent() {
     ){
         when(cameraPermissionState.status){
             is PermissionStatus.Granted -> {
-                CameraView()
+                    ModelView()
             }
             else -> {
                 Column(

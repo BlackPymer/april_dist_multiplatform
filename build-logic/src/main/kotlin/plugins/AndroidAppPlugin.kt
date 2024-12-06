@@ -11,7 +11,9 @@ import extensions.configureKotlinOptions
 import extensions.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.getByType
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import setups.BaseComposeSetup
 
@@ -20,7 +22,7 @@ class AndroidAppPlugin : Plugin<Project> {
         with(project) {
             with(pluginManager) {
                 apply(libs.plugins.androidApplication.get().pluginId)
-                apply(BaseComposeSetup::class.java)
+                apply(BaseComposeSetup::class)
             }
 
             androidMainDependencies {
@@ -32,10 +34,10 @@ class AndroidAppPlugin : Plugin<Project> {
             androidTestDependencies {
                 implementation(libs.junit)
             }
-            with(extensions.getByType(KotlinMultiplatformExtension::class.java)) {
+            with(extensions.getByType(KotlinMultiplatformExtension::class)) {
                 androidTarget()
 
-                with(extensions.getByType(BaseAppModuleExtension::class.java)) {
+                with(extensions.getByType(BaseAppModuleExtension::class)) {
                     defaultConfig {
                         versionCode = applicationVersionCode
                         versionName = applicationVersionName

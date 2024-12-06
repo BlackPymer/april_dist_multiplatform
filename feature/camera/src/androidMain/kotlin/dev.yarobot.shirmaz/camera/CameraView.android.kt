@@ -13,7 +13,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
 
 @Composable
-actual fun CameraView() {
+actual fun CameraView(modelView: @Composable () -> Unit) {
     val context = LocalContext.current
     val lifeCycleOwner = LocalLifecycleOwner.current
 
