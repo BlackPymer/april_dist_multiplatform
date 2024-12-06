@@ -5,7 +5,7 @@ kotlin = "2.0.21"
 
 compileSdk = "35"
 minSdk = "24"
-targetSdk = "34"
+targetSdk = "35"
 
 app-versionCode = "1"
 app-versionName = "1.0.0"
@@ -65,10 +65,6 @@ google-filament-utils = {module = "com.google.android.filament:filament-utils-an
 google-gltfio = {module = "com.google.android.filament:gltfio-android", version.ref = "filament"}
 
 jetbrains-viewmodel = {module ="org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "jetbrains-viewmodel"}
-
-google-filament = { module = "com.google.android.filament:filament-android", version.ref = "filament"}
-google-filament-utils = {module = "com.google.android.filament:filament-utils-android", version.ref = "filament"}
-google-gltfio = {module = "com.google.android.filament:gltfio-android", version.ref = "filament"}
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

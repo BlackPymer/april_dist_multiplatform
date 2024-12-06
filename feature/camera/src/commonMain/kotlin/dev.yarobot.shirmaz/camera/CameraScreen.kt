@@ -45,7 +45,9 @@ private fun ScreenContent(
     ){
         when (state.cameraProvideState) {
             is CameraProvideState.Granted -> {
-                CameraView()
+              //  CameraView{
+                    ModelView()
+              //  }
             }
 
             else -> {
