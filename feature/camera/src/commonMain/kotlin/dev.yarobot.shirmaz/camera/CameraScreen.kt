@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -23,7 +24,6 @@ import shirmaz.feature.camera.generated.resources.camera_request
 fun CameraScreen() {
     val viewModel = viewModel { CameraViewModel() }
     val state by viewModel.state.collectAsState()
-    viewModel.onIntent(CameraIntent.RequestCamera(LocalPermissionsController.current))
     ScreenContent(
         onIntent = { viewModel.onIntent(it) },
         state = remember(state) { state }
@@ -36,6 +36,9 @@ private fun ScreenContent(
     state: CameraScreenState
 ) {
     val permissionsController = LocalPermissionsController.current
+    LaunchedEffect(permissionsController){
+        onIntent(CameraIntent.RequestCamera(permissionsController))
+    }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
