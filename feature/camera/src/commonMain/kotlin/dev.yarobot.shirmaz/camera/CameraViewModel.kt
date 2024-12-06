@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class CameraViewModel() : MVIViewModel<CameraIntent, CameraScreenState>() {
+class CameraViewModel: MVIViewModel<CameraIntent, CameraScreenState>() {
     private val _state = MutableStateFlow(
         CameraScreenState(
             cameraProvideState = CameraProvideState.NotGranted
@@ -20,16 +20,22 @@ class CameraViewModel() : MVIViewModel<CameraIntent, CameraScreenState>() {
 
     override fun onIntent(intent: CameraIntent) {
         when (intent) {
-            is CameraIntent.RequestCamera -> {
-                intent.permissionsController.provide(Permission.CAMERA)
-                intent.permissionsController.proceedState(Permission.CAMERA)
-            }
+            is CameraIntent.RequestCamera -> intent.permissionsController.requestCamera()
+            is CameraIntent.CheckCameraPermission -> intent.permissionsController
+                .proceedCameraState()
         }
     }
 
-    private fun PermissionsController.proceedState(permission: Permission) =
+    private fun PermissionsController.requestCamera(){
         viewModelScope.launch {
-            when (this@proceedState.getPermissionState(permission)) {
+            this@requestCamera.providePermission(Permission.CAMERA)
+        }
+        this.proceedCameraState()
+    }
+
+    private fun PermissionsController.proceedCameraState() =
+        viewModelScope.launch {
+            when (this@proceedCameraState.getPermissionState(Permission.CAMERA)) {
                 PermissionState.Granted -> {
                     _state.update {
                         it.copy(cameraProvideState = CameraProvideState.Granted)
@@ -38,11 +44,5 @@ class CameraViewModel() : MVIViewModel<CameraIntent, CameraScreenState>() {
 
                 else -> _state.update { it.copy(cameraProvideState = CameraProvideState.NotGranted) }
             }
-        }
-
-
-    private fun PermissionsController.provide(permission: Permission) =
-        viewModelScope.launch {
-            this@provide.providePermission(permission)
         }
 }
