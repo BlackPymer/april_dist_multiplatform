@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import dev.yarobot.shirmaz.camera.model.ModelView
 import dev.yarobot.shirmaz.core.compose.base.LocalPermissionsController
 import org.jetbrains.compose.resources.stringResource
 import shirmaz.feature.camera.generated.resources.Res
@@ -36,18 +37,18 @@ private fun ScreenContent(
     state: CameraScreenState
 ) {
     val permissionsController = LocalPermissionsController.current
-    LaunchedEffect(permissionsController){
+    LaunchedEffect(permissionsController) {
         onIntent(CameraIntent.RequestCamera(permissionsController))
     }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
-    ){
+    ) {
         when (state.cameraProvideState) {
             is CameraProvideState.Granted -> {
-              //  CameraView{
+                CameraView {
                     ModelView()
-              //  }
+                }
             }
 
             else -> {

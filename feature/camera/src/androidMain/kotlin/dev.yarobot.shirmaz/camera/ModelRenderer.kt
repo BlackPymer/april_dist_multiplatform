@@ -47,8 +47,9 @@ class ModelRenderer {
         this.lifecycle = lifecycle
         assets = surfaceView.context.assets
 
-        lifecycle.addObserver(lifecycleObserver)
         choreographer = Choreographer.getInstance()
+
+        lifecycle.addObserver(lifecycleObserver)
         uiHelper = UiHelper(UiHelper.ContextErrorPolicy.DONT_CHECK).apply {
             // This is needed to make the background transparent
             isOpaque = false

@@ -4,6 +4,7 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -20,17 +21,24 @@ actual fun CameraView(modelView: @Composable () -> Unit) {
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
     val previewView = remember { PreviewView(context) }
 
-    AndroidView(
-        factory = { previewView },
-        modifier = Modifier.fillMaxSize(),
-        update = {
-            val cameraProvider = cameraProviderFuture.get()
-            val preview = Preview.Builder().build()
-            preview.surfaceProvider = previewView.surfaceProvider
-            val cameraSelector =
-                CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK)
-                    .build()
-            cameraProvider.bindToLifecycle(lifeCycleOwner, cameraSelector, preview)
-        })
+    Box(){
+        AndroidView(
+            factory = { previewView },
+            modifier = Modifier.fillMaxSize(),
+            update = {
+                val cameraProvider = cameraProviderFuture.get()
+                val preview = Preview.Builder().build()
+                preview.surfaceProvider = previewView.surfaceProvider
+                val cameraSelector =
+                    CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                        .build()
+                cameraProvider.bindToLifecycle(lifeCycleOwner, cameraSelector, preview)
+            })
+
+        modelView()
+    }
+
+
+
 
 }
