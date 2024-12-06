@@ -60,6 +60,10 @@ androidx-camera-view = { group = "androidx.camera", name = "camera-view", versio
 androidx-camera-extensions = { group = "androidx.camera", name = "camera-extensions", version.ref = "cameraLifecycle" }
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraLifecycle" }
 
+google-filament = { module = "com.google.android.filament:filament-android", version.ref = "filament"}
+google-filament-utils = {module = "com.google.android.filament:filament-utils-android", version.ref = "filament"}
+google-gltfio = {module = "com.google.android.filament:gltfio-android", version.ref = "filament"}
+
 jetbrains-viewmodel = {module ="org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "jetbrains-viewmodel"}
 
 google-filament = { module = "com.google.android.filament:filament-android", version.ref = "filament"}
