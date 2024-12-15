@@ -1,28 +1,32 @@
 package dev.yarobot.shirmaz.camera
 
 import android.annotation.SuppressLint
-import android.content.res.AssetManager
 import android.view.Choreographer
 import android.view.SurfaceView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.google.android.filament.View
 import com.google.android.filament.android.UiHelper
 import com.google.android.filament.utils.ModelViewer
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import shirmaz.feature.camera.generated.resources.Res
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 class ModelRenderer {
     private lateinit var surfaceView: SurfaceView
     private lateinit var lifecycle: Lifecycle
+    private lateinit var lifecycleOwner: LifecycleOwner  // Сохраняем ссылку на LifecycleOwner
 
     private lateinit var choreographer: Choreographer
     private lateinit var uiHelper: UiHelper
 
     private lateinit var modelViewer: ModelViewer
-
-    private lateinit var assets: AssetManager
 
     private val frameScheduler = FrameCallback()
 
@@ -42,10 +46,11 @@ class ModelRenderer {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    fun onSurfaceAvailable(surfaceView: SurfaceView, lifecycle: Lifecycle) {
+    fun onSurfaceAvailable(surfaceView: SurfaceView, lifecycleOwner: LifecycleOwner) {
         this.surfaceView = surfaceView
-        this.lifecycle = lifecycle
-        assets = surfaceView.context.assets
+        this.lifecycleOwner = lifecycleOwner
+        this.lifecycle = lifecycleOwner.lifecycle
+
 
         choreographer = Choreographer.getInstance()
 
@@ -78,13 +83,17 @@ class ModelRenderer {
             }
         }
 
-        createRenderables()
+        // Запускаем корутину для вызова suspend функции
+        lifecycleOwner.lifecycleScope.launch {
+            createRenderables()
+        }
     }
 
-    private fun createRenderables() {
-        val buffer = assets.open("models/sample.glb").use { input ->
-            val bytes = ByteArray(input.available())
-            input.read(bytes)
+    private suspend fun loadResource(resourceName: String): ByteBuffer =
+        withContext(Dispatchers.IO) {
+            val resourceStream = object {}.javaClass.getResourceAsStream("/$resourceName")
+                ?: throw IllegalArgumentException("Resource $resourceName not found")
+            val bytes = resourceStream.use { it.readBytes() }
             ByteBuffer.allocateDirect(bytes.size).apply {
                 order(ByteOrder.nativeOrder())
                 put(bytes)
@@ -92,7 +101,11 @@ class ModelRenderer {
             }
         }
 
-        modelViewer.loadModelGlb(buffer)
+    @OptIn(ExperimentalResourceApi::class)
+    private suspend fun createRenderables() {
+        val buffer = Res.readBytes("files/sample1.glb")
+        val byteBuffer = ByteBuffer.wrap(buffer)
+        modelViewer.loadModelGlb(byteBuffer)
         modelViewer.transformToUnitCube()
     }
 
@@ -103,4 +116,3 @@ class ModelRenderer {
         }
     }
 }
-
