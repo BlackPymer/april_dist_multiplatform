@@ -89,17 +89,7 @@ class ModelRenderer {
         }
     }
 
-    private suspend fun loadResource(resourceName: String): ByteBuffer =
-        withContext(Dispatchers.IO) {
-            val resourceStream = object {}.javaClass.getResourceAsStream("/$resourceName")
-                ?: throw IllegalArgumentException("Resource $resourceName not found")
-            val bytes = resourceStream.use { it.readBytes() }
-            ByteBuffer.allocateDirect(bytes.size).apply {
-                order(ByteOrder.nativeOrder())
-                put(bytes)
-                rewind()
-            }
-        }
+
 
     @OptIn(ExperimentalResourceApi::class)
     private suspend fun createRenderables() {
