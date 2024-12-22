@@ -10,25 +10,34 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.filament.View
 import com.google.android.filament.android.UiHelper
 import com.google.android.filament.utils.ModelViewer
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import shirmaz.feature.camera.generated.resources.Res
 import java.nio.ByteBuffer
-import java.nio.ByteOrder
 
-class ModelRenderer {
-    private lateinit var surfaceView: SurfaceView
-    private lateinit var lifecycle: Lifecycle
-    private lateinit var lifecycleOwner: LifecycleOwner  // Сохраняем ссылку на LifecycleOwner
 
-    private lateinit var choreographer: Choreographer
-    private lateinit var uiHelper: UiHelper
+class ModelRenderer(
+    private val surfaceView: SurfaceView,
+    private val lifecycle: Lifecycle) {
 
-    private lateinit var modelViewer: ModelViewer
+
+    private val dispatcher = Dispatchers.Unconfined
+    private val modelOpenScope = CoroutineScope(SupervisorJob() + dispatcher)
+
+    private val choreographer: Choreographer = Choreographer.getInstance()
+    private val uiHelper: UiHelper = UiHelper(UiHelper.ContextErrorPolicy.DONT_CHECK).apply {
+        // This is needed to make the background transparent
+        isOpaque = false
+    }
+
+    private val modelViewer: ModelViewer =
+        ModelViewer(surfaceView = surfaceView, uiHelper = uiHelper)
 
     private val frameScheduler = FrameCallback()
+
 
     private val lifecycleObserver = object : DefaultLifecycleObserver {
         override fun onResume(owner: LifecycleOwner) {
@@ -46,21 +55,8 @@ class ModelRenderer {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    fun onSurfaceAvailable(surfaceView: SurfaceView, lifecycleOwner: LifecycleOwner) {
-        this.surfaceView = surfaceView
-        this.lifecycleOwner = lifecycleOwner
-        this.lifecycle = lifecycleOwner.lifecycle
-
-
-        choreographer = Choreographer.getInstance()
-
+    fun onSurfaceAvailable() {
         lifecycle.addObserver(lifecycleObserver)
-        uiHelper = UiHelper(UiHelper.ContextErrorPolicy.DONT_CHECK).apply {
-            // This is needed to make the background transparent
-            isOpaque = false
-        }
-
-        modelViewer = ModelViewer(surfaceView = surfaceView, uiHelper = uiHelper)
 
         // This is needed so we can move the camera in the rendering
         surfaceView.setOnTouchListener { _, event ->
@@ -82,17 +78,13 @@ class ModelRenderer {
                 hdrColorBuffer = View.QualityLevel.MEDIUM
             }
         }
-
-        // Запускаем корутину для вызова suspend функции
-        lifecycleOwner.lifecycleScope.launch {
-            createRenderables()
+        modelOpenScope.launch {
+            modelOpen()
         }
     }
 
-
-
     @OptIn(ExperimentalResourceApi::class)
-    private suspend fun createRenderables() {
+    suspend fun modelOpen() {
         val buffer = Res.readBytes("files/sample1.glb")
         val byteBuffer = ByteBuffer.wrap(buffer)
         modelViewer.loadModelGlb(byteBuffer)

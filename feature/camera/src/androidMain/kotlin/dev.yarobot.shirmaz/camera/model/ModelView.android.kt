@@ -8,12 +8,11 @@ import dev.yarobot.shirmaz.camera.ModelRenderer
 
 @Composable
 actual fun ModelView() {
-    val lifecycleOwner = LocalLifecycleOwner.current
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
     AndroidView(factory = { context ->
-        val renderer = ModelRenderer()
-
         SurfaceView(context).apply {
-            renderer.onSurfaceAvailable(this, lifecycleOwner)
+            val renderer = ModelRenderer(surfaceView = this, lifecycle = lifecycle)
+            renderer.onSurfaceAvailable()
         }
     })
 }

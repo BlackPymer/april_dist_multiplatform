@@ -19,4 +19,5 @@ kotlin{
 androidMainDependencies {
     implementation(libs.bundles.android.filament)
     implementation(libs.bundles.android.camera)
+
 }
