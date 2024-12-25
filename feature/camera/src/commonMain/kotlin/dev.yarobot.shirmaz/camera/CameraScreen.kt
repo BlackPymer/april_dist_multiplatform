@@ -47,7 +47,9 @@ private fun ScreenContent(
         when (state.cameraProvideState) {
             is CameraProvideState.Granted -> {
                 CameraView {
-                    ModelView()
+                    state.currentModel?.let {
+                        ModelView(remember(state) { state.currentModel })
+                    }
                 }
             }
 

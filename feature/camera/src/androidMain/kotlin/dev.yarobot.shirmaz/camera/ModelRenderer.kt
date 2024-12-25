@@ -6,35 +6,23 @@ import android.view.SurfaceView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import com.google.android.filament.View
 import com.google.android.filament.android.UiHelper
 import com.google.android.filament.utils.ModelViewer
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.ExperimentalResourceApi
-import shirmaz.feature.camera.generated.resources.Res
+import dev.yarobot.shirmaz.camera.model.ThreeDModel
 import java.nio.ByteBuffer
-
 
 class ModelRenderer(
     private val surfaceView: SurfaceView,
-    private val lifecycle: Lifecycle) {
-
-
-    private val dispatcher = Dispatchers.Unconfined
-    private val modelOpenScope = CoroutineScope(SupervisorJob() + dispatcher)
-
+    private val lifecycle: Lifecycle,
+    private val model: ThreeDModel
+) {
     private val choreographer: Choreographer = Choreographer.getInstance()
     private val uiHelper: UiHelper = UiHelper(UiHelper.ContextErrorPolicy.DONT_CHECK).apply {
-        // This is needed to make the background transparent
         isOpaque = false
     }
 
-    private val modelViewer: ModelViewer =
-        ModelViewer(surfaceView = surfaceView, uiHelper = uiHelper)
+    private val modelViewer: ModelViewer = ModelViewer(surfaceView = surfaceView, uiHelper = uiHelper)
 
     private val frameScheduler = FrameCallback()
 
@@ -58,37 +46,28 @@ class ModelRenderer(
     fun onSurfaceAvailable() {
         lifecycle.addObserver(lifecycleObserver)
 
-        // This is needed so we can move the camera in the rendering
         surfaceView.setOnTouchListener { _, event ->
             modelViewer.onTouchEvent(event)
             true
         }
 
-        // This is the other code needed to make the background transparent
-        modelViewer.scene.skybox = null
-        modelViewer.view.blendMode = View.BlendMode.TRANSLUCENT
-        modelViewer.renderer.clearOptions = modelViewer.renderer.clearOptions.apply {
-            clear = true
-        }
-
-        // This part defines the quality of your model, feel free to change it or
-        // add other options
-        modelViewer.view.apply {
-            renderQuality = renderQuality.apply {
-                hdrColorBuffer = View.QualityLevel.MEDIUM
-            }
-        }
-        modelOpenScope.launch {
-            modelOpen()
-        }
+        setUpModelViewer()
+        modelOpen()
     }
 
-    @OptIn(ExperimentalResourceApi::class)
-    suspend fun modelOpen() {
-        val buffer = Res.readBytes("files/sample1.glb")
-        val byteBuffer = ByteBuffer.wrap(buffer)
+    private fun modelOpen() {
+        val byteBuffer = ByteBuffer.wrap(model.bytes)
         modelViewer.loadModelGlb(byteBuffer)
         modelViewer.transformToUnitCube()
+    }
+
+    private fun setUpModelViewer() = modelViewer.apply {
+        scene.skybox = null
+        view.blendMode = View.BlendMode.TRANSLUCENT
+        renderer.clearOptions = this.renderer.clearOptions.apply {
+            clear = true
+        }
+        view.renderQuality.hdrColorBuffer = View.QualityLevel.MEDIUM
     }
 
     inner class FrameCallback : Choreographer.FrameCallback {
