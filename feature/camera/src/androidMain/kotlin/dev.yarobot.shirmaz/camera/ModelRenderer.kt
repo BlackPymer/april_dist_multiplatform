@@ -8,6 +8,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.google.android.filament.View
 import com.google.android.filament.android.UiHelper
+import com.google.android.filament.utils.Float3
 import com.google.android.filament.utils.ModelViewer
 import dev.yarobot.shirmaz.camera.model.ThreeDModel
 import java.nio.ByteBuffer
@@ -22,7 +23,8 @@ class ModelRenderer(
         isOpaque = false
     }
 
-    private val modelViewer: ModelViewer = ModelViewer(surfaceView = surfaceView, uiHelper = uiHelper)
+    private val modelViewer: ModelViewer =
+        ModelViewer(surfaceView = surfaceView, uiHelper = uiHelper)
 
     private val frameScheduler = FrameCallback()
 
@@ -53,6 +55,9 @@ class ModelRenderer(
 
         setUpModelViewer()
         modelOpen()
+        val boneController = BoneController(modelViewer)
+        boneController.setPosition(boneName = "Bone.004", pos = Float3(2f, 0f, 0f))
+        boneController.setRotation(boneName = "Bone.004", angle = Float3(90f, 0f, 0f))
     }
 
     private fun modelOpen() {
