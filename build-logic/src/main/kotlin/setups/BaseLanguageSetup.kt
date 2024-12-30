@@ -8,7 +8,7 @@ import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
-class BaseLanguageSetup: Plugin<Project> {
+class BaseLanguageSetup : Plugin<Project> {
     @OptIn(ExperimentalKotlinGradlePluginApi::class)
     override fun apply(project: Project) {
         with(project) {

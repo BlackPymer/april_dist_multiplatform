@@ -31,7 +31,6 @@ cameraLifecycle = "1.4.0"
 jetbrains-viewmodel = "2.8.2"
 
 filament = "1.56.0"
-
 [libraries]
 # Gradle plugins
 gradleplugins-android = { module = "com.android.tools.build:gradle", version.ref = "agp" }
@@ -59,6 +58,7 @@ androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", 
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraLifecycle" }
 androidx-camera-extensions = { group = "androidx.camera", name = "camera-extensions", version.ref = "cameraLifecycle" }
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraLifecycle" }
+
 
 google-filament = { module = "com.google.android.filament:filament-android", version.ref = "filament"}
 google-filament-utils = {module = "com.google.android.filament:filament-utils-android", version.ref = "filament"}
