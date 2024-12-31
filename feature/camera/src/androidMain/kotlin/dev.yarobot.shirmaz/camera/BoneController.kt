@@ -23,12 +23,24 @@ class BoneController(private val modelViewer: ModelViewer) {
     var String.position: Float3?
         get() = modelViewer.asset?.getFirstEntityByName(this)?.getTransform()?.translation
         set(value) {
-            modelViewer.asset?.getFirstEntityByName(this)?.let { entity ->
-                val defaultTransform = entity.getTransform()
-                val transform = defaultTransform * translation(value ?: Float3())
-                entity.setTransform(transform)
-            }
-            modelViewer.animator?.updateBoneMatrices()
+            require(value != null) { "Position must not be null." }
+
+            val boneIndex = modelViewer.asset?.getFirstEntityByName(this)
+                ?: throw IllegalArgumentException("Bone with name $this not found.")
+
+            val transformManager = modelViewer.engine.transformManager
+            val boneInstance = transformManager.getInstance(boneIndex)
+            if (boneInstance == 0) throw IllegalArgumentException("Bone $this is not part of the TransformManager.")
+
+            transformManager.setTransform(
+                boneInstance,
+                FloatArray(16).apply {
+                    this[0] = 1f; this[5] = 1f; this[10] = 1f; this[15] = 1f
+                    this[12] = value.x
+                    this[13] = value.y
+                    this[14] = value.z
+                }
+            )
         }
 
 
