@@ -37,4 +37,3 @@ fun Project.iosTestDependencies(block: KotlinDependencyHandler.() -> Unit) =
     with(kotlinMultiplatform) {
         sourceSets.iosTest.dependencies(block)
     }
-}

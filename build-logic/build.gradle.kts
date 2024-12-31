@@ -1,14 +1,6 @@
 plugins{
     `kotlin-dsl`
 }
-
-repositories {
-    mavenCentral()
-    google()
-    gradlePluginPortal()
-    maven(url = "https://maven.pkg.jetbrains.space/public/p/compose/dev")
-}
-
 dependencies{
     implementation(libs.bundles.gradleplugins)
     implementation(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
