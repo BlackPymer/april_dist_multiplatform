@@ -1,5 +1,9 @@
 package plugins
 
+
+import extensions.androidMainDependencies
+import extensions.compose
+import extensions.kotlinMultiplatform
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
@@ -13,6 +17,11 @@ class CommonComposePlugin: Plugin<Project> {
                 apply(CommonLanguagePlugin::class)
                 apply(BaseComposeSetup::class)
                 apply(AndroidComposeSetup::class)
+            }
+            with(kotlinMultiplatform) {
+                androidMainDependencies {
+                    implementation(compose.uiTooling)
+                }
             }
         }
     }
