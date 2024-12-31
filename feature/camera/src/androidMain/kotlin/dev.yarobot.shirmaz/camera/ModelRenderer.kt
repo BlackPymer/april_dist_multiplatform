@@ -28,6 +28,7 @@ class ModelRenderer(
 
     private val frameScheduler = FrameCallback()
 
+    private val boneController = BoneController(modelViewer)
 
     private val lifecycleObserver = object : DefaultLifecycleObserver {
         override fun onResume(owner: LifecycleOwner) {
@@ -55,9 +56,10 @@ class ModelRenderer(
 
         setUpModelViewer()
         modelOpen()
-        val boneController = BoneController(modelViewer)
-        boneController.setPosition(boneName = "Bone.004", pos = Float3(2f, 0f, 0f))
-        boneController.setRotation(boneName = "Bone.004", angle = Float3(90f, 0f, 0f))
+        with(boneController) {
+            Bones.rightCollarbone.position = Float3(20f, 0f, 0f)
+            Bones.rightCollarbone.rotation = Float3(90f,0f,0f)
+        }
     }
 
     private fun modelOpen() {
