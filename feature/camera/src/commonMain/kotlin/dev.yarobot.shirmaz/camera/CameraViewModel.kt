@@ -33,19 +33,6 @@ class CameraViewModel : MVIViewModel<CameraIntent, CameraScreenState>() {
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = _state.value
     )
-import dev.yarobot.shirmaz.core.language.MVIViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-
-class CameraViewModel: MVIViewModel<CameraIntent, CameraScreenState>() {
-    private val _state = MutableStateFlow(
-        CameraScreenState(
-            cameraProvideState = CameraProvideState.NotGranted
-        )
-    )
-    override val state = _state.asStateFlow()
 
     override fun onIntent(intent: CameraIntent) {
         when (intent) {
