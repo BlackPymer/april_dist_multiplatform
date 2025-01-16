@@ -13,7 +13,8 @@ import kotlinx.coroutines.launch
 class CameraViewModel: MVIViewModel<CameraIntent, CameraScreenState>() {
     private val _state = MutableStateFlow(
         CameraScreenState(
-            cameraProvideState = CameraProvideState.NotGranted
+            cameraProvideState = CameraProvideState.NotGranted,
+            isUnclothes = false
         )
     )
     override val state = _state.asStateFlow()
@@ -23,6 +24,8 @@ class CameraViewModel: MVIViewModel<CameraIntent, CameraScreenState>() {
             is CameraIntent.RequestCamera -> intent.permissionsController.requestCamera()
             is CameraIntent.CheckCameraPermission -> intent.permissionsController
                 .proceedCameraState()
+            is CameraIntent.TakePicture -> {}
+            is CameraIntent.OpenGallery -> {}
         }
     }
 

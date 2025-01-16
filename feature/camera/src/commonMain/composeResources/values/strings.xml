@@ -1,4 +1,5 @@
 <resources>
     <string name="camera_not_granted">Camera permission not granted</string>
     <string name="camera_request">Allow access to camera</string>
+    <string name="gallery_cd">Open gallery</string>
 </resources>
