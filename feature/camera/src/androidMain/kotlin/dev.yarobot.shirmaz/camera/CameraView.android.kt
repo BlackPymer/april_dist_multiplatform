@@ -37,8 +37,4 @@ actual fun CameraView(modelView: @Composable () -> Unit) {
 
         modelView()
     }
-
-
-
-
 }

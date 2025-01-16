@@ -39,7 +39,6 @@ private fun ScreenContent(
     val permissionsController = LocalPermissionsController.current
 
     LaunchedEffect(permissionsController) {
-
         onIntent(CameraIntent.RequestCamera(permissionsController))
     }
     Box(
