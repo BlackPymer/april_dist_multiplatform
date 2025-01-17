@@ -4,11 +4,21 @@ import androidx.lifecycle.viewModelScope
 import dev.icerock.moko.permissions.Permission
 import dev.icerock.moko.permissions.PermissionState
 import dev.icerock.moko.permissions.PermissionsController
+import dev.yarobot.shirmaz.camera.model.Models
+import dev.yarobot.shirmaz.camera.model.ThreeDModel
 import dev.yarobot.shirmaz.core.language.MVIViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import shirmaz.feature.camera.generated.resources.Res
+
 
 class CameraViewModel(shirts: Array<Shirt>) : MVIViewModel<CameraIntent, CameraScreenState>() {
     private val _state = MutableStateFlow(
@@ -17,9 +27,17 @@ class CameraViewModel(shirts: Array<Shirt>) : MVIViewModel<CameraIntent, CameraS
             isUnclothes = false,
             shirts = shirts,
             chosenShirt = 1
+            currentModel = null
+
         )
     )
-    override val state = _state.asStateFlow()
+    override val state = _state.onStart {
+        loadModel(Models.sampleModel)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = _state.value
+    )
 
     override fun onIntent(intent: CameraIntent) {
         when (intent) {
@@ -62,6 +80,16 @@ class CameraViewModel(shirts: Array<Shirt>) : MVIViewModel<CameraIntent, CameraS
     private fun Int.chooseShirt() {
         _state.update{
             it.copy(chosenShirt = this@chooseShirt)
+    @OptIn(ExperimentalResourceApi::class)
+    private fun loadModel(modelName: String) = viewModelScope.launch {
+        withContext(Dispatchers.IO) {
+            _state.update {
+                it.copy(
+                    currentModel = ThreeDModel(
+                        Res.readBytes("files/$modelName")
+                    )
+                )
+            }
         }
     }
 }
