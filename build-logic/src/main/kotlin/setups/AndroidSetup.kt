@@ -6,6 +6,7 @@ import extensions.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.get
+import org.gradle.kotlin.dsl.getByType
 
 class AndroidSetup: Plugin<Project> {
     override fun apply(target: Project) {
@@ -13,7 +14,7 @@ class AndroidSetup: Plugin<Project> {
             with(pluginManager){
                 apply(libs.plugins.androidLibrary.get().pluginId)
             }
-            with(extensions.getByType(LibraryExtension::class.java)) {
+            with(extensions.getByType(LibraryExtension::class)) {
                 compileOptions {
                     compileSdk = libs.versions.compileSdk.get().toInt()
 

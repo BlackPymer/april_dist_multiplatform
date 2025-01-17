@@ -1,12 +1,13 @@
 package plugins
 
-import extensions.kotlinMultiplatform
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.getByType
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 class IOSEntryPlugin: Plugin<Project> {
     override fun apply(project: Project) {
-        with(project.kotlinMultiplatform){
+        with(project.extensions.getByType(KotlinMultiplatformExtension::class)){
             listOf(
                 iosX64(),
                 iosArm64(),

@@ -3,6 +3,7 @@
 /build
 /.gradle
 /.kotlin
+/.run
 
 # Files
 /local.properties

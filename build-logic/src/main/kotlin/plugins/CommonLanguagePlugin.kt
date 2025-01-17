@@ -2,20 +2,20 @@ package plugins
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.getByType
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import setups.AndroidSetup
 import setups.BaseLanguageSetup
 
 class CommonLanguagePlugin: Plugin<Project> {
-    @OptIn(ExperimentalWasmDsl::class)
     override fun apply(project: Project) {
         with(project) {
             with(pluginManager) {
-                apply(BaseLanguageSetup::class.java)
-                apply(AndroidSetup::class.java)
+                apply(BaseLanguageSetup::class)
+                apply(AndroidSetup::class)
             }
-            with(extensions.getByType(KotlinMultiplatformExtension::class.java)) {
+            with(extensions.getByType(KotlinMultiplatformExtension::class)) {
                 androidTarget()
                 iosX64()
                 iosArm64()

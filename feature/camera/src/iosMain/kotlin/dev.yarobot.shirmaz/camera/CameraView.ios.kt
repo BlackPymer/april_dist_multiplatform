@@ -23,7 +23,7 @@ import platform.UIKit.UIView
 
 @OptIn(ExperimentalForeignApi::class)
 @Composable
-actual fun CameraView() {
+actual fun CameraView(modelView: @Composable () -> Unit) {
     val device = AVCaptureDevice.devicesWithMediaType(AVMediaTypeVideo).firstOrNull { device ->
         (device as AVCaptureDevice).position == AVCaptureDevicePositionBack
     }!! as AVCaptureDevice
