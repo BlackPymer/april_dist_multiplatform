@@ -26,7 +26,7 @@ class CameraViewModel(shirts: Array<Shirt>) : MVIViewModel<CameraIntent, CameraS
             cameraProvideState = CameraProvideState.NotGranted,
             isUnclothes = false,
             shirts = shirts,
-            chosenShirt = 1
+            chosenShirt = 1,
             currentModel = null
 
         )
@@ -44,6 +44,7 @@ class CameraViewModel(shirts: Array<Shirt>) : MVIViewModel<CameraIntent, CameraS
             is CameraIntent.RequestCamera -> intent.permissionsController.requestCamera()
             is CameraIntent.CheckCameraPermission -> intent.permissionsController
                 .proceedCameraState()
+
             is CameraIntent.TakePicture -> {}
             is CameraIntent.OpenGallery -> {}
             is CameraIntent.Unclothes -> updateUnclothes()
@@ -78,8 +79,11 @@ class CameraViewModel(shirts: Array<Shirt>) : MVIViewModel<CameraIntent, CameraS
     }
 
     private fun Int.chooseShirt() {
-        _state.update{
+        _state.update {
             it.copy(chosenShirt = this@chooseShirt)
+        }
+    }
+
     @OptIn(ExperimentalResourceApi::class)
     private fun loadModel(modelName: String) = viewModelScope.launch {
         withContext(Dispatchers.IO) {

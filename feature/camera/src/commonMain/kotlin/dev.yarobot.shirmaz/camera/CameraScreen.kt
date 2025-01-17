@@ -93,18 +93,19 @@ private fun ScreenContent(
                     state.currentModel?.let {
                         ModelView(remember(state) { state.currentModel })
                     }
-                Column(
-                    modifier = Modifier.align(Alignment.BottomCenter),
-                    verticalArrangement = Arrangement.Bottom,
-                ) {
-                    if (!state.isUnclothes) {
-                        Carousel(onIntent = onIntent, state = state)
-                        Spacer(
-                            modifier = Modifier
-                                .height(ShirmazTheme.dimension.caruselPaddingFromToolbar)
-                        )
+                    Column(
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                        verticalArrangement = Arrangement.Bottom,
+                    ) {
+                        if (!state.isUnclothes) {
+                            Carousel(onIntent = onIntent, state = state)
+                            Spacer(
+                                modifier = Modifier
+                                    .height(ShirmazTheme.dimension.caruselPaddingFromToolbar)
+                            )
+                        }
+                        ToolBar(onIntent = onIntent, state = state)
                     }
-                    ToolBar(onIntent = onIntent, state = state)
                 }
             }
 
