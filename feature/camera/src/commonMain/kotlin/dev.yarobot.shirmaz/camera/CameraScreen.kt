@@ -31,13 +31,11 @@ import shirmaz.feature.camera.generated.resources.camera_request
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.unit.dp
 import dev.yarobot.shirmaz.core.compose.ui.ShirmazTheme
 import shirmaz.feature.camera.generated.resources.clothes
 import shirmaz.feature.camera.generated.resources.gallery
