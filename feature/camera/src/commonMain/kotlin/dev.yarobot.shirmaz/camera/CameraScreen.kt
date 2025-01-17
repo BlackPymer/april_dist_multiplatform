@@ -29,8 +29,13 @@ import shirmaz.feature.camera.generated.resources.Res
 import shirmaz.feature.camera.generated.resources.camera_not_granted
 import shirmaz.feature.camera.generated.resources.camera_request
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 import dev.yarobot.shirmaz.core.compose.ui.ShirmazTheme
@@ -48,17 +53,17 @@ fun CameraScreen() {
     val shirts: Array<Shirt> = arrayOf(
         Shirt(
             index = 1,
-            name = Res.string.shirt1_name.toString(),
+            name = stringResource(Res.string.shirt1_name),
             painter = painterResource(Res.drawable.clothes)
         ),
         Shirt(
             index = 2,
-            name = Res.string.shirt2_name.toString(),
+            name = stringResource(Res.string.shirt2_name),
             painter = painterResource(Res.drawable.clothes)
         ),
         Shirt(
             index = 3,
-            name = Res.string.shirt3_name.toString(),
+            name = stringResource(Res.string.shirt3_name),
             painter = painterResource(Res.drawable.clothes)
         )
     )
@@ -86,7 +91,19 @@ private fun ScreenContent(
         when (state.cameraProvideState) {
             is CameraProvideState.Granted -> {
                 CameraView()
-                ToolBar(onIntent = onIntent, state = state)
+                Column(
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    verticalArrangement = Arrangement.Bottom,
+                ) {
+                    if (!state.isUnclothes) {
+                        Carousel(onIntent = onIntent, state = state)
+                        Spacer(
+                            modifier = Modifier
+                                .height(ShirmazTheme.dimension.caruselPaddingFromToolbar)
+                        )
+                    }
+                    ToolBar(onIntent = onIntent, state = state)
+                }
             }
 
             else -> {
@@ -108,7 +125,60 @@ private fun ScreenContent(
 }
 
 @Composable
-private fun BoxScope.ToolBar(
+private fun Carousel(onIntent: (CameraIntent) -> Unit, state: CameraScreenState) {
+    val scrollState = rememberScrollState()
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(scrollState),
+
+        horizontalArrangement = Arrangement.spacedBy(ShirmazTheme.dimension.itemSpacing)
+    ) {
+        state.shirts.forEach { shirt ->
+            Column {
+                IconButton(
+                    modifier = if (state.chosenShirt != shirt.index) {
+                        Modifier
+                            .size(ShirmazTheme.dimension.shirtButton)
+                            .clip(RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius))
+                            .background(ShirmazTheme.colors.shirtBackground)
+                    } else {
+                        Modifier
+                            .size(ShirmazTheme.dimension.shirtButton)
+                            .clip(RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius))
+                            .background(ShirmazTheme.colors.shirtBackground)
+                            .border(
+                                ShirmazTheme.dimension.borderThikness,
+                                Color.White,
+                                RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius)
+                            )
+                    },
+                    onClick = { onIntent(CameraIntent.ChooseShirt(shirt.index)) }
+                ) {
+                    Image(
+                        painter = shirt.painter,
+                        contentDescription = shirt.name
+                    )
+                }
+
+                Text(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally),
+
+                    color = ShirmazTheme.colors.text,
+                    text = shirt.name
+
+                )
+            }
+        }
+    }
+
+}
+
+
+@Composable
+private fun ToolBar(
     onIntent: (CameraIntent) -> Unit,
     state: CameraScreenState
 ) {
@@ -116,7 +186,6 @@ private fun BoxScope.ToolBar(
         modifier = Modifier
             .fillMaxWidth()
             .height(ShirmazTheme.dimension.toolBarHeight)
-            .align(Alignment.BottomCenter)
             .background(ShirmazTheme.colors.toolBar),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
@@ -130,7 +199,6 @@ private fun BoxScope.ToolBar(
         }
     }
 }
-
 
 
 @Composable

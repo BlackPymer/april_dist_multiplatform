@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class CameraViewModel(shirts:Array<Shirt>) : MVIViewModel<CameraIntent, CameraScreenState>() {
+class CameraViewModel(shirts: Array<Shirt>) : MVIViewModel<CameraIntent, CameraScreenState>() {
     private val _state = MutableStateFlow(
         CameraScreenState(
             cameraProvideState = CameraProvideState.NotGranted,
@@ -28,7 +28,8 @@ class CameraViewModel(shirts:Array<Shirt>) : MVIViewModel<CameraIntent, CameraSc
                 .proceedCameraState()
             is CameraIntent.TakePicture -> {}
             is CameraIntent.OpenGallery -> {}
-            is CameraIntent.Unclothes -> {updateUnclothes()}
+            is CameraIntent.Unclothes -> updateUnclothes()
+            is CameraIntent.ChooseShirt -> intent.index.chooseShirt()
         }
     }
 
@@ -52,9 +53,15 @@ class CameraViewModel(shirts:Array<Shirt>) : MVIViewModel<CameraIntent, CameraSc
             }
         }
 
-    private fun updateUnclothes(){
+    private fun updateUnclothes() {
         _state.update {
             it.copy(isUnclothes = !it.isUnclothes)
+        }
+    }
+
+    private fun Int.chooseShirt() {
+        _state.update{
+            it.copy(chosenShirt = this@chooseShirt)
         }
     }
 }
