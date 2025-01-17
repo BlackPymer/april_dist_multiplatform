@@ -1,11 +1,11 @@
 [versions]
-agp = "8.5.2"
+agp = "8.7.3"
 java = "17"
 kotlin = "2.0.21"
 
 compileSdk = "35"
 minSdk = "24"
-targetSdk = "34"
+targetSdk = "35"
 
 app-versionCode = "1"
 app-versionName = "1.0.0"
@@ -30,6 +30,7 @@ cameraLifecycle = "1.4.0"
 
 jetbrains-viewmodel = "2.8.2"
 
+filament = "1.56.0"
 [libraries]
 # Gradle plugins
 gradleplugins-android = { module = "com.android.tools.build:gradle", version.ref = "agp" }
@@ -58,6 +59,11 @@ androidx-camera-view = { group = "androidx.camera", name = "camera-view", versio
 androidx-camera-extensions = { group = "androidx.camera", name = "camera-extensions", version.ref = "cameraLifecycle" }
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraLifecycle" }
 
+
+google-filament = { module = "com.google.android.filament:filament-android", version.ref = "filament"}
+google-filament-utils = {module = "com.google.android.filament:filament-utils-android", version.ref = "filament"}
+google-gltfio = {module = "com.google.android.filament:gltfio-android", version.ref = "filament"}
+
 jetbrains-viewmodel = {module ="org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "jetbrains-viewmodel"}
 
 [plugins]
@@ -69,6 +75,8 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 kotlinCocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
 
 [bundles]
+android-filament =["google-filament", "google-filament-utils", "google-gltfio"]
+
 android-camera = [
     "androidx-camera-core", "androidx-camera-camera2", "androidx-camera-view",
     "androidx-camera-extensions", "androidx-camera-lifecycle"

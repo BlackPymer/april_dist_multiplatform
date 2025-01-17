@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
+import dev.yarobot.shirmaz.camera.model.ModelView
 import dev.yarobot.shirmaz.core.compose.base.LocalPermissionsController
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -88,7 +89,10 @@ private fun ScreenContent(
     ) {
         when (state.cameraProvideState) {
             is CameraProvideState.Granted -> {
-                CameraView()
+                CameraView {
+                    state.currentModel?.let {
+                        ModelView(remember(state) { state.currentModel })
+                    }
                 Column(
                     modifier = Modifier.align(Alignment.BottomCenter),
                     verticalArrangement = Arrangement.Bottom,
