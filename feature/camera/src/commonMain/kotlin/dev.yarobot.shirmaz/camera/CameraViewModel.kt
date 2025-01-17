@@ -10,11 +10,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class CameraViewModel: MVIViewModel<CameraIntent, CameraScreenState>() {
+class CameraViewModel(shirts:Array<Shirt>) : MVIViewModel<CameraIntent, CameraScreenState>() {
     private val _state = MutableStateFlow(
         CameraScreenState(
             cameraProvideState = CameraProvideState.NotGranted,
-            isUnclothes = false
+            isUnclothes = false,
+            shirts = shirts,
+            chosenShirt = 1
         )
     )
     override val state = _state.asStateFlow()
@@ -26,10 +28,11 @@ class CameraViewModel: MVIViewModel<CameraIntent, CameraScreenState>() {
                 .proceedCameraState()
             is CameraIntent.TakePicture -> {}
             is CameraIntent.OpenGallery -> {}
+            is CameraIntent.Unclothes -> {updateUnclothes()}
         }
     }
 
-    private fun PermissionsController.requestCamera(){
+    private fun PermissionsController.requestCamera() {
         viewModelScope.launch {
             this@requestCamera.providePermission(Permission.CAMERA)
         }
@@ -48,4 +51,10 @@ class CameraViewModel: MVIViewModel<CameraIntent, CameraScreenState>() {
                 else -> _state.update { it.copy(cameraProvideState = CameraProvideState.NotGranted) }
             }
         }
+
+    private fun updateUnclothes(){
+        _state.update {
+            it.copy(isUnclothes = !it.isUnclothes)
+        }
+    }
 }

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -22,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.yarobot.shirmaz.core.compose.base.LocalPermissionsController
 import org.jetbrains.compose.resources.painterResource
@@ -34,24 +32,48 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.unit.dp
+import dev.yarobot.shirmaz.core.compose.ui.ShirmazTheme
+import shirmaz.feature.camera.generated.resources.clothes
 import shirmaz.feature.camera.generated.resources.gallery
 import shirmaz.feature.camera.generated.resources.gallery_cd
+import shirmaz.feature.camera.generated.resources.shirt1_name
+import shirmaz.feature.camera.generated.resources.shirt2_name
+import shirmaz.feature.camera.generated.resources.shirt3_name
+import shirmaz.feature.camera.generated.resources.unclothes
 
 
 @Composable
 fun CameraScreen() {
-    val viewModel = viewModel { CameraViewModel() }
+    val shirts: Array<Shirt> = arrayOf(
+        Shirt(
+            index = 1,
+            name = Res.string.shirt1_name.toString(),
+            painter = painterResource(Res.drawable.clothes)
+        ),
+        Shirt(
+            index = 2,
+            name = Res.string.shirt2_name.toString(),
+            painter = painterResource(Res.drawable.clothes)
+        ),
+        Shirt(
+            index = 3,
+            name = Res.string.shirt3_name.toString(),
+            painter = painterResource(Res.drawable.clothes)
+        )
+    )
+    val viewModel = viewModel { CameraViewModel(shirts) }
     val state by viewModel.state.collectAsState()
     ScreenContent(
         onIntent = { viewModel.onIntent(it) },
-        state = remember(state) { state }
+        state = remember(state) { state },
     )
 }
 
 @Composable
 private fun ScreenContent(
     onIntent: (CameraIntent) -> Unit,
-    state: CameraScreenState
+    state: CameraScreenState,
 ) {
     val permissionsController = LocalPermissionsController.current
     LaunchedEffect(permissionsController) {
@@ -64,7 +86,7 @@ private fun ScreenContent(
         when (state.cameraProvideState) {
             is CameraProvideState.Granted -> {
                 CameraView()
-                ToolBar(onIntent = onIntent)
+                ToolBar(onIntent = onIntent, state = state)
             }
 
             else -> {
@@ -86,34 +108,43 @@ private fun ScreenContent(
 }
 
 @Composable
-private fun BoxScope.ToolBar(onIntent: (CameraIntent) -> Unit) {
+private fun BoxScope.ToolBar(
+    onIntent: (CameraIntent) -> Unit,
+    state: CameraScreenState
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(144.dp)
+            .height(ShirmazTheme.dimension.toolBarHeight)
             .align(Alignment.BottomCenter)
-            .background(Color.Black.copy(alpha = 0.5f)),
+            .background(ShirmazTheme.colors.toolBar),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
         GalleryButton(onIntent = onIntent)
         TakePictureButton(onIntent = onIntent)
+        if (state.isUnclothes) {
+            ClothesButton(onIntent = onIntent)
+        } else {
+            UnclothesButton(onIntent = onIntent)
+        }
     }
 }
+
+
 
 @Composable
 private fun GalleryButton(modifier: Modifier = Modifier, onIntent: (CameraIntent) -> Unit) {
     IconButton(
-        modifier = modifier,
+        modifier = modifier.size(ShirmazTheme.dimension.galleryButton),
         onClick = { onIntent(CameraIntent.OpenGallery) }
 
     ) {
-
         val painter: Painter = painterResource(Res.drawable.gallery)
         Image(
+            modifier = modifier,
             painter = painter,
-            contentDescription = stringResource(Res.string.gallery_cd),
-            modifier = Modifier.size(48.dp)
+            contentDescription = stringResource(Res.string.gallery_cd)
         )
     }
 }
@@ -124,13 +155,51 @@ private fun TakePictureButton(
     onIntent: (CameraIntent) -> Unit
 ) {
     IconButton(
+        modifier = modifier.size(ShirmazTheme.dimension.takePictureButton),
         onClick = { onIntent(CameraIntent.TakePicture) }
     ) {
         Box(
             modifier = Modifier
-                .size(80.dp)
                 .clip(CircleShape)
+                .size(ShirmazTheme.dimension.takePictureButton)
                 .background(Color.White)
+        )
+    }
+}
+
+@Composable
+private fun UnclothesButton(
+    modifier: Modifier = Modifier,
+    onIntent: (CameraIntent) -> Unit
+) {
+    IconButton(
+        modifier = modifier.size(ShirmazTheme.dimension.unclothesButton),
+        onClick = { onIntent(CameraIntent.Unclothes) }
+    ) {
+        val painter: Painter = painterResource(Res.drawable.unclothes)
+        Image(
+            modifier = modifier,
+            painter = painter,
+            contentDescription = stringResource(Res.string.gallery_cd)
+        )
+    }
+}
+
+@Composable
+private fun ClothesButton(
+    modifier: Modifier = Modifier,
+    onIntent: (CameraIntent) -> Unit
+) {
+    IconButton(
+        modifier = modifier.size(ShirmazTheme.dimension.clothesButton),
+        onClick = { onIntent(CameraIntent.Unclothes) }
+    ) {
+        val painter: Painter = painterResource(Res.drawable.clothes)
+        Image(
+            modifier = modifier.size(ShirmazTheme.dimension.clothesButton),
+            painter = painter,
+            contentDescription = stringResource(Res.string.gallery_cd)
+
         )
     }
 }

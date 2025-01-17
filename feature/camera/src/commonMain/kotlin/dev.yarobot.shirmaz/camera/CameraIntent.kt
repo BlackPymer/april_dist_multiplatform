@@ -9,4 +9,5 @@ sealed class CameraIntent : Intent {
         CameraIntent()
     data object TakePicture : CameraIntent()
     data object OpenGallery : CameraIntent()
+    data object Unclothes: CameraIntent()
 }
