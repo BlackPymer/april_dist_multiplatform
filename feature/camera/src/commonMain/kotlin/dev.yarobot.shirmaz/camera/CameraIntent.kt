@@ -10,6 +10,6 @@ sealed class CameraIntent : Intent {
 
     data object TakePicture : CameraIntent()
     data object OpenGallery : CameraIntent()
-    data object Unclothes : CameraIntent()
-    data class ChooseShirt(val index: Int) : CameraIntent()
+    data object ChangeCorouselVisability : CameraIntent()
+    data class ChooseShirt(val shirt: Shirt) : CameraIntent()
 }

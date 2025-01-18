@@ -1,9 +1,10 @@
 package dev.yarobot.shirmaz.camera
 
-import androidx.compose.ui.graphics.painter.Painter
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.StringResource
 
 data class Shirt(
-    val name: String,
-    val painter: Painter,
-    val index: Int
+    val nameRes: StringResource,
+    val painterRes: DrawableResource,
+    val modelName: String
 )

@@ -5,10 +5,8 @@ import dev.yarobot.shirmaz.core.language.ScreenState
 
 data class CameraScreenState(
     val cameraProvideState: CameraProvideState,
-
-    val isUnclothes: Boolean,
-    val shirts: Array<Shirt>,
-    val chosenShirt: Int,
-
-    val currentModel: ThreeDModel?
-): ScreenState
+    val shirts: List<Shirt>,
+    val currentShirt: Shirt?,
+    val currentModel: ThreeDModel?,
+    val isCarouselVisible: Boolean
+) : ScreenState

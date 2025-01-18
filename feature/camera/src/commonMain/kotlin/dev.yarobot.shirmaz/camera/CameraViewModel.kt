@@ -18,22 +18,39 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import shirmaz.feature.camera.generated.resources.Res
+import shirmaz.feature.camera.generated.resources.clothes
+import shirmaz.feature.camera.generated.resources.shirt1_name
+import shirmaz.feature.camera.generated.resources.shirt2_name
+import shirmaz.feature.camera.generated.resources.shirt3_name
 
 
-class CameraViewModel(shirts: Array<Shirt>) : MVIViewModel<CameraIntent, CameraScreenState>() {
+class CameraViewModel : MVIViewModel<CameraIntent, CameraScreenState>() {
     private val _state = MutableStateFlow(
         CameraScreenState(
             cameraProvideState = CameraProvideState.NotGranted,
-            isUnclothes = false,
-            shirts = shirts,
-            chosenShirt = 1,
-            currentModel = null
-
+            shirts = listOf(
+                Shirt(
+                    nameRes = (Res.string.shirt1_name),
+                    painterRes = (Res.drawable.clothes),
+                    modelName = Models.sampleModel
+                ),
+                Shirt(
+                    nameRes = (Res.string.shirt2_name),
+                    painterRes = (Res.drawable.clothes),
+                    modelName = Models.sampleModel
+                ),
+                Shirt(
+                    nameRes = (Res.string.shirt3_name),
+                    painterRes = (Res.drawable.clothes),
+                    modelName = Models.sampleModel
+                )
+            ),
+            currentShirt = null,
+            currentModel = null,
+            isCarouselVisible = false
         )
     )
-    override val state = _state.onStart {
-        loadModel(Models.sampleModel)
-    }.stateIn(
+    override val state = _state.onStart {}.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = _state.value
@@ -47,8 +64,8 @@ class CameraViewModel(shirts: Array<Shirt>) : MVIViewModel<CameraIntent, CameraS
 
             is CameraIntent.TakePicture -> {}
             is CameraIntent.OpenGallery -> {}
-            is CameraIntent.Unclothes -> updateUnclothes()
-            is CameraIntent.ChooseShirt -> intent.index.chooseShirt()
+            is CameraIntent.ChangeCorouselVisability -> changeCorouselVisability()
+            is CameraIntent.ChooseShirt -> intent.shirt.chooseAsCurrent()
         }
     }
 
@@ -63,6 +80,7 @@ class CameraViewModel(shirts: Array<Shirt>) : MVIViewModel<CameraIntent, CameraS
         viewModelScope.launch {
             when (this@proceedCameraState.getPermissionState(Permission.CAMERA)) {
                 PermissionState.Granted -> {
+
                     _state.update {
                         it.copy(cameraProvideState = CameraProvideState.Granted)
                     }
@@ -72,28 +90,33 @@ class CameraViewModel(shirts: Array<Shirt>) : MVIViewModel<CameraIntent, CameraS
             }
         }
 
-    private fun updateUnclothes() {
+    private fun changeCorouselVisability() {
         _state.update {
-            it.copy(isUnclothes = !it.isUnclothes)
+            it.copy(isCarouselVisible = !it.isCarouselVisible)
         }
     }
 
-    private fun Int.chooseShirt() {
+    private fun Shirt.chooseAsCurrent() {
         _state.update {
-            it.copy(chosenShirt = this@chooseShirt)
+            it.copy(currentShirt = this)
         }
+        loadModel()
     }
+
 
     @OptIn(ExperimentalResourceApi::class)
-    private fun loadModel(modelName: String) = viewModelScope.launch {
+    private fun loadModel() = viewModelScope.launch {
         withContext(Dispatchers.IO) {
-            _state.update {
-                it.copy(
-                    currentModel = ThreeDModel(
-                        Res.readBytes("files/$modelName")
+            _state.value.currentShirt?.modelName.let { name ->
+                _state.update {
+                    it.copy(
+                        currentModel = ThreeDModel(
+                            Res.readBytes("files/${name}")
+                        )
                     )
-                )
+                }
             }
         }
     }
+
 }
