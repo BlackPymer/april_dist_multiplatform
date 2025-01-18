@@ -10,11 +10,13 @@ data class ShirmazDimension(
     val takePictureButton: Dp,
     val unclothesButton: Dp,
     val clothesButton: Dp,
-    val shirtButton: Dp,
-    val caruselPaddingFromToolbar: Dp,
+    val shirtPicture: Dp,
+    val carouselPaddingFromToolbar: Dp,
     val itemSpacing: Dp,
     val buttonCornerRadius: Dp,
-    val borderThikness: Dp
+    val borderThikness: Dp,
+    val shirtButtonHeight: Dp,
+    val shirtButtonWidth: Dp
 )
 
 val shirmazDimension = ShirmazDimension(
@@ -23,11 +25,13 @@ val shirmazDimension = ShirmazDimension(
     takePictureButton = 100.dp,
     unclothesButton = 72.dp,
     clothesButton = 72.dp,
-    shirtButton = 100.dp,
-    caruselPaddingFromToolbar = 16.dp,
+    shirtPicture = 45.dp,
+    carouselPaddingFromToolbar = 16.dp,
     itemSpacing = 16.dp,
     buttonCornerRadius = 16.dp,
-    borderThikness = 2.dp
+    borderThikness = 2.dp,
+    shirtButtonHeight = 76.dp,
+    shirtButtonWidth = 65.dp
 )
 val LocalShirmazDimension = compositionLocalOf<ShirmazDimension> {
     error("No provided colors")

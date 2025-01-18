@@ -31,9 +31,11 @@ import shirmaz.feature.camera.generated.resources.camera_not_granted
 import shirmaz.feature.camera.generated.resources.camera_request
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.painter.Painter
@@ -115,45 +117,46 @@ private fun Carousel(onIntent: (CameraIntent) -> Unit, state: CameraScreenState)
         horizontalArrangement = Arrangement.spacedBy(ShirmazTheme.dimension.itemSpacing)
     ) {
         state.shirts.forEach { shirt ->
-            Column {
-                IconButton(
-                    modifier = if (state.currentShirt != shirt) {
-                        Modifier
-                            .size(ShirmazTheme.dimension.shirtButton)
-                            .clip(RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius))
-                            .background(ShirmazTheme.colors.shirtBackground)
-                    } else {
-                        Modifier
-                            .size(ShirmazTheme.dimension.shirtButton)
-                            .clip(RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius))
-                            .background(ShirmazTheme.colors.shirtBackground)
-                            .border(
-                                ShirmazTheme.dimension.borderThikness,
-                                Color.White,
-                                RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius)
-                            )
-                    },
-                    onClick = { onIntent(CameraIntent.ChooseShirt(shirt)) }
-                ) {
-                    Image(
-                        painter = painterResource(shirt.painterRes),
-                        contentDescription = stringResource(shirt.nameRes)
-                    )
+            Column(
+                modifier = if (state.currentShirt != shirt) {
+                    Modifier
+                        .height(ShirmazTheme.dimension.shirtButtonHeight)
+                        .width(ShirmazTheme.dimension.shirtButtonWidth)
+                        .clip(RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius))
+                        .background(ShirmazTheme.colors.shirtBackground)
+                        .clickable { onIntent(CameraIntent.ChooseShirt(shirt)) }
+                } else {
+                    Modifier
+                        .clip(RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius))
+                        .background(ShirmazTheme.colors.shirtBackground)
+                        .clickable { onIntent(CameraIntent.ChooseShirt(shirt)) }
+                        .border(
+                            ShirmazTheme.dimension.borderThikness,
+                            Color.White,
+                            RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius)
+                        )
                 }
-
+            ) {
+                Image(
+                    modifier = Modifier
+                        .size(ShirmazTheme.dimension.shirtPicture)
+                        .align(Alignment.CenterHorizontally),
+                    painter = painterResource(shirt.painterRes),
+                    contentDescription = stringResource(shirt.nameRes)
+                )
                 Text(
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally),
                     color = ShirmazTheme.colors.text,
                     text = stringResource(shirt.nameRes)
-
                 )
+
             }
         }
     }
     Spacer(
         modifier = Modifier
-            .height(ShirmazTheme.dimension.caruselPaddingFromToolbar)
+            .height(ShirmazTheme.dimension.carouselPaddingFromToolbar)
     )
 
 }
@@ -190,10 +193,9 @@ private fun GalleryButton(modifier: Modifier = Modifier, onIntent: (CameraIntent
         onClick = { onIntent(CameraIntent.OpenGallery) }
 
     ) {
-        val painter: Painter = painterResource(Res.drawable.gallery)
         Image(
             modifier = modifier,
-            painter = painter,
+            painter = painterResource(Res.drawable.gallery),
             contentDescription = stringResource(Res.string.gallery_cd)
         )
     }
@@ -244,10 +246,9 @@ private fun ClothesButton(
         modifier = modifier.size(ShirmazTheme.dimension.clothesButton),
         onClick = { onIntent(CameraIntent.ChangeCorouselVisability) }
     ) {
-        val painter: Painter = painterResource(Res.drawable.clothes)
         Image(
             modifier = modifier.size(ShirmazTheme.dimension.clothesButton),
-            painter = painter,
+            painter = painterResource(Res.drawable.clothes),
             contentDescription = stringResource(Res.string.gallery_cd)
 
         )
