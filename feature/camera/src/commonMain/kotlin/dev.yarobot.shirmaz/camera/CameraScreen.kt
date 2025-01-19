@@ -40,6 +40,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.painter.Painter
 import dev.yarobot.shirmaz.core.compose.ui.ShirmazTheme
+import org.jetbrains.compose.resources.DrawableResource
+import shirmaz.feature.camera.generated.resources.carousel_cd
 import shirmaz.feature.camera.generated.resources.clothes
 import shirmaz.feature.camera.generated.resources.gallery
 import shirmaz.feature.camera.generated.resources.gallery_cd
@@ -118,24 +120,25 @@ private fun Carousel(onIntent: (CameraIntent) -> Unit, state: CameraScreenState)
     ) {
         state.shirts.forEach { shirt ->
             Column(
-                modifier = if (state.currentShirt != shirt) {
-                    Modifier
-                        .height(ShirmazTheme.dimension.shirtButtonHeight)
-                        .width(ShirmazTheme.dimension.shirtButtonWidth)
-                        .clip(RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius))
-                        .background(ShirmazTheme.colors.shirtBackground)
-                        .clickable { onIntent(CameraIntent.ChooseShirt(shirt)) }
-                } else {
-                    Modifier
-                        .clip(RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius))
-                        .background(ShirmazTheme.colors.shirtBackground)
-                        .clickable { onIntent(CameraIntent.ChooseShirt(shirt)) }
-                        .border(
-                            ShirmazTheme.dimension.borderThikness,
-                            Color.White,
-                            RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius)
-                        )
-                }
+                modifier =
+                Modifier
+                    .height(ShirmazTheme.dimension.shirtButtonHeight)
+                    .width(ShirmazTheme.dimension.shirtButtonWidth)
+                    .clip(RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius))
+                    .background(ShirmazTheme.colors.shirtBackground)
+                    .clickable { onIntent(CameraIntent.ChooseShirt(shirt)) }
+                    .then(
+                        if (state.currentShirt == shirt) {
+                            Modifier.border(
+                                ShirmazTheme.dimension.borderThikness,
+                                Color.White,
+                                RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius)
+                            )
+                        } else {
+                            Modifier
+                        }
+                    )
+
             ) {
                 Image(
                     modifier = Modifier
@@ -178,9 +181,9 @@ private fun ToolBar(
         GalleryButton(onIntent = onIntent)
         TakePictureButton(onIntent = onIntent)
         if (state.isCarouselVisible) {
-            ClothesButton(onIntent = onIntent)
+            CarouselButton(onIntent = onIntent, image = Res.drawable.unclothes)
         } else {
-            UnclothesButton(onIntent = onIntent)
+            CarouselButton(onIntent = onIntent, image = Res.drawable.clothes)
         }
     }
 }
@@ -220,37 +223,20 @@ private fun TakePictureButton(
 }
 
 @Composable
-private fun UnclothesButton(
+private fun CarouselButton(
     modifier: Modifier = Modifier,
-    onIntent: (CameraIntent) -> Unit
+    onIntent: (CameraIntent) -> Unit,
+    image: DrawableResource
 ) {
     IconButton(
-        modifier = modifier.size(ShirmazTheme.dimension.unclothesButton),
+        modifier = modifier.size(ShirmazTheme.dimension.carouselButton),
         onClick = { onIntent(CameraIntent.ChangeCorouselVisability) }
     ) {
-        val painter: Painter = painterResource(Res.drawable.unclothes)
+        val painter: Painter = painterResource(image)
         Image(
             modifier = modifier,
             painter = painter,
-            contentDescription = stringResource(Res.string.gallery_cd)
-        )
-    }
-}
-
-@Composable
-private fun ClothesButton(
-    modifier: Modifier = Modifier,
-    onIntent: (CameraIntent) -> Unit
-) {
-    IconButton(
-        modifier = modifier.size(ShirmazTheme.dimension.clothesButton),
-        onClick = { onIntent(CameraIntent.ChangeCorouselVisability) }
-    ) {
-        Image(
-            modifier = modifier.size(ShirmazTheme.dimension.clothesButton),
-            painter = painterResource(Res.drawable.clothes),
-            contentDescription = stringResource(Res.string.gallery_cd)
-
+            contentDescription = stringResource(Res.string.carousel_cd)
         )
     }
 }
