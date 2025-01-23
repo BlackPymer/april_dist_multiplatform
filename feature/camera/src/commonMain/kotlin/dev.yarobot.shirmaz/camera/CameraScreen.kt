@@ -213,15 +213,28 @@ private fun TakePictureButton(
     onIntent: (CameraIntent) -> Unit
 ) {
     IconButton(
-        modifier = modifier.size(ShirmazTheme.dimension.takePictureButton),
+        modifier = modifier.size(ShirmazTheme.dimension.takePictureButtonBorderCircle),
         onClick = { onIntent(CameraIntent.TakePicture) }
     ) {
         Box(
             modifier = Modifier
+                .size(ShirmazTheme.dimension.takePictureButtonBorderCircle)
                 .clip(CircleShape)
-                .size(ShirmazTheme.dimension.takePictureButton)
-                .background(Color.White)
-        )
+                .border(
+                    width = ShirmazTheme.dimension.takePictureButtonBorderWidth,
+                    color = Color.White,
+                    shape = CircleShape
+                )
+                .background(Color.Transparent)
+        ) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(ShirmazTheme.dimension.takePictureButtonCircle)
+                    .clip(CircleShape)
+                    .background(Color.White)
+            )
+        }
     }
 }
 

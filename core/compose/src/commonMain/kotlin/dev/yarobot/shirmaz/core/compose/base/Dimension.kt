@@ -7,7 +7,9 @@ import androidx.compose.ui.unit.dp
 data class ShirmazDimension(
     val toolBarHeight: Dp,
     val galleryButton: Dp,
-    val takePictureButton: Dp,
+    val takePictureButtonBorderCircle: Dp,
+    val takePictureButtonBorderWidth: Dp,
+    val takePictureButtonCircle: Dp,
     val carouselButton: Dp,
     val shirtPicture: Dp,
     val carouselPaddingFromToolbar: Dp,
@@ -21,7 +23,9 @@ data class ShirmazDimension(
 val shirmazDimension = ShirmazDimension(
     toolBarHeight = 144.dp,
     galleryButton = 72.dp,
-    takePictureButton = 100.dp,
+    takePictureButtonBorderCircle = 64.dp,
+    takePictureButtonBorderWidth = 2.dp,
+    takePictureButtonCircle = 54.dp,
     carouselButton = 72.dp,
     shirtPicture = 45.dp,
     carouselPaddingFromToolbar = 16.dp,
