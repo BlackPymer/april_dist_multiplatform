@@ -19,9 +19,11 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import shirmaz.feature.camera.generated.resources.Res
 import shirmaz.feature.camera.generated.resources.clothes
+import shirmaz.feature.camera.generated.resources.null_shirt
 import shirmaz.feature.camera.generated.resources.shirt1_name
 import shirmaz.feature.camera.generated.resources.shirt2_name
 import shirmaz.feature.camera.generated.resources.shirt3_name
+import shirmaz.feature.camera.generated.resources.unclothes
 
 
 class CameraViewModel : MVIViewModel<CameraIntent, CameraScreenState>() {
@@ -29,6 +31,11 @@ class CameraViewModel : MVIViewModel<CameraIntent, CameraScreenState>() {
         CameraScreenState(
             cameraProvideState = CameraProvideState.NotGranted,
             shirts = listOf(
+                Shirt(
+                    nameRes = (Res.string.null_shirt),
+                    painterRes = (Res.drawable.unclothes),
+                    modelName = null
+                ),
                 Shirt(
                     nameRes = (Res.string.shirt1_name),
                     painterRes = (Res.drawable.clothes),
@@ -106,8 +113,16 @@ class CameraViewModel : MVIViewModel<CameraIntent, CameraScreenState>() {
 
     @OptIn(ExperimentalResourceApi::class)
     private fun loadModel() = viewModelScope.launch {
+
         withContext(Dispatchers.IO) {
-            _state.value.currentShirt?.modelName.let { name ->
+            if(_state.value.currentShirt?.modelName == null){
+                _state.update {
+                    it.copy(
+                        currentModel = null
+                    )
+                }
+            }
+            _state.value.currentShirt?.modelName?.let { name ->
                 _state.update {
                     it.copy(
                         currentModel = ThreeDModel(

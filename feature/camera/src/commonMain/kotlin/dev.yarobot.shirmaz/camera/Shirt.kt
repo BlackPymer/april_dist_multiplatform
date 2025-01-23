@@ -6,5 +6,5 @@ import org.jetbrains.compose.resources.StringResource
 data class Shirt(
     val nameRes: StringResource,
     val painterRes: DrawableResource,
-    val modelName: String
+    val modelName: String?
 )

@@ -122,6 +122,7 @@ private fun Carousel(onIntent: (CameraIntent) -> Unit, state: CameraScreenState)
             Column(
                 modifier =
                 Modifier
+                    .align(Alignment.CenterVertically)
                     .height(ShirmazTheme.dimension.shirtButtonHeight)
                     .width(ShirmazTheme.dimension.shirtButtonWidth)
                     .clip(RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius))
@@ -147,13 +148,14 @@ private fun Carousel(onIntent: (CameraIntent) -> Unit, state: CameraScreenState)
                     painter = painterResource(shirt.painterRes),
                     contentDescription = stringResource(shirt.nameRes)
                 )
-                Text(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally),
-                    color = ShirmazTheme.colors.text,
-                    text = stringResource(shirt.nameRes)
-                )
-
+                if(shirt.modelName!=null) {
+                    Text(
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally),
+                        color = ShirmazTheme.colors.text,
+                        text = stringResource(shirt.nameRes)
+                    )
+                }
             }
         }
     }
