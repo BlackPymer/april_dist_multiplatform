@@ -11,7 +11,7 @@ data class ShirmazColors(
 
 val shirmazColors = ShirmazColors(
     toolBar = Color(0xB3131313),
-    shirtBackground = Color(0x66131313),
+    shirtBackground = Color(0x33131313),
     text = Color(0xFFFFFFFF)
 )
 val LocalShirmazColors = compositionLocalOf<ShirmazColors> {

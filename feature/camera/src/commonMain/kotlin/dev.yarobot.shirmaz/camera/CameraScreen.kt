@@ -138,7 +138,8 @@ private fun Carousel(onIntent: (CameraIntent) -> Unit, state: CameraScreenState)
                         } else {
                             Modifier
                         }
-                    )
+                    ),
+                verticalArrangement = Arrangement.Center
 
             ) {
                 Image(
@@ -148,7 +149,7 @@ private fun Carousel(onIntent: (CameraIntent) -> Unit, state: CameraScreenState)
                     painter = painterResource(shirt.painterRes),
                     contentDescription = stringResource(shirt.nameRes)
                 )
-                if(shirt.modelName!=null) {
+                if (shirt.modelName != null) {
                     Text(
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally),
