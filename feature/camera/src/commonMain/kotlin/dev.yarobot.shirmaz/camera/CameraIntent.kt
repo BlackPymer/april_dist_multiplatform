@@ -12,4 +12,6 @@ sealed class CameraIntent : Intent {
     data object OpenGallery : CameraIntent()
     data object ChangeCorouselVisability : CameraIntent()
     data class ChooseShirt(val shirt: Shirt) : CameraIntent()
+    data object BackToToolbar: CameraIntent()
+    data object SaveImage: CameraIntent()
 }

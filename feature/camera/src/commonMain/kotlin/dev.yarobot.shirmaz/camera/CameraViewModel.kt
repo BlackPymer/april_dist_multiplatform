@@ -24,6 +24,7 @@ import shirmaz.feature.camera.generated.resources.shirt1_name
 import shirmaz.feature.camera.generated.resources.shirt2_name
 import shirmaz.feature.camera.generated.resources.shirt3_name
 import shirmaz.feature.camera.generated.resources.unclothes
+import shirmaz.feature.camera.generated.resources.unclothes_no_text
 
 
 class CameraViewModel : MVIViewModel<CameraIntent, CameraScreenState>() {
@@ -33,7 +34,7 @@ class CameraViewModel : MVIViewModel<CameraIntent, CameraScreenState>() {
             shirts = listOf(
                 Shirt(
                     nameRes = (Res.string.null_shirt),
-                    painterRes = (Res.drawable.unclothes),
+                    painterRes = (Res.drawable.unclothes_no_text),
                     modelName = null
                 ),
                 Shirt(
@@ -54,7 +55,8 @@ class CameraViewModel : MVIViewModel<CameraIntent, CameraScreenState>() {
             ),
             currentShirt = null,
             currentModel = null,
-            isCarouselVisible = false
+            isCarouselVisible = false,
+            saving = false
         )
     )
     override val state = _state.onStart {}.stateIn(
@@ -69,10 +71,24 @@ class CameraViewModel : MVIViewModel<CameraIntent, CameraScreenState>() {
             is CameraIntent.CheckCameraPermission -> intent.permissionsController
                 .proceedCameraState()
 
-            is CameraIntent.TakePicture -> {}
+            is CameraIntent.TakePicture -> takePicture()
             is CameraIntent.OpenGallery -> {}
             is CameraIntent.ChangeCorouselVisability -> changeCorouselVisability()
             is CameraIntent.ChooseShirt -> intent.shirt.chooseAsCurrent()
+            is CameraIntent.BackToToolbar -> backToToolbar()
+            is CameraIntent.SaveImage -> {}
+        }
+    }
+
+    private fun backToToolbar() {
+        _state.update {
+            it.copy(saving = false)
+        }
+    }
+
+    private fun takePicture() {
+        _state.update {
+            it.copy(saving = true, isCarouselVisible = true)
         }
     }
 
@@ -115,7 +131,7 @@ class CameraViewModel : MVIViewModel<CameraIntent, CameraScreenState>() {
     private fun loadModel() = viewModelScope.launch {
 
         withContext(Dispatchers.IO) {
-            if(_state.value.currentShirt?.modelName == null){
+            if (_state.value.currentShirt?.modelName == null) {
                 _state.update {
                     it.copy(
                         currentModel = null

@@ -34,17 +34,25 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.contentColorFor
 import androidx.compose.ui.graphics.painter.Painter
 import dev.yarobot.shirmaz.core.compose.ui.ShirmazTheme
 import org.jetbrains.compose.resources.DrawableResource
+import shirmaz.feature.camera.generated.resources.arrow
+import shirmaz.feature.camera.generated.resources.back_cd
 import shirmaz.feature.camera.generated.resources.carousel_cd
 import shirmaz.feature.camera.generated.resources.clothes
 import shirmaz.feature.camera.generated.resources.gallery
 import shirmaz.feature.camera.generated.resources.gallery_cd
+import shirmaz.feature.camera.generated.resources.save_cd
 import shirmaz.feature.camera.generated.resources.unclothes
 
 
@@ -84,7 +92,11 @@ private fun ScreenContent(
                         if (state.isCarouselVisible) {
                             Carousel(onIntent = onIntent, state = state)
                         }
-                        ToolBar(onIntent = onIntent, state = state)
+                        if (state.saving) {
+                            SavingPanel(onIntent = onIntent, state = state)
+                        } else {
+                            ToolBar(onIntent = onIntent, state = state)
+                        }
                     }
                 }
             }
@@ -114,7 +126,8 @@ private fun Carousel(onIntent: (CameraIntent) -> Unit, state: CameraScreenState)
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .horizontalScroll(scrollState),
+            .horizontalScroll(scrollState)
+            .padding(ShirmazTheme.dimension.carouselPaddingFromLeftScreenBorder),
 
         horizontalArrangement = Arrangement.spacedBy(ShirmazTheme.dimension.itemSpacing)
     ) {
@@ -154,7 +167,9 @@ private fun Carousel(onIntent: (CameraIntent) -> Unit, state: CameraScreenState)
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally),
                         color = ShirmazTheme.colors.text,
-                        text = stringResource(shirt.nameRes)
+                        text = stringResource(shirt.nameRes),
+                        fontSize = ShirmazTheme.dimension.carouselButtonFontSize
+
                     )
                 }
             }
@@ -162,7 +177,13 @@ private fun Carousel(onIntent: (CameraIntent) -> Unit, state: CameraScreenState)
     }
     Spacer(
         modifier = Modifier
-            .height(ShirmazTheme.dimension.carouselPaddingFromToolbar)
+            .then (
+                if(!state.saving) {
+                    Modifier.height(ShirmazTheme.dimension.carouselPaddingFromToolbar)
+                }else{
+                    Modifier.height(ShirmazTheme.dimension.carouselPaddingFromSavingPanel)
+                }
+            )
     )
 
 }
@@ -190,7 +211,6 @@ private fun ToolBar(
         }
     }
 }
-
 
 @Composable
 private fun GalleryButton(modifier: Modifier = Modifier, onIntent: (CameraIntent) -> Unit) {
@@ -222,7 +242,7 @@ private fun TakePictureButton(
                 .clip(CircleShape)
                 .border(
                     width = ShirmazTheme.dimension.takePictureButtonBorderWidth,
-                    color = Color.White,
+                    color = ShirmazTheme.colors.takePictureButton,
                     shape = CircleShape
                 )
                 .background(Color.Transparent)
@@ -232,7 +252,7 @@ private fun TakePictureButton(
                     .align(Alignment.Center)
                     .size(ShirmazTheme.dimension.takePictureButtonCircle)
                     .clip(CircleShape)
-                    .background(Color.White)
+                    .background(ShirmazTheme.colors.takePictureButton)
             )
         }
     }
@@ -253,6 +273,79 @@ private fun CarouselButton(
             modifier = modifier,
             painter = painter,
             contentDescription = stringResource(Res.string.carousel_cd)
+        )
+    }
+}
+
+
+@Composable
+private fun SavingPanel(onIntent: (CameraIntent) -> Unit, state: CameraScreenState) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(ShirmazTheme.dimension.toolBarHeight),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        BackButton(onIntent = onIntent)
+        SaveButton(onIntent = onIntent)
+    }
+}
+
+@Composable
+private fun RowScope.BackButton(
+    modifier: Modifier = Modifier,
+    onIntent: (CameraIntent) -> Unit
+) {
+    Button(
+        modifier = modifier
+            .align(Alignment.CenterVertically)
+            .height(ShirmazTheme.dimension.savingButtonsHeight)
+            .width(ShirmazTheme.dimension.savingButtonsWidth),
+        colors = ButtonDefaults.buttonColors(containerColor = ShirmazTheme.colors.toolBar),
+        shape = RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius),
+
+        onClick = { onIntent(CameraIntent.BackToToolbar) }
+    ) {
+        Row(
+            modifier = Modifier
+                .align(Alignment.CenterVertically),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                modifier = modifier,
+                painter = painterResource(Res.drawable.arrow),
+                contentDescription = stringResource(Res.string.back_cd)
+            )
+            Text(
+                text = stringResource(Res.string.back_cd),
+                color = ShirmazTheme.colors.text,
+                fontSize = ShirmazTheme.dimension.savingButtonsFontSize
+            )
+        }
+    }
+}
+
+@Composable
+private fun RowScope.SaveButton(
+    modifier: Modifier = Modifier,
+    onIntent: (CameraIntent) -> Unit
+) {
+    Button(
+        modifier = modifier
+            .align(Alignment.CenterVertically)
+            .height(ShirmazTheme.dimension.savingButtonsHeight)
+            .width(ShirmazTheme.dimension.savingButtonsWidth),
+        colors = ButtonDefaults.buttonColors(containerColor = ShirmazTheme.colors.toolBar),
+        shape = RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius),
+
+        onClick = { onIntent(CameraIntent.SaveImage) }
+    ) {
+        Text(
+            text = stringResource(Res.string.save_cd),
+            color = ShirmazTheme.colors.text,
+            fontSize = ShirmazTheme.dimension.savingButtonsFontSize
         )
     }
 }

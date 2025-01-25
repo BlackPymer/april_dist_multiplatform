@@ -6,13 +6,15 @@ import androidx.compose.ui.graphics.Color
 data class ShirmazColors(
     val toolBar: Color,
     val shirtBackground: Color,
-    val text: Color
+    val text: Color,
+    val takePictureButton: Color
 )
 
 val shirmazColors = ShirmazColors(
     toolBar = Color(0xB3131313),
     shirtBackground = Color(0x33131313),
-    text = Color(0xFFFFFFFF)
+    text = Color(0xFFFFFFFF),
+    takePictureButton = Color(0xFFFFFFFF)
 )
 val LocalShirmazColors = compositionLocalOf<ShirmazColors> {
     error("No provided colors")

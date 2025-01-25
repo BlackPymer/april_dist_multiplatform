@@ -13,6 +13,9 @@ kotlin{
         version = libs.versions.app.versionCode.get()
     }
 }
+dependencies {
+    implementation(libs.play.services.wallet)
+}
 
 
 

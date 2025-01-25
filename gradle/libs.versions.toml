@@ -31,6 +31,7 @@ cameraLifecycle = "1.4.0"
 jetbrains-viewmodel = "2.8.2"
 
 filament = "1.56.0"
+playServicesWallet = "19.4.0"
 [libraries]
 # Gradle plugins
 gradleplugins-android = { module = "com.android.tools.build:gradle", version.ref = "agp" }
@@ -65,6 +66,7 @@ google-filament-utils = {module = "com.google.android.filament:filament-utils-an
 google-gltfio = {module = "com.google.android.filament:gltfio-android", version.ref = "filament"}
 
 jetbrains-viewmodel = {module ="org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "jetbrains-viewmodel"}
+play-services-wallet = { group = "com.google.android.gms", name = "play-services-wallet", version.ref = "playServicesWallet" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

@@ -3,6 +3,8 @@
     <string name="camera_request">Allow access to camera</string>
     <string name="gallery_cd">Open gallery</string>
     <string name="carousel_cd">Open carousel</string>
+    <string name="back_cd">Back</string>
+    <string name="save_cd">Save</string>
     <string name="null_shirt">No shirt</string>
     <string name="shirt1_name">Shirt 1</string>
     <string name="shirt2_name">Shirt 2</string>
