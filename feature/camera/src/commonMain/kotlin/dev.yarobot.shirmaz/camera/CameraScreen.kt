@@ -14,6 +14,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import dev.icerock.moko.permissions.DeniedAlwaysException
+import dev.icerock.moko.permissions.DeniedException
+import dev.icerock.moko.permissions.PermissionsController
 import dev.yarobot.shirmaz.camera.model.ModelView
 import dev.yarobot.shirmaz.core.compose.base.LocalPermissionsController
 import org.jetbrains.compose.resources.stringResource
@@ -38,8 +41,10 @@ private fun ScreenContent(
 ) {
     val permissionsController = LocalPermissionsController.current
 
-    LaunchedEffect(permissionsController) {
-        onIntent(CameraIntent.RequestCamera(permissionsController))
+    LaunchedEffect(state.cameraProvideState) {
+        if (state.cameraProvideState == CameraProvideState.NotGranted) {
+            onIntent(CameraIntent.RequestCamera(permissionsController))
+        }
     }
     Box(
         modifier = Modifier.fillMaxSize(),

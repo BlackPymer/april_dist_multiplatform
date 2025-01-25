@@ -1,6 +1,8 @@
 package dev.yarobot.shirmaz.camera
 
 import androidx.lifecycle.viewModelScope
+import dev.icerock.moko.permissions.DeniedAlwaysException
+import dev.icerock.moko.permissions.DeniedException
 import dev.icerock.moko.permissions.Permission
 import dev.icerock.moko.permissions.PermissionState
 import dev.icerock.moko.permissions.PermissionsController
@@ -33,17 +35,31 @@ class CameraViewModel : MVIViewModel<CameraIntent, CameraScreenState>() {
     override fun onIntent(intent: CameraIntent) {
         when (intent) {
             is CameraIntent.RequestCamera -> intent.permissionsController.requestCamera()
-            is CameraIntent.CheckCameraPermission -> viewModelScope.launch {
-                intent.permissionsController
-                    .proceedCameraState()
-            }
+            is CameraIntent.CheckCameraPermission ->
+                intent.permissionsController.checkAndTryProvideCamera()
+
+            is CameraIntent.OpenSettings -> intent.permissionsController.openSettings()
         }
+    }
+
+    private fun PermissionsController.openSettings() {
+        this@openSettings.openAppSettings()
     }
 
     private fun PermissionsController.requestCamera() {
         viewModelScope.launch {
-            this@requestCamera.providePermission(Permission.CAMERA)
-            proceedCameraState()
+            try {
+                this@requestCamera.providePermission(Permission.CAMERA)
+                proceedCameraState()
+            } catch (e: Exception) {
+                    openSettings()
+            }
+        }
+    }
+
+    private fun PermissionsController.checkAndTryProvideCamera() {
+        viewModelScope.launch {
+            this@checkAndTryProvideCamera.proceedCameraState()
         }
     }
 
@@ -54,10 +70,8 @@ class CameraViewModel : MVIViewModel<CameraIntent, CameraScreenState>() {
                     it.copy(cameraProvideState = CameraProvideState.Granted)
                 }
             }
-
-            else -> _state.update { it.copy(cameraProvideState = CameraProvideState.NotGranted) }
+            else -> {}
         }
-
 
     @OptIn(ExperimentalResourceApi::class)
     private fun loadModel(modelName: String) = viewModelScope.launch {
