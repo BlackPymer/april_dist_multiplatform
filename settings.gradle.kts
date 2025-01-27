@@ -30,12 +30,4 @@ dependencyResolutionManagement {
     }
 }
 
-includeBuild("build-logic")
-
-include(":androidApp")
-
-include(":core:language")
-include(":core:compose")
-
-include(":feature:camera")
-include(":feature:app")
+include(":shirmazApp")

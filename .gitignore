@@ -3,6 +3,8 @@
 /build
 /.gradle
 /.kotlin
+/iosApp/Pods
+/iosApp/build
 
 # Files
 /local.properties
