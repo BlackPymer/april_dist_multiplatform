@@ -59,7 +59,8 @@ private val deviceTypes = listOf(
 @OptIn(ExperimentalForeignApi::class)
 @Composable
 actual fun CameraView(
-    onImageCaptured: (image: PlatformImage) -> Unit
+    onImageCaptured: (image: PlatformImage) -> Unit,
+    modelView: @Composable () -> Unit
 ) {
     val camera: AVCaptureDevice? = remember {
         discoverySessionWithDeviceTypes(
@@ -103,7 +104,7 @@ private fun RealDeviceCamera(
                     didOutputSampleBuffer: CMSampleBufferRef?,
                     fromConnection: AVCaptureConnection
                 ) {
-                    if (didOutputSampleBuffer == null || frameCount++ % 50 != 0) return
+                    if (didOutputSampleBuffer == null || frameCount++ % 10 != 0) return
                     val cvBuffer = CMSampleBufferGetImageBuffer(didOutputSampleBuffer) ?: return
                     val ciImage = CIImage.imageWithCVPixelBuffer(cvBuffer)
                     val cgImage = ciContext.createCGImage(ciImage, ciImage.extent)

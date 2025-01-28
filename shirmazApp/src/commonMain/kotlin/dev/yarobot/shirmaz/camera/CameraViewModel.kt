@@ -13,8 +13,6 @@ import dev.yarobot.shirmaz.posedetection.createPoseDetector
 import kotlinx.coroutines.Dispatchers
 import dev.yarobot.shirmaz.camera.model.Models
 import dev.yarobot.shirmaz.camera.model.ThreeDModel
-import dev.yarobot.shirmaz.core.language.MVIViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,9 +21,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import shirmaz.feature.camera.generated.resources.Res
+import shirmaz.shirmazapp.generated.resources.Res
 
 class CameraViewModel : ViewModel() {
     private val poseDetector = createPoseDetector(ShirmazPoseDetectorOptions.STREAM)

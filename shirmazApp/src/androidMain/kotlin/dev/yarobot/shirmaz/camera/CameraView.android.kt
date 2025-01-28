@@ -15,9 +15,9 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import dev.yarobot.shirmaz.platform.PlatformImage
 
 @Composable
-actual fun CameraView(modelView: @Composable () -> Unit) {
 actual fun CameraView(
-    onImageCaptured: (PlatformImage) -> Unit
+    onImageCaptured: (PlatformImage) -> Unit,
+    modelView: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
     val lifeCycleOwner = LocalLifecycleOwner.current
@@ -25,7 +25,7 @@ actual fun CameraView(
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
     val previewView = remember { PreviewView(context) }
 
-    Box(){
+    Box{
         AndroidView(
             factory = { previewView },
             modifier = Modifier.fillMaxSize(),

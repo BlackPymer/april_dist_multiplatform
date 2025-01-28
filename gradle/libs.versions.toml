@@ -1,6 +1,5 @@
 [versions]
 agp = "8.7.3"
-java = "17"
 kotlin = "2.1.0"
 
 compileSdk = "35"
@@ -89,8 +88,4 @@ android-filament =["google-filament", "google-filament-utils", "google-gltfio"]
 android-camera = [
     "androidx-camera-core", "androidx-camera-camera2", "androidx-camera-view",
     "androidx-camera-extensions", "androidx-camera-lifecycle"
-]
-
-gradleplugins = [
-    "gradleplugins-android", "gradleplugins-compose", "gradleplugins-kotlin",
 ]
