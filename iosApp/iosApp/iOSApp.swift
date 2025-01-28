@@ -1,4 +1,5 @@
 import SwiftUI
+import ShirmazApp
 
 @main
 struct iOSApp: App {
@@ -8,3 +9,4 @@ struct iOSApp: App {
         }
     }
 }
+
