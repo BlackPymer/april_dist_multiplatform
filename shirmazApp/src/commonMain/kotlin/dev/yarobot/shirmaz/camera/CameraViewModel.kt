@@ -11,11 +11,21 @@ import dev.yarobot.shirmaz.platform.type
 import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetectorOptions
 import dev.yarobot.shirmaz.posedetection.createPoseDetector
 import kotlinx.coroutines.Dispatchers
+import dev.yarobot.shirmaz.camera.model.Models
+import dev.yarobot.shirmaz.camera.model.ThreeDModel
+import dev.yarobot.shirmaz.core.language.MVIViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import shirmaz.feature.camera.generated.resources.Res
 
 class CameraViewModel : ViewModel() {
     private val poseDetector = createPoseDetector(ShirmazPoseDetectorOptions.STREAM)
@@ -23,9 +33,17 @@ class CameraViewModel : ViewModel() {
     private val _state = MutableStateFlow(
         CameraScreenState(
             cameraProvideState = CameraProvideState.NotGranted,
+            currentModel = null
         )
     )
-    val state = _state.asStateFlow()
+
+    val state = _state.onStart {
+        loadModel(Models.sampleModel)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = _state.value
+    )
 
     fun onIntent(intent: CameraIntent) {
         when (intent) {
@@ -56,6 +74,19 @@ class CameraViewModel : ViewModel() {
                 else -> _state.update { it.copy(cameraProvideState = CameraProvideState.NotGranted) }
             }
         }
+
+    @OptIn(ExperimentalResourceApi::class)
+    private fun loadModel(modelName: String) = viewModelScope.launch {
+        withContext(Dispatchers.IO) {
+            _state.update {
+                it.copy(
+                    currentModel = ThreeDModel(
+                        Res.readBytes("files/$modelName")
+                    )
+                )
+            }
+        }
+    }
 
     private fun detectPose(image: PlatformImage) {
         viewModelScope.launch {

@@ -1,7 +1,9 @@
 @file:Suppress("UnstableApiUsage")
 
+import org.gradle.api.initialization.resolve.RepositoriesMode.FAIL_ON_PROJECT_REPOS
+
+
 rootProject.name = "Shirmaz"
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
     repositories {
@@ -18,6 +20,7 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
+    repositoriesMode.set(FAIL_ON_PROJECT_REPOS)
     repositories {
         google {
             mavenContent {
