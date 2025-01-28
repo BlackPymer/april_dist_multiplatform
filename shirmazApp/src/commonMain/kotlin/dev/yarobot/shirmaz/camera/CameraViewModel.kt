@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dev.icerock.moko.permissions.Permission
 import dev.icerock.moko.permissions.PermissionState
 import dev.icerock.moko.permissions.PermissionsController
-import dev.yarobot.shirmaz.platform.`3DPos`
+import dev.yarobot.shirmaz.platform.float3DPose
 import dev.yarobot.shirmaz.platform.PlatformImage
 import dev.yarobot.shirmaz.platform.type
 import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetectorOptions
@@ -64,7 +64,7 @@ class CameraViewModel : ViewModel() {
                     println("!!!!! start")
                     poses?.let {
                         it.forEach { pose ->
-                            println("${pose.`3DPos`()} ${pose.type}")
+                            println("${pose.float3DPose()} ${pose.type}")
                         }
                     }
                     error?.let {

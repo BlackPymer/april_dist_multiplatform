@@ -34,5 +34,5 @@ expect val RIGHT_HEEL: PlatformLandmarkType?
 expect val LEFT_FOOT_INDEX: PlatformLandmarkType?
 expect val RIGHT_FOOT_INDEX: PlatformLandmarkType?
 
-expect fun PlatformLandmark.`3DPos`(): Float3Dimension
+expect fun PlatformLandmark.float3DPose(): Float3Dimension
 expect val PlatformLandmark.type: PlatformLandmarkType

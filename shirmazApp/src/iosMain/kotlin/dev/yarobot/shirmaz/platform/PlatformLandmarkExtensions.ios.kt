@@ -74,7 +74,7 @@ actual val RIGHT_FOOT_INDEX: PlatformLandmarkType?
     get() = MLKPoseLandmarkTypeRightToe
 
 @OptIn(ExperimentalForeignApi::class)
-actual fun PlatformLandmark.`3DPos`(): Float3Dimension = Float3Dimension(
+actual fun PlatformLandmark.`float3DPose`(): Float3Dimension = Float3Dimension(
     x = (this.position as MLKVision3DPoint).x.toFloat(),
     y = (this.position as MLKVision3DPoint).y.toFloat(),
     z = (this.position as MLKVision3DPoint).z.toFloat()

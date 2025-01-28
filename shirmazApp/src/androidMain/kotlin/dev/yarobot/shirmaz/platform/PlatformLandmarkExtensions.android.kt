@@ -70,7 +70,7 @@ actual val RIGHT_FOOT_INDEX: PlatformLandmarkType?
     get() = PoseLandmark.RIGHT_FOOT_INDEX
 
 
-actual fun PlatformLandmark.`3DPos`(): Float3Dimension =
+actual fun PlatformLandmark.float3DPose(): Float3Dimension =
     Float3Dimension(
         x = this.position3D.x,
         y = this.position3D.y,
