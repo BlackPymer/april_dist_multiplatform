@@ -86,20 +86,17 @@ class CameraViewModel : ViewModel() {
     }
 
     private fun detectPose(image: PlatformImage) {
-        viewModelScope.launch {
-            withContext(Dispatchers.Default){
-                poseDetector.processImage(image){ poses, error ->
-                    println("!!!!! start")
-                    poses?.let {
-                        it.forEach { pose ->
-                            println("${pose.float3DPose()} ${pose.type}")
-                        }
-                    }
-                    error?.let {
-                        println(it)
-                    }
+        poseDetector.processImage(image) { poses, error ->
+            println("!!!!! start")
+            poses?.let {
+                it.forEach { pose ->
+                    println("${pose.float3DPose()} ${pose.type}")
                 }
             }
+            error?.let {
+                println(it)
+            }
         }
+
     }
 }
