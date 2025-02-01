@@ -10,42 +10,38 @@ import dev.yarobot.shirmaz.platform.PlatformError
 import dev.yarobot.shirmaz.platform.PlatformImage
 import dev.yarobot.shirmaz.platform.PlatformLandmark
 
-actual fun createPoseDetector(options: ShirmazPoseDetectorOptions): ShirmazPoseDetector {
-    return object : ShirmazPoseDetector {
-        override val options: ShirmazPoseDetectorOptions
-            get() = options
+class AndroidPoseDetector(override val options: ShirmazPoseDetectorOptions) : ShirmazPoseDetector {
 
-        private val poseDetectorOption: PoseDetectorOptions = PoseDetectorOptions.Builder()
-            .setDetectorMode(
-                when (options) {
-                    is ShirmazPoseDetectorOptions.STREAM -> PoseDetectorOptions.STREAM_MODE
-                    is ShirmazPoseDetectorOptions.SINGLE_IMAGE ->
-                        PoseDetectorOptions.SINGLE_IMAGE_MODE
+    private val poseDetectorOption: PoseDetectorOptions = PoseDetectorOptions.Builder()
+        .setDetectorMode(
+            when (options) {
+                is ShirmazPoseDetectorOptions.STREAM -> PoseDetectorOptions.STREAM_MODE
+                is ShirmazPoseDetectorOptions.SINGLE_IMAGE -> PoseDetectorOptions.SINGLE_IMAGE_MODE
+                else -> PoseDetectorOptions.STREAM_MODE
+            }
+        )
+        .build()
 
-                    else -> PoseDetectorOptions.STREAM_MODE
-                }
-            )
-            .build()
-        private val poseDetector: PoseDetector = PoseDetection.getClient(poseDetectorOption)
+    private val poseDetector: PoseDetector = PoseDetection.getClient(poseDetectorOption)
 
-        @OptIn(ExperimentalGetImage::class)
-        override fun processImage(
-            image: PlatformImage,
-            onProcess: (List<PlatformLandmark>?, PlatformError?) -> Unit
-        ) {
-
-            val inputImage =
-                InputImage.fromMediaImage(image.image!!, image.imageInfo.rotationDegrees)
-            poseDetector.process(inputImage)
-                .addOnSuccessListener { pose ->
-                    onProcess(pose.allPoseLandmarks, null)
-                }
-                .addOnFailureListener { error ->
-                    onProcess(null, error)
-                }
-                .addOnCompleteListener {
-                    image.close()
-                }
-        }
+    @OptIn(ExperimentalGetImage::class)
+    override fun processImage(
+        image: PlatformImage,
+        onProcess: (List<PlatformLandmark>?, PlatformError?) -> Unit
+    ) {
+        val inputImage =
+            InputImage.fromMediaImage(image.image!!, image.imageInfo.rotationDegrees)
+        poseDetector.process(inputImage)
+            .addOnSuccessListener { pose ->
+                onProcess(pose.allPoseLandmarks, null)
+            }
+            .addOnFailureListener { error ->
+                onProcess(null, error)
+            }
+            .addOnCompleteListener {
+                image.close()
+            }
     }
 }
+actual fun createPoseDetector(options: ShirmazPoseDetectorOptions): ShirmazPoseDetector =
+    AndroidPoseDetector(options)

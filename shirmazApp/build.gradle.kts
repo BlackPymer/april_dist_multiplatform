@@ -110,6 +110,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.core.ktx)
     debugImplementation(compose.uiTooling)
 }
 

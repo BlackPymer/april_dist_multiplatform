@@ -37,6 +37,7 @@ mlkit-pod-image = "1.0.0-beta6"
 mlkit-pod-mlkit = "7.0.0"
 
 poseDetection = "18.0.0-beta5"
+coreKtx = "1.13.0"
 
 [libraries]
 # Gradle plugins
@@ -73,6 +74,7 @@ google-gltfio = {module = "com.google.android.filament:gltfio-android", version.
 jetbrains-viewmodel = {module ="org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "jetbrains-viewmodel"}
 pose-detection = { group = "com.google.mlkit", name = "pose-detection", version.ref = "poseDetection" }
 pose-detection-accurate = { group = "com.google.mlkit", name = "pose-detection-accurate", version.ref = "poseDetection" }
+core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
