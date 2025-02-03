@@ -4,6 +4,8 @@
 /.gradle
 /.kotlin
 /.run
+/iosApp/Pods
+/iosApp/build
 
 # Files
 /local.properties
