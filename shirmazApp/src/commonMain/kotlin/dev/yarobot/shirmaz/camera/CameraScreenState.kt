@@ -7,7 +7,6 @@ data class CameraScreenState(
     val currentModel: ThreeDModel?,
     val shirts: List<Shirt>,
     val currentShirt: Shirt?,
-    val currentModel: ThreeDModel?,
     val isCarouselVisible: Boolean,
     val saving: Boolean
 )

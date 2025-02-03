@@ -7,6 +7,12 @@ import dev.icerock.moko.permissions.PermissionState
 import dev.icerock.moko.permissions.PermissionsController
 import dev.yarobot.shirmaz.camera.model.Models
 import dev.yarobot.shirmaz.camera.model.ThreeDModel
+import dev.yarobot.shirmaz.platform.PlatformImage
+import dev.yarobot.shirmaz.platform.float3DPose
+import dev.yarobot.shirmaz.platform.type
+import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetectorOptions
+import dev.yarobot.shirmaz.posedetection.createPoseDetector
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,15 +22,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import shirmaz.feature.camera.generated.resources.Res
-import shirmaz.feature.camera.generated.resources.clothes
-import shirmaz.feature.camera.generated.resources.null_shirt
-import shirmaz.feature.camera.generated.resources.shirt1_name
-import shirmaz.feature.camera.generated.resources.shirt2_name
-import shirmaz.feature.camera.generated.resources.shirt3_name
-import shirmaz.feature.camera.generated.resources.unclothes
-import shirmaz.feature.camera.generated.resources.unclothes_no_text
 import shirmaz.shirmazapp.generated.resources.Res
+import shirmaz.shirmazapp.generated.resources.clothes
+import shirmaz.shirmazapp.generated.resources.null_shirt
+import shirmaz.shirmazapp.generated.resources.shirt1_name
+import shirmaz.shirmazapp.generated.resources.shirt2_name
+import shirmaz.shirmazapp.generated.resources.shirt3_name
+import shirmaz.shirmazapp.generated.resources.unclothes_no_text
 
 class CameraViewModel : ViewModel() {
     private val poseDetector = createPoseDetector(ShirmazPoseDetectorOptions.STREAM)
@@ -62,7 +66,7 @@ class CameraViewModel : ViewModel() {
     )
 
     val state = _state.onStart {
-        loadModel(Models.sampleModel)
+        loadModel()
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -134,7 +138,6 @@ class CameraViewModel : ViewModel() {
 
     @OptIn(ExperimentalResourceApi::class)
     private fun loadModel() = viewModelScope.launch {
-
         withContext(Dispatchers.IO) {
             if (_state.value.currentShirt?.modelName == null) {
                 _state.update {

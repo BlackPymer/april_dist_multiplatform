@@ -7,11 +7,6 @@ import dev.icerock.moko.permissions.PermissionsController
 import dev.icerock.moko.permissions.compose.BindEffect
 import dev.icerock.moko.permissions.compose.PermissionsControllerFactory
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
-import dev.yarobot.shirmaz.core.compose.base.LocalPermissionsController
-import dev.yarobot.shirmaz.core.compose.base.LocalShirmazColors
-import dev.yarobot.shirmaz.core.compose.base.LocalShirmazDimension
-import dev.yarobot.shirmaz.core.compose.base.shirmazColors
-import dev.yarobot.shirmaz.core.compose.base.shirmazDimension
 
 
 @Composable

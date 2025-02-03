@@ -24,15 +24,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.yarobot.shirmaz.ui.LocalPermissionsController
 import dev.yarobot.shirmaz.camera.model.ModelView
-import dev.yarobot.shirmaz.core.compose.base.LocalPermissionsController
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import shirmaz.shirmazapp.generated.resources.Res
 import shirmaz.shirmazapp.generated.resources.camera_not_granted
 import shirmaz.shirmazapp.generated.resources.camera_request
-import shirmaz.feature.camera.generated.resources.Res
-import shirmaz.feature.camera.generated.resources.camera_not_granted
-import shirmaz.feature.camera.generated.resources.camera_request
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -46,19 +42,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.contentColorFor
 import androidx.compose.ui.graphics.painter.Painter
-import dev.yarobot.shirmaz.core.compose.ui.ShirmazTheme
+import dev.yarobot.shirmaz.ui.ShirmazTheme
 import org.jetbrains.compose.resources.DrawableResource
-import shirmaz.feature.camera.generated.resources.arrow
-import shirmaz.feature.camera.generated.resources.back_cd
-import shirmaz.feature.camera.generated.resources.carousel_cd
-import shirmaz.feature.camera.generated.resources.clothes
-import shirmaz.feature.camera.generated.resources.gallery
-import shirmaz.feature.camera.generated.resources.gallery_cd
-import shirmaz.feature.camera.generated.resources.save_cd
-import shirmaz.feature.camera.generated.resources.unclothes
-
+import shirmaz.shirmazapp.generated.resources.arrow
+import shirmaz.shirmazapp.generated.resources.back_cd
+import shirmaz.shirmazapp.generated.resources.carousel_cd
+import shirmaz.shirmazapp.generated.resources.clothes
+import shirmaz.shirmazapp.generated.resources.gallery
+import shirmaz.shirmazapp.generated.resources.gallery_cd
+import shirmaz.shirmazapp.generated.resources.save_cd
+import shirmaz.shirmazapp.generated.resources.unclothes
 
 @Composable
 fun CameraScreen() {

@@ -1,4 +1,4 @@
-package dev.yarobot.shirmaz.core.compose.base
+package dev.yarobot.shirmaz.ui
 
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.unit.Dp
