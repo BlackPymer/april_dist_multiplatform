@@ -2,23 +2,20 @@ package dev.yarobot.shirmaz.camera
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.icerock.moko.permissions.DeniedAlwaysException
-import dev.icerock.moko.permissions.DeniedException
 import dev.icerock.moko.permissions.Permission
 import dev.icerock.moko.permissions.PermissionState
 import dev.icerock.moko.permissions.PermissionsController
-import dev.yarobot.shirmaz.platform.float3DPose
+import dev.yarobot.shirmaz.camera.model.Models
+import dev.yarobot.shirmaz.camera.model.ThreeDModel
 import dev.yarobot.shirmaz.platform.PlatformImage
+import dev.yarobot.shirmaz.platform.float3DPose
 import dev.yarobot.shirmaz.platform.type
 import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetectorOptions
 import dev.yarobot.shirmaz.posedetection.createPoseDetector
 import kotlinx.coroutines.Dispatchers
-import dev.yarobot.shirmaz.camera.model.Models
-import dev.yarobot.shirmaz.camera.model.ThreeDModel
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -52,6 +49,7 @@ class CameraViewModel : ViewModel() {
                 intent.permissionsController.checkAndTryProvideCamera()
 
             is CameraIntent.OpenSettings -> intent.permissionsController.openSettings()
+            is CameraIntent.OnImageCaptured -> detectPose(intent.image)
         }
     }
 
