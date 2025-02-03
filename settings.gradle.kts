@@ -2,7 +2,6 @@
 
 import org.gradle.api.initialization.resolve.RepositoriesMode.FAIL_ON_PROJECT_REPOS
 
-
 rootProject.name = "Shirmaz"
 
 pluginManagement {
@@ -33,12 +32,4 @@ dependencyResolutionManagement {
     }
 }
 
-includeBuild("build-logic")
-
-include(":androidApp")
-
-include(":core:language")
-include(":core:compose")
-
-include(":feature:camera")
-include(":feature:app")
+include(":shirmazApp")
