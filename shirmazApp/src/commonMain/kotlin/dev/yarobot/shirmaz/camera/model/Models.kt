@@ -1,5 +1,5 @@
 package dev.yarobot.shirmaz.camera.model
 
 object Models {
-    val sampleModel = "sample1.glb"
+    val longSleeves1 = "longSleeves1.glb"
 }

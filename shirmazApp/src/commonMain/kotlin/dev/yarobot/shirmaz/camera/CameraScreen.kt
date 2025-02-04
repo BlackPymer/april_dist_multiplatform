@@ -52,7 +52,7 @@ private fun ScreenContent(
                     }
                 ) {
                     state.currentModel?.let {
-                        ModelView(remember(state) { state.currentModel })
+                        ModelView(remember(state) { state })
                     }
                 }
             }

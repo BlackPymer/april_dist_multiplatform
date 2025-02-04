@@ -1,10 +1,11 @@
 package dev.yarobot.shirmaz.camera
 
 object Bones {
-    val leftArm = "Bone"
-    val leftCollarbone = "Bone.001"
-    val rightCollarbone = "Bone.002"
-    val rightArm = "Bone.003"
-    val upperSpine = "Bone.004"
-    val downSpine = "Bone.005"
+    val spine = "Spine"
+    val leftShoulder = "left_shoulder"
+    val leftArm = "left_arm"
+    val leftHand = "left_hand"
+    val rightShoulder = "right_shoulder"
+    val rightArm = "right_arm"
+    val right_hand = "right_hand"
 }

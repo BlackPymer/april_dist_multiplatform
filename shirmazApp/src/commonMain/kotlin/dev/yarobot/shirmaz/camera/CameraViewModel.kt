@@ -30,12 +30,13 @@ class CameraViewModel : ViewModel() {
     private val _state = MutableStateFlow(
         CameraScreenState(
             cameraProvideState = CameraProvideState.NotGranted,
-            currentModel = null
+            currentModel = null,
+            modelPosition = null
         )
     )
 
     val state = _state.onStart {
-        loadModel(Models.sampleModel)
+        loadModel(Models.longSleeves1)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
