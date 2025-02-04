@@ -38,9 +38,7 @@ private fun ScreenContent(
 ) {
     val permissionsController = LocalPermissionsController.current
     LaunchedEffect(state.cameraProvideState) {
-        if (state.cameraProvideState == CameraProvideState.NotGranted) {
-            onIntent(CameraIntent.RequestCamera(permissionsController))
-        }
+        onIntent(CameraIntent.RequestCamera(permissionsController))
     }
     Box(
         modifier = Modifier.fillMaxSize(),

@@ -48,14 +48,10 @@ class CameraViewModel : ViewModel() {
             is CameraIntent.CheckCameraPermission ->
                 intent.permissionsController.checkAndTryProvideCamera()
 
-            is CameraIntent.OpenSettings -> intent.permissionsController.openSettings()
             is CameraIntent.OnImageCaptured -> detectPose(intent.image)
         }
     }
 
-    private fun PermissionsController.openSettings() {
-        this@openSettings.openAppSettings()
-    }
 
     private fun PermissionsController.requestCamera() {
         viewModelScope.launch {
@@ -63,7 +59,7 @@ class CameraViewModel : ViewModel() {
                 this@requestCamera.providePermission(Permission.CAMERA)
                 proceedCameraState()
             } catch (e: Exception) {
-                    openSettings()
+                proceedCameraState()
             }
         }
     }
@@ -81,6 +77,8 @@ class CameraViewModel : ViewModel() {
                     it.copy(cameraProvideState = CameraProvideState.Granted)
                 }
             }
+
+            PermissionState.DeniedAlways -> this@proceedCameraState.openAppSettings()
             else -> {}
         }
 
@@ -99,8 +97,8 @@ class CameraViewModel : ViewModel() {
 
     private fun detectPose(image: PlatformImage) {
         viewModelScope.launch {
-            withContext(Dispatchers.Default){
-                poseDetector.processImage(image){ poses, error ->
+            withContext(Dispatchers.Default) {
+                poseDetector.processImage(image) { poses, error ->
                     println("!!!!! start")
                     poses?.let {
                         it.forEach { pose ->
