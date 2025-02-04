@@ -33,7 +33,7 @@ data class ShirmazDimension(
     val savingButtonsFontSize: TextUnit
 )
 
-val shirmazDimension = ShirmazDimension(
+internal val shirmazDimension = ShirmazDimension(
     toolBarHeight = 144.dp,
 
     galleryButton = 72.dp,
@@ -59,6 +59,4 @@ val shirmazDimension = ShirmazDimension(
     savingButtonsWidth = 182.dp,
     savingButtonsFontSize = 16.sp
 )
-val LocalShirmazDimension = compositionLocalOf<ShirmazDimension> {
-    error("No provided colors")
-}
+

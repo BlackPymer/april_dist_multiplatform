@@ -42,6 +42,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.runtime.currentComposer
 import androidx.compose.ui.graphics.painter.Painter
 import dev.yarobot.shirmaz.ui.ShirmazTheme
 import org.jetbrains.compose.resources.DrawableResource
@@ -70,7 +71,7 @@ private fun ScreenContent(
     state: CameraScreenState,
 ) {
     val permissionsController = LocalPermissionsController.current
-    LaunchedEffect(permissionsController){
+    LaunchedEffect(permissionsController) {
         onIntent(CameraIntent.RequestCamera(permissionsController))
     }
     Box(
@@ -134,60 +135,63 @@ private fun Carousel(onIntent: (CameraIntent) -> Unit, state: CameraScreenState)
         horizontalArrangement = Arrangement.spacedBy(ShirmazTheme.dimension.itemSpacing)
     ) {
         state.shirts.forEach { shirt ->
-            Column(
-                modifier =
-                Modifier
-                    .align(Alignment.CenterVertically)
-                    .height(ShirmazTheme.dimension.shirtButtonHeight)
-                    .width(ShirmazTheme.dimension.shirtButtonWidth)
-                    .clip(RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius))
-                    .background(ShirmazTheme.colors.shirtBackground)
-                    .clickable { onIntent(CameraIntent.ChooseShirt(shirt)) }
-                    .then(
-                        if (state.currentShirt == shirt) {
-                            Modifier.border(
-                                ShirmazTheme.dimension.borderThikness,
-                                Color.White,
-                                RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius)
-                            )
-                        } else {
-                            Modifier
-                        }
-                    ),
-                verticalArrangement = Arrangement.Center
-
-            ) {
-                Image(
-                    modifier = Modifier
-                        .size(ShirmazTheme.dimension.shirtPicture)
-                        .align(Alignment.CenterHorizontally),
-                    painter = painterResource(shirt.painterRes),
-                    contentDescription = stringResource(shirt.nameRes)
-                )
-                if (shirt.modelName != null) {
-                    Text(
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally),
-                        color = ShirmazTheme.colors.text,
-                        text = stringResource(shirt.nameRes),
-                        fontSize = ShirmazTheme.dimension.carouselButtonFontSize
-
-                    )
-                }
-            }
+            CarouselElement(onIntent = onIntent, state = state, shirt = shirt)
         }
     }
     Spacer(
         modifier = Modifier
-            .then (
-                if(!state.saving) {
-                    Modifier.height(ShirmazTheme.dimension.carouselPaddingFromToolbar)
-                }else{
-                    Modifier.height(ShirmazTheme.dimension.carouselPaddingFromSavingPanel)
-                }
+            .then(
+                Modifier.height(
+                    if (!state.saving) ShirmazTheme.dimension.carouselPaddingFromToolbar
+                    else ShirmazTheme.dimension.carouselPaddingFromSavingPanel
+                )
             )
     )
 
+}
+
+@Composable
+private fun RowScope.CarouselElement(
+    onIntent: (CameraIntent) -> Unit,
+    state: CameraScreenState,
+    shirt: Shirt
+) {
+    Column(
+        modifier =
+        Modifier
+            .align(Alignment.CenterVertically)
+            .height(ShirmazTheme.dimension.shirtButtonHeight)
+            .width(ShirmazTheme.dimension.shirtButtonWidth)
+            .clip(RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius))
+            .background(ShirmazTheme.colors.shirtBackground)
+            .clickable { onIntent(CameraIntent.ChooseShirt(shirt)) }
+            .border(
+                ShirmazTheme.dimension.borderThikness,
+                if (state.currentShirt == shirt) ShirmazTheme.colors.takePictureButton
+                else Color.Transparent,
+                RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius)
+            ),
+        verticalArrangement = Arrangement.Center
+
+    ) {
+        Image(
+            modifier = Modifier
+                .size(ShirmazTheme.dimension.shirtPicture)
+                .align(Alignment.CenterHorizontally),
+            painter = painterResource(shirt.painterRes),
+            contentDescription = stringResource(shirt.nameRes)
+        )
+        if (shirt.modelName != null) {
+            Text(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally),
+                color = ShirmazTheme.colors.text,
+                text = stringResource(shirt.nameRes),
+                fontSize = ShirmazTheme.dimension.carouselButtonFontSize
+
+            )
+        }
+    }
 }
 
 
