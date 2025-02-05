@@ -30,23 +30,17 @@ import platform.AVFoundation.AVCaptureVideoDataOutputSampleBufferDelegateProtoco
 import platform.AVFoundation.AVCaptureVideoPreviewLayer
 import platform.AVFoundation.AVLayerVideoGravityResizeAspectFill
 import platform.AVFoundation.AVMediaTypeVideo
-import platform.CoreImage.CIContext
-import platform.CoreImage.CIImage
-import platform.CoreImage.createCGImage
-import platform.CoreMedia.CMSampleBufferGetImageBuffer
 import platform.CoreMedia.CMSampleBufferRef
 import platform.CoreVideo.kCVPixelBufferPixelFormatTypeKey
 import platform.CoreVideo.kCVPixelFormatType_32BGRA
 import platform.Foundation.NSNumber
-import platform.UIKit.UIImage
 import platform.UIKit.UIViewController
 import platform.darwin.NSObject
 import platform.darwin.dispatch_async
-import platform.darwin.dispatch_get_main_queue
+import platform.darwin.dispatch_queue_create
 import platform.darwin.dispatch_queue_t
-import kotlin.OptIn
-import kotlin.Unit
-import kotlin.also
+import kotlin.native.runtime.GC
+import kotlin.native.runtime.NativeRuntimeApi
 
 private val deviceTypes = listOf(
     AVCaptureDeviceTypeBuiltInWideAngleCamera,
@@ -81,7 +75,7 @@ actual fun CameraView(
     }
 }
 
-@OptIn(ExperimentalForeignApi::class)
+@OptIn(ExperimentalForeignApi::class, NativeRuntimeApi::class)
 @Composable
 private fun RealDeviceCamera(
     camera: AVCaptureDevice,
@@ -97,19 +91,14 @@ private fun RealDeviceCamera(
     val cameraDelegate: AVCaptureVideoDataOutputSampleBufferDelegateProtocol =
         remember {
             object : NSObject(), AVCaptureVideoDataOutputSampleBufferDelegateProtocol {
-                private val ciContext = CIContext()
-                private var frameCount = 0
                 override fun captureOutput(
                     output: AVCaptureOutput,
                     didOutputSampleBuffer: CMSampleBufferRef?,
                     fromConnection: AVCaptureConnection
                 ) {
-                    if (didOutputSampleBuffer == null || frameCount++ % 10 != 0) return
-                    val cvBuffer = CMSampleBufferGetImageBuffer(didOutputSampleBuffer) ?: return
-                    val ciImage = CIImage.imageWithCVPixelBuffer(cvBuffer)
-                    val cgImage = ciContext.createCGImage(ciImage, ciImage.extent)
-
-                    onImageCaptured(MLKVisionImage(UIImage(cGImage = cgImage)))
+                    if (didOutputSampleBuffer == null) return
+                    onImageCaptured(MLKVisionImage(didOutputSampleBuffer))
+                    GC.collect()
                 }
             }
         }
@@ -137,7 +126,7 @@ private class IosCameraViewController(
     private val captureSession: AVCaptureSession,
     private val cameraDelegate: AVCaptureVideoDataOutputSampleBufferDelegateProtocol,
 ) : UIViewController(null, null) {
-    private val queue: dispatch_queue_t = dispatch_get_main_queue()
+    private val queue: dispatch_queue_t = dispatch_queue_create("cameraQueue", null)
 
     private val previewLayer = AVCaptureVideoPreviewLayer(session = captureSession)
     private val videoDataOutput = AVCaptureVideoDataOutput()
