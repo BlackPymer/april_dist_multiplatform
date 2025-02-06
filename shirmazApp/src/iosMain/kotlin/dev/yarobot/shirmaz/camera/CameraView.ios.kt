@@ -30,10 +30,16 @@ import platform.AVFoundation.AVCaptureVideoDataOutputSampleBufferDelegateProtoco
 import platform.AVFoundation.AVCaptureVideoPreviewLayer
 import platform.AVFoundation.AVLayerVideoGravityResizeAspectFill
 import platform.AVFoundation.AVMediaTypeVideo
+import platform.CoreGraphics.CGImageRelease
+import platform.CoreImage.CIContext
+import platform.CoreImage.CIImage
+import platform.CoreImage.createCGImage
+import platform.CoreMedia.CMSampleBufferGetImageBuffer
 import platform.CoreMedia.CMSampleBufferRef
 import platform.CoreVideo.kCVPixelBufferPixelFormatTypeKey
 import platform.CoreVideo.kCVPixelFormatType_32BGRA
 import platform.Foundation.NSNumber
+import platform.UIKit.UIImage
 import platform.UIKit.UIViewController
 import platform.darwin.NSObject
 import platform.darwin.dispatch_async
@@ -91,13 +97,19 @@ private fun RealDeviceCamera(
     val cameraDelegate: AVCaptureVideoDataOutputSampleBufferDelegateProtocol =
         remember {
             object : NSObject(), AVCaptureVideoDataOutputSampleBufferDelegateProtocol {
+                private val ciContext = CIContext()
                 override fun captureOutput(
                     output: AVCaptureOutput,
                     didOutputSampleBuffer: CMSampleBufferRef?,
                     fromConnection: AVCaptureConnection
                 ) {
                     if (didOutputSampleBuffer == null) return
-                    onImageCaptured(MLKVisionImage(didOutputSampleBuffer))
+                    val cvBuffer = CMSampleBufferGetImageBuffer(didOutputSampleBuffer) ?: return
+                    val ciImage = CIImage.imageWithCVPixelBuffer(cvBuffer)
+                    val cgImage = ciContext.createCGImage(ciImage, ciImage.extent)
+                    val uiImage = UIImage(cGImage = cgImage)
+                    CGImageRelease(cgImage)
+                    onImageCaptured(MLKVisionImage(uiImage))
                     GC.collect()
                 }
             }
