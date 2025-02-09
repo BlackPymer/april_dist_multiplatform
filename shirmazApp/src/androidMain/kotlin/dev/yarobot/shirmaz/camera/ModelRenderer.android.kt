@@ -1,5 +1,3 @@
-// androidMain/src/your/package/ModelRenderer.kt
-
 package dev.yarobot.shirmaz.camera
 
 import android.annotation.SuppressLint
@@ -64,41 +62,55 @@ actual class ModelRenderer actual constructor(
         }
 
         setUpModelViewer()
-        modelOpen()
+        modelOpen(Float3(0f, 0f, -4f))
+    }
 
-        /*
+    actual fun bindBones(
+        modelPosition: List<PlatformLandmark>?,
+        screenWidth: Float,
+        screenHeight: Float
+    ) {
         with(boneController) {
-            Bones.leftShoulder.position = Float3(100f, 0f, 0f)
-            Bones.spine.position = Float3(0f, 100f, 0f)
-            Bones.leftShoulder.rotation = Float3(45f, 0f, 0f)
-        }
-        */
-    }
+            if (modelPosition != null) {
+                val centerPoint = modelPosition.let { list ->
+                    if (list.size > 24) {
+                        println("!!$screenWidth - w; $screenHeight - h")
+                        val pos1 = list[23].position3D
+                        val pos2 = list[24].position3D
+                        Float3(
+                            x = (pos1.x + pos2.x) / 2,
+                            y = (pos1.y + pos2.y) / 2,
+                            z = (pos1.z + pos2.z) / 2
+                        )
+                    } else {
+                        println("!!!modelPosition.size <24,")
+                        println("!!!${modelPosition.size}")
+                        Float3(0f, 0f, -4f)
 
-    actual fun bindBones(modelPosition:  List<PlatformLandmark>?){
-        with(boneController){
-            Bones.spine.position = modelPosition?.let { list ->
-                if (list.size > 24) {
-                    val pos1 = list[23].position
-                    val pos2 = list[24].position
-                    Float3(
-                        x = (pos1.x + pos2.x) / 2,
-                        y = (pos1.y + pos2.y) / 2
-                        /*,
-                        z = (pos1.z + pos2.z) / 2*/
-                    )
-                } else {
-                    null
+                    }
                 }
+                Bones.spine.position = Float3(0f,0f,0f)
+            } else {
+                println("!!!modelPosition is null")
             }
-
         }
     }
 
-    private fun modelOpen() {
+    private fun convertPixelToBonesCoordinates(
+        pixel: Float3,
+        screenWidth: Float,
+        screenHeight: Float
+    ): Float3 {
+        val normalizedX = (pixel.x / screenWidth) * 2f - 1f
+        val normalizedY = 1f - (pixel.y / screenHeight) * 2f
+
+        return Float3(normalizedX, normalizedY, -4f)
+    }
+
+    private fun modelOpen(centerPoint: Float3) {
         val byteBuffer = ByteBuffer.wrap(model.bytes)
         modelViewer.loadModelGlb(byteBuffer)
-        modelViewer.transformToUnitCube()
+        modelViewer.transformToUnitCube(centerPoint = centerPoint)
     }
 
     private fun setUpModelViewer() = modelViewer.apply {

@@ -6,21 +6,64 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import dev.yarobot.shirmaz.camera.CameraScreenState
 import dev.yarobot.shirmaz.camera.ModelRenderer
+import dev.yarobot.shirmaz.platform.PlatformImage
+import dev.yarobot.shirmaz.platform.PlatformLandmark
+import dev.yarobot.shirmaz.platform.float3DPose
+import dev.yarobot.shirmaz.platform.type
+import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetectorOptions
+import dev.yarobot.shirmaz.posedetection.createPoseDetector
 
-@Composable
-actual fun ModelView(state: CameraScreenState) {
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-    AndroidView(factory = { context ->
-        SurfaceView(context).apply {
-            val renderer = state.currentModel?.let {
-                ModelRenderer(
-                    surfaceView = this,
-                    lifecycle = lifecycle,
-                    model = it
+
+actual class ModelView actual constructor() {
+    private val poseDetector = createPoseDetector(ShirmazPoseDetectorOptions.STREAM)
+
+    private var modelRenderer: ModelRenderer? = null
+
+    @Composable
+    actual fun ModelRendererInit(state: CameraScreenState) {
+        println("!!!!! modelRendererInit")
+        val lifecycle = LocalLifecycleOwner.current.lifecycle
+        AndroidView(factory = { context ->
+            SurfaceView(context).apply {
+                modelRenderer = state.currentModel?.let {
+                    ModelRenderer(
+                        surfaceView = this,
+                        lifecycle = lifecycle,
+                        model = it
+                    )
+                }
+                modelRenderer?.onSurfaceAvailable()
+            }
+        })
+        //modelRenderer?.onSurfaceAvailable()
+    }
+
+
+    actual fun updateModelPosition(image: PlatformImage) {
+        detectPose(
+            image = image,
+            screenHeight = image.height.toFloat(),
+            screenWidth = image.width.toFloat()
+        )
+    }
+
+    private fun detectPose(image: PlatformImage, screenHeight: Float, screenWidth: Float) {
+        poseDetector.processImage(image) { poses, error ->
+            println("!!!!! start")
+            poses?.let {
+                it.forEach { pose ->
+                    println("!!${pose.float3DPose()} ${pose.type}")
+                }
+                modelRenderer?.bindBones(
+                    modelPosition = poses,
+                    screenHeight = screenHeight,
+                    screenWidth = screenWidth
                 )
             }
-            renderer?.bindBones(state.modelPosition)
-            renderer?.onSurfaceAvailable()
+            error?.let {
+                println(it)
+            }
+
         }
-    })
+    }
 }

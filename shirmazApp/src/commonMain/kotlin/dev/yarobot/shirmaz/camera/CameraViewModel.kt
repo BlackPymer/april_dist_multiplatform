@@ -49,7 +49,7 @@ class CameraViewModel : ViewModel() {
             is CameraIntent.CheckCameraPermission -> intent.permissionsController
                 .proceedCameraState()
 
-            is CameraIntent.OnImageCaptured -> detectPose(intent.image)
+            //is CameraIntent.OnImageCaptured -> detectPose(intent.image)
         }
     }
 
@@ -84,20 +84,5 @@ class CameraViewModel : ViewModel() {
                 )
             }
         }
-    }
-
-    private fun detectPose(image: PlatformImage) {
-        poseDetector.processImage(image) { poses, error ->
-            println("!!!!! start")
-            poses?.let {
-                it.forEach { pose ->
-                    println("${pose.float3DPose()} ${pose.type}")
-                }
-            }
-            error?.let {
-                println(it)
-            }
-        }
-
     }
 }

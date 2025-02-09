@@ -2,7 +2,13 @@ package dev.yarobot.shirmaz.camera.model
 
 import androidx.compose.runtime.Composable
 import dev.yarobot.shirmaz.camera.CameraScreenState
+import dev.yarobot.shirmaz.platform.PlatformImage
 
-@Composable
-actual fun ModelView(state: CameraScreenState) {
+actual class ModelView actual constructor() {
+    @Composable
+    actual fun ModelRendererInit(state: CameraScreenState) {
+    }
+
+    actual fun updateModelPosition(image: PlatformImage) {
+    }
 }

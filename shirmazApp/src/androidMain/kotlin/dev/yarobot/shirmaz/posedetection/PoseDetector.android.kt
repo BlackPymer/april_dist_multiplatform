@@ -10,7 +10,8 @@ import dev.yarobot.shirmaz.platform.PlatformError
 import dev.yarobot.shirmaz.platform.PlatformImage
 import dev.yarobot.shirmaz.platform.PlatformLandmark
 
-class AndroidPoseDetector(override val options: ShirmazPoseDetectorOptions) : ShirmazPoseDetector {
+private class AndroidPoseDetector(override val options: ShirmazPoseDetectorOptions) :
+    ShirmazPoseDetector {
 
     private val poseDetectorOption: PoseDetectorOptions = PoseDetectorOptions.Builder()
         .setDetectorMode(
@@ -43,5 +44,6 @@ class AndroidPoseDetector(override val options: ShirmazPoseDetectorOptions) : Sh
             }
     }
 }
+
 actual fun createPoseDetector(options: ShirmazPoseDetectorOptions): ShirmazPoseDetector =
     AndroidPoseDetector(options)

@@ -37,24 +37,26 @@ private fun ScreenContent(
     state: CameraScreenState
 ) {
     val permissionsController = LocalPermissionsController.current
-    LaunchedEffect(permissionsController){
+    LaunchedEffect(permissionsController) {
         onIntent(CameraIntent.RequestCamera(permissionsController))
     }
+    val modelView = remember { ModelView() }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         when (state.cameraProvideState) {
             is CameraProvideState.Granted -> {
+
                 CameraView(
                     onImageCaptured = {
-                        onIntent(CameraIntent.OnImageCaptured(it))
-                    }
-                ) {
-                    state.currentModel?.let {
-                        ModelView(remember(state) { state })
-                    }
-                }
+                        modelView.updateModelPosition(it)
+                    },
+                    modelView = {
+                        state.currentModel?.let {
+                            modelView.ModelRendererInit(state)
+                        }
+                    })
             }
 
             else -> {

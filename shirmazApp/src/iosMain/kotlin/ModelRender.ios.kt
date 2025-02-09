@@ -7,7 +7,11 @@ actual class ModelRenderer actual constructor(surfaceView: Any, lifecycle: Any, 
     actual fun onSurfaceAvailable() {
         throw NotImplementedError("ModelRenderer is not implemented for iOS.")
     }
-    actual fun bindBones(modelPosition:  List<PlatformLandmark>?) {
+    actual fun bindBones(
+        modelPosition: List<PlatformLandmark>?,
+        screenWidth: Float,
+        screenHeight: Float
+    )  {
         throw NotImplementedError("ModelRenderer is not implemented for iOS.")
     }
 }

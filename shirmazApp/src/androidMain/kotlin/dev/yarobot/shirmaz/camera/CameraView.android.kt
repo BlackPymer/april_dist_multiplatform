@@ -33,7 +33,7 @@ actual fun CameraView(
         val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
 
         val imageCapture = remember { ImageCapture.Builder().build() }
-
+        modelView()
         AndroidView(
             factory = { previewView },
             modifier = Modifier.fillMaxSize(),
@@ -73,5 +73,4 @@ actual fun CameraView(
                 }
             }
         )
-        modelView()
     }}

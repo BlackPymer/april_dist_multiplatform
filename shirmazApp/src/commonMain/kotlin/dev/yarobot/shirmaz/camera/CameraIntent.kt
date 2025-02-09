@@ -6,5 +6,5 @@ import dev.yarobot.shirmaz.platform.PlatformImage
 sealed class CameraIntent{
     data class RequestCamera(val permissionsController: PermissionsController) : CameraIntent()
     data class CheckCameraPermission(val permissionsController: PermissionsController): CameraIntent()
-    data class OnImageCaptured(val image: PlatformImage) : CameraIntent()
+    //data class OnImageCaptured(val image: PlatformImage) : CameraIntent()
 }
