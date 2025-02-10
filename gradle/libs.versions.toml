@@ -38,6 +38,7 @@ mlkit-pod-mlkit = "7.0.0"
 
 poseDetection = "18.0.0-beta5"
 coreKtx = "1.13.0"
+window = "1.3.0"
 
 [libraries]
 # Gradle plugins
@@ -75,6 +76,7 @@ jetbrains-viewmodel = {module ="org.jetbrains.androidx.lifecycle:lifecycle-viewm
 pose-detection = { group = "com.google.mlkit", name = "pose-detection", version.ref = "poseDetection" }
 pose-detection-accurate = { group = "com.google.mlkit", name = "pose-detection-accurate", version.ref = "poseDetection" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-window = { group = "androidx.window", name = "window", version.ref = "window" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

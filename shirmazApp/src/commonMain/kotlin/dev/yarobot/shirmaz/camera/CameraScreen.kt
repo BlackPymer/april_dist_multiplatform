@@ -16,6 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.yarobot.shirmaz.ui.LocalPermissionsController
 import dev.yarobot.shirmaz.camera.model.ModelView
+import dev.yarobot.shirmaz.platform.getScreenHeight
+import dev.yarobot.shirmaz.platform.getScreenWidth
 import org.jetbrains.compose.resources.stringResource
 import shirmaz.shirmazapp.generated.resources.Res
 import shirmaz.shirmazapp.generated.resources.camera_not_granted
@@ -40,14 +42,15 @@ private fun ScreenContent(
     LaunchedEffect(permissionsController) {
         onIntent(CameraIntent.RequestCamera(permissionsController))
     }
-    val modelView = remember { ModelView() }
+    val screenHeight = getScreenHeight()
+    val screenWidth = getScreenWidth()
+    val modelView = remember { ModelView(screenHeight = screenHeight, screenWidth = screenWidth) }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         when (state.cameraProvideState) {
             is CameraProvideState.Granted -> {
-
                 CameraView(
                     onImageCaptured = {
                         modelView.updateModelPosition(it)
@@ -56,7 +59,9 @@ private fun ScreenContent(
                         state.currentModel?.let {
                             modelView.ModelRendererInit(state)
                         }
-                    })
+                    },
+                    screenHeight = screenHeight,
+                    screenWidth = screenWidth)
             }
 
             else -> {

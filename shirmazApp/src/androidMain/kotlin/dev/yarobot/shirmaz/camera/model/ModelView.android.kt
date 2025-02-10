@@ -14,7 +14,10 @@ import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetectorOptions
 import dev.yarobot.shirmaz.posedetection.createPoseDetector
 
 
-actual class ModelView actual constructor() {
+actual class ModelView actual constructor(
+    private val screenHeight: Float,
+    private val screenWidth: Float
+) {
     private val poseDetector = createPoseDetector(ShirmazPoseDetectorOptions.STREAM)
 
     private var modelRenderer: ModelRenderer? = null
@@ -29,7 +32,9 @@ actual class ModelView actual constructor() {
                     ModelRenderer(
                         surfaceView = this,
                         lifecycle = lifecycle,
-                        model = it
+                        model = it,
+                        screenHeight = screenHeight,
+                        screenWidth = screenWidth
                     )
                 }
                 modelRenderer?.onSurfaceAvailable()
@@ -40,14 +45,15 @@ actual class ModelView actual constructor() {
 
 
     actual fun updateModelPosition(image: PlatformImage) {
+
         detectPose(
             image = image,
-            screenHeight = image.height.toFloat(),
-            screenWidth = image.width.toFloat()
+            imageHeight = image.height.toFloat(),
+            imageWidth = image.width.toFloat()
         )
     }
 
-    private fun detectPose(image: PlatformImage, screenHeight: Float, screenWidth: Float) {
+    private fun detectPose(image: PlatformImage, imageHeight: Float, imageWidth: Float) {
         poseDetector.processImage(image) { poses, error ->
             println("!!!!! start")
             poses?.let {
@@ -56,8 +62,8 @@ actual class ModelView actual constructor() {
                 }
                 modelRenderer?.bindBones(
                     modelPosition = poses,
-                    screenHeight = screenHeight,
-                    screenWidth = screenWidth
+                    imageHeight = imageHeight,
+                    imageWidth = imageWidth
                 )
             }
             error?.let {

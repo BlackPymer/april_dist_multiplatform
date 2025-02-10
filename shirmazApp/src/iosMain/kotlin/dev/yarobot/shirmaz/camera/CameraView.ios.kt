@@ -60,7 +60,9 @@ private val deviceTypes = listOf(
 @Composable
 actual fun CameraView(
     onImageCaptured: (image: PlatformImage) -> Unit,
-    modelView: @Composable () -> Unit
+    modelView: @Composable () -> Unit,
+    screenHeight: Float,
+    screenWidth: Float
 ) {
     val camera: AVCaptureDevice? = remember {
         discoverySessionWithDeviceTypes(

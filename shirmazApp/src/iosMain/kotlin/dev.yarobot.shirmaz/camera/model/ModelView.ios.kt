@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import dev.yarobot.shirmaz.camera.CameraScreenState
 import dev.yarobot.shirmaz.platform.PlatformImage
 
-actual class ModelView actual constructor() {
+actual class ModelView actual constructor(actual val screenHeight:Float, actual val screenWidth:Float) {
     @Composable
     actual fun ModelRendererInit(state: CameraScreenState) {
     }

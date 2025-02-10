@@ -18,7 +18,9 @@ import dev.yarobot.shirmaz.platform.PlatformLandmark
 actual class ModelRenderer actual constructor(
     surfaceView: Any,
     lifecycle: Any,
-    private val model: ThreeDModel
+    private val model: ThreeDModel,
+    private val screenHeight: Float,
+    private val screenWidth: Float
 ) {
 
     private val surfaceView1: SurfaceView = surfaceView as SurfaceView
@@ -62,34 +64,57 @@ actual class ModelRenderer actual constructor(
         }
 
         setUpModelViewer()
-        modelOpen(Float3(0f, 0f, -4f))
+        modelOpen(Float3(-1f, 23 / 9f, -4f))
     }
 
     actual fun bindBones(
         modelPosition: List<PlatformLandmark>?,
-        screenWidth: Float,
-        screenHeight: Float
+        imageWidth: Float,
+        imageHeight: Float
     ) {
         with(boneController) {
             if (modelPosition != null) {
                 val centerPoint = modelPosition.let { list ->
                     if (list.size > 24) {
+                        println("!!$imageWidth - w; $imageHeight - h")
                         println("!!$screenWidth - w; $screenHeight - h")
-                        val pos1 = list[23].position3D
-                        val pos2 = list[24].position3D
+                        val pos1 = convertNNPointToScreenPixels(
+                            nnPoint = Float3(
+                                list[23].position3D.x,
+                                list[23].position3D.y,
+                                list[23].position3D.z
+                            ),
+                            imageWidth = imageWidth,
+                            imageHeight = imageHeight,
+                            screenWidth = screenWidth,
+                            screenHeight = screenHeight
+                        )
+                        val pos2 = convertNNPointToScreenPixels(
+                            nnPoint = Float3(
+                                list[24].position3D.x,
+                                list[24].position3D.y,
+                                list[24].position3D.z
+                            ),
+                            imageWidth = imageWidth,
+                            imageHeight = imageHeight,
+                            screenWidth = screenWidth,
+                            screenHeight = screenHeight
+                        )
                         Float3(
                             x = (pos1.x + pos2.x) / 2,
                             y = (pos1.y + pos2.y) / 2,
                             z = (pos1.z + pos2.z) / 2
                         )
                     } else {
-                        println("!!!modelPosition.size <24,")
+                        println("!!!modelPosition.size < 24,")
                         println("!!!${modelPosition.size}")
                         Float3(0f, 0f, -4f)
 
                     }
                 }
-                Bones.spine.position = Float3(0f,0f,0f)
+                Bones.spine.position = convertPixelToBonesCoordinates(centerPoint)
+
+
             } else {
                 println("!!!modelPosition is null")
             }
@@ -97,15 +122,65 @@ actual class ModelRenderer actual constructor(
     }
 
     private fun convertPixelToBonesCoordinates(
-        pixel: Float3,
-        screenWidth: Float,
-        screenHeight: Float
+        pixel: Float3
     ): Float3 {
-        val normalizedX = (pixel.x / screenWidth) * 2f - 1f
-        val normalizedY = 1f - (pixel.y / screenHeight) * 2f
-
-        return Float3(normalizedX, normalizedY, -4f)
+        val mainBonePadding = Float3(33f, -35f, 0f)
+        val ratio = screenWidth / 550f
+        val newPosition = Float3(
+            x = pixel.x / ratio + mainBonePadding.x,
+            y = -pixel.y / ratio + mainBonePadding.y,
+            z = -pixel.z / ratio + mainBonePadding.z
+        )
+        if (newPosition.x.isNaN() || newPosition.y.isNaN() || newPosition.z.isNaN()) {
+            println("!!! ERROR: New position for Spine contains NaN: $newPosition")
+        } else {
+            return newPosition
+        }
+        return Float3(0f, 0f, 0f)
     }
+
+    /**
+     * Преобразует координаты, выданные нейросетью (в системе координат изображения),
+     * в координаты экрана.
+     *
+     * @param nnPoint Точка, полученная от нейросети (например, в пикселях исходного изображения).
+     * @param imageWidth Ширина изображения, на котором выполнялся анализ.
+     * @param imageHeight Высота изображения, на котором выполнялся анализ.
+     * @param screenWidth Ширина экрана (или рендеринг-сцены).
+     * @param screenHeight Высота экрана (или рендеринг-сцены).
+     * @param invertY Если true, то ось Y инвертируется (например, если 0 находится сверху).
+     * @return Точка в координатах экрана.
+     */
+    private fun convertNNPointToScreenPixels(
+        nnPoint: Float3,
+        imageWidth: Float,
+        imageHeight: Float,
+        screenWidth: Float,
+        screenHeight: Float,
+        invertX: Boolean = true,
+        invertY: Boolean = true
+    ): Float3 {
+        val scale = maxOf(screenWidth / imageWidth, screenHeight / imageHeight)
+        val scaledImageWidth = imageWidth * scale
+        val scaledImageHeight = imageHeight * scale
+
+        val offsetX = (screenWidth - scaledImageWidth) / 2f
+        val offsetY = (screenHeight - scaledImageHeight) / 2f
+
+        val screenX = if (invertX) {
+            (imageWidth - nnPoint.x) * scale + offsetX
+        } else {
+            nnPoint.x * scale + offsetX
+        }
+        val screenY = if (invertY) {
+            (imageHeight - nnPoint.y) * scale + offsetY
+        } else {
+            nnPoint.y * scale + offsetY
+        }
+        return Float3(nnPoint.x, screenY, nnPoint.z)
+    }
+
+
 
     private fun modelOpen(centerPoint: Float3) {
         val byteBuffer = ByteBuffer.wrap(model.bytes)
@@ -119,7 +194,7 @@ actual class ModelRenderer actual constructor(
         renderer.clearOptions = renderer.clearOptions.apply {
             clear = true
         }
-        view.renderQuality.hdrColorBuffer = View.QualityLevel.MEDIUM
+        view.renderQuality.hdrColorBuffer = View.QualityLevel.LOW
     }
 
     inner class FrameCallback : Choreographer.FrameCallback {

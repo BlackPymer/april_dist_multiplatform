@@ -5,8 +5,7 @@ import dev.yarobot.shirmaz.camera.CameraScreenState
 import dev.yarobot.shirmaz.platform.PlatformImage
 
 
-
-expect class ModelView(){
+expect class ModelView(screenHeight: Float, screenWidth: Float) {
     @Composable
     fun ModelRendererInit(state: CameraScreenState)
 
