@@ -74,10 +74,8 @@ actual class ModelRenderer actual constructor(
     ) {
         with(boneController) {
             if (modelPosition != null) {
-                val centerPoint = modelPosition.let { list ->
+                val centerPoint = convertPixelToBonesCoordinates(modelPosition.let { list ->
                     if (list.size > 24) {
-                        println("!!$imageWidth - w; $imageHeight - h")
-                        println("!!$screenWidth - w; $screenHeight - h")
                         val pos1 = convertNNPointToScreenPixels(
                             nnPoint = Float3(
                                 list[23].position3D.x,
@@ -112,14 +110,37 @@ actual class ModelRenderer actual constructor(
 
                     }
                 }
-                Bones.spine.position = convertPixelToBonesCoordinates(centerPoint)
+                )
+                Bones.spine.position = centerPoint
 
+                Bones.rightShoulder.position = modelPosition.let { list ->
+                    val point = convertPixelToBonesCoordinates(
+                        convertNNPointToScreenPixels(
+                            nnPoint = Float3(
+                                list[12].position3D.x-list[24].position3D.x,
+                                list[12].position3D.y-list[24].position3D.y,
+                                list[12].position3D.z+list[24].position3D.z
+                            ),
+                            imageWidth = imageWidth,
+                            imageHeight = imageHeight,
+                            screenWidth = screenWidth,
+                            screenHeight = screenHeight,
+                            invertY = false
+                        )
+                    )
+                    Float3(
+                        point.x,
+                        point.y,
+                        point.z
+                    )
+                }
 
             } else {
                 println("!!!modelPosition is null")
             }
         }
     }
+
 
     private fun convertPixelToBonesCoordinates(
         pixel: Float3
@@ -139,18 +160,6 @@ actual class ModelRenderer actual constructor(
         return Float3(0f, 0f, 0f)
     }
 
-    /**
-     * Преобразует координаты, выданные нейросетью (в системе координат изображения),
-     * в координаты экрана.
-     *
-     * @param nnPoint Точка, полученная от нейросети (например, в пикселях исходного изображения).
-     * @param imageWidth Ширина изображения, на котором выполнялся анализ.
-     * @param imageHeight Высота изображения, на котором выполнялся анализ.
-     * @param screenWidth Ширина экрана (или рендеринг-сцены).
-     * @param screenHeight Высота экрана (или рендеринг-сцены).
-     * @param invertY Если true, то ось Y инвертируется (например, если 0 находится сверху).
-     * @return Точка в координатах экрана.
-     */
     private fun convertNNPointToScreenPixels(
         nnPoint: Float3,
         imageWidth: Float,
@@ -179,7 +188,6 @@ actual class ModelRenderer actual constructor(
         }
         return Float3(nnPoint.x, screenY, nnPoint.z)
     }
-
 
 
     private fun modelOpen(centerPoint: Float3) {
