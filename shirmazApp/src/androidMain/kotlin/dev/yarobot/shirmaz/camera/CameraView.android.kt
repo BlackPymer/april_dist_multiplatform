@@ -16,7 +16,7 @@ import dev.yarobot.shirmaz.platform.PlatformImage
 
 @Composable
 actual fun CameraView(
-    onImageCaptured: (PlatformImage) -> Unit,
+    onImageCaptured: (image: PlatformImage) -> Unit,
     modelView: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
