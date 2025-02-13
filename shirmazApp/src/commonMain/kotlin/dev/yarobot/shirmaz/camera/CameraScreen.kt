@@ -37,7 +37,7 @@ private fun ScreenContent(
     state: CameraScreenState
 ) {
     val permissionsController = LocalPermissionsController.current
-    LaunchedEffect(permissionsController){
+    LaunchedEffect(state.cameraProvideState) {
         onIntent(CameraIntent.RequestCamera(permissionsController))
     }
     Box(

@@ -5,14 +5,14 @@ import androidx.lifecycle.viewModelScope
 import dev.icerock.moko.permissions.Permission
 import dev.icerock.moko.permissions.PermissionState
 import dev.icerock.moko.permissions.PermissionsController
-import dev.yarobot.shirmaz.platform.float3DPose
+import dev.yarobot.shirmaz.camera.model.Models
+import dev.yarobot.shirmaz.camera.model.ThreeDModel
 import dev.yarobot.shirmaz.platform.PlatformImage
+import dev.yarobot.shirmaz.platform.float3DPose
 import dev.yarobot.shirmaz.platform.type
 import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetectorOptions
 import dev.yarobot.shirmaz.posedetection.createPoseDetector
 import kotlinx.coroutines.Dispatchers
-import dev.yarobot.shirmaz.camera.model.Models
-import dev.yarobot.shirmaz.camera.model.ThreeDModel
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -44,31 +44,37 @@ class CameraViewModel : ViewModel() {
 
     fun onIntent(intent: CameraIntent) {
         when (intent) {
-            is CameraIntent.RequestCamera -> intent.permissionsController.requestCamera()
-            is CameraIntent.CheckCameraPermission -> intent.permissionsController
-                .proceedCameraState()
-
+            is CameraIntent.RequestCamera -> requestCamera(intent.controller)
             is CameraIntent.OnImageCaptured -> detectPose(intent.image)
         }
     }
 
-    private fun PermissionsController.requestCamera() {
+
+    private fun requestCamera(controller: PermissionsController) {
         viewModelScope.launch {
-            this@requestCamera.providePermission(Permission.CAMERA)
+            kotlin.runCatching {
+                controller.providePermission(Permission.CAMERA)
+            }.onSuccess {
+                proceedCameraState(controller)
+            }.onFailure {
+                proceedCameraState(controller)
+            }
         }
-        this.proceedCameraState()
     }
 
-    private fun PermissionsController.proceedCameraState() =
-        viewModelScope.launch {
-            when (this@proceedCameraState.getPermissionState(Permission.CAMERA)) {
-                PermissionState.Granted -> {
-                    _state.update {
-                        it.copy(cameraProvideState = CameraProvideState.Granted)
-                    }
+    private suspend fun proceedCameraState(controller: PermissionsController) =
+        when (controller.getPermissionState(Permission.CAMERA)) {
+            PermissionState.Granted -> {
+                _state.update {
+                    it.copy(cameraProvideState = CameraProvideState.Granted)
                 }
-
-                else -> _state.update { it.copy(cameraProvideState = CameraProvideState.NotGranted) }
+            }
+            PermissionState.DeniedAlways -> controller.openAppSettings()
+            PermissionState.Denied -> controller.openAppSettings()
+            else -> {
+                _state.update {
+                    it.copy(cameraProvideState = CameraProvideState.NotGranted)
+                }
             }
         }
 
@@ -87,8 +93,8 @@ class CameraViewModel : ViewModel() {
 
     private fun detectPose(image: PlatformImage) {
         viewModelScope.launch {
-            withContext(Dispatchers.Default){
-                poseDetector.processImage(image){ poses, error ->
+            withContext(Dispatchers.Default) {
+                poseDetector.processImage(image) { poses, error ->
                     println("!!!!! start")
                     poses?.let {
                         it.forEach { pose ->
