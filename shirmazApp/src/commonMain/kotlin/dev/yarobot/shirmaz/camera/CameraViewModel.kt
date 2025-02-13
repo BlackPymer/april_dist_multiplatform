@@ -44,42 +44,38 @@ class CameraViewModel : ViewModel() {
 
     fun onIntent(intent: CameraIntent) {
         when (intent) {
-            is CameraIntent.RequestCamera -> intent.permissionsController.requestCamera()
-            is CameraIntent.CheckCameraPermission ->
-                intent.permissionsController.checkAndTryProvideCamera()
-
+            is CameraIntent.RequestCamera -> requestCamera(intent.controller)
             is CameraIntent.OnImageCaptured -> detectPose(intent.image)
         }
     }
 
 
-    private fun PermissionsController.requestCamera() {
+    private fun requestCamera(controller: PermissionsController) {
         viewModelScope.launch {
-            try {
-                this@requestCamera.providePermission(Permission.CAMERA)
-                proceedCameraState()
-            } catch (e: Exception) {
-                proceedCameraState()
+            kotlin.runCatching {
+                controller.providePermission(Permission.CAMERA)
+            }.onSuccess {
+                proceedCameraState(controller)
+            }.onFailure {
+                proceedCameraState(controller)
             }
         }
     }
 
-    private fun PermissionsController.checkAndTryProvideCamera() {
-        viewModelScope.launch {
-            this@checkAndTryProvideCamera.proceedCameraState()
-        }
-    }
-
-    private suspend fun PermissionsController.proceedCameraState() =
-        when (this@proceedCameraState.getPermissionState(Permission.CAMERA)) {
+    private suspend fun proceedCameraState(controller: PermissionsController) =
+        when (controller.getPermissionState(Permission.CAMERA)) {
             PermissionState.Granted -> {
                 _state.update {
                     it.copy(cameraProvideState = CameraProvideState.Granted)
                 }
             }
-
-            PermissionState.DeniedAlways -> this@proceedCameraState.openAppSettings()
-            else -> {}
+            PermissionState.DeniedAlways -> controller.openAppSettings()
+            PermissionState.Denied -> controller.openAppSettings()
+            else -> {
+                _state.update {
+                    it.copy(cameraProvideState = CameraProvideState.NotGranted)
+                }
+            }
         }
 
     @OptIn(ExperimentalResourceApi::class)
