@@ -12,7 +12,6 @@ import com.google.android.filament.utils.Float3
 import com.google.android.filament.utils.ModelViewer
 import dev.yarobot.shirmaz.camera.model.ThreeDModel
 import java.nio.ByteBuffer
-import androidx.lifecycle.LifecycleObserver
 import dev.yarobot.shirmaz.platform.PlatformLandmark
 
 actual class ModelRenderer actual constructor(
@@ -104,22 +103,20 @@ actual class ModelRenderer actual constructor(
                             z = (pos1.z + pos2.z) / 2
                         )
                     } else {
-                        println("!!!modelPosition.size < 24,")
-                        println("!!!${modelPosition.size}")
                         Float3(0f, 0f, -4f)
 
                     }
                 }
                 )
                 Bones.spine.position = centerPoint
-
+                Bones.leftHand.rotation = Float3(0f,0f,5f)
                 Bones.rightShoulder.position = modelPosition.let { list ->
-                    val point = convertPixelToBonesCoordinates(
+                        convertPixelToBonesCoordinates(
                         convertNNPointToScreenPixels(
                             nnPoint = Float3(
-                                list[12].position3D.x-list[24].position3D.x,
-                                list[12].position3D.y-list[24].position3D.y,
-                                list[12].position3D.z+list[24].position3D.z
+                                list[12].position3D.x - list[24].position3D.x,
+                                list[12].position3D.y - list[24].position3D.y,
+                                list[12].position3D.z + list[24].position3D.z
                             ),
                             imageWidth = imageWidth,
                             imageHeight = imageHeight,
@@ -128,10 +125,21 @@ actual class ModelRenderer actual constructor(
                             invertY = false
                         )
                     )
-                    Float3(
-                        point.x,
-                        point.y,
-                        point.z
+                }
+                Bones.leftShoulder.position = modelPosition.let { list ->
+                    convertPixelToBonesCoordinates(
+                        convertNNPointToScreenPixels(
+                            nnPoint = Float3(
+                                list[11].position3D.x - list[24].position3D.x,
+                                list[11].position3D.y - list[24].position3D.y,
+                                list[11].position3D.z + list[24].position3D.z
+                            ),
+                            imageWidth = imageWidth,
+                            imageHeight = imageHeight,
+                            screenWidth = screenWidth,
+                            screenHeight = screenHeight,
+                            invertY = false
+                        )
                     )
                 }
 
@@ -166,21 +174,13 @@ actual class ModelRenderer actual constructor(
         imageHeight: Float,
         screenWidth: Float,
         screenHeight: Float,
-        invertX: Boolean = true,
         invertY: Boolean = true
     ): Float3 {
         val scale = maxOf(screenWidth / imageWidth, screenHeight / imageHeight)
-        val scaledImageWidth = imageWidth * scale
         val scaledImageHeight = imageHeight * scale
 
-        val offsetX = (screenWidth - scaledImageWidth) / 2f
         val offsetY = (screenHeight - scaledImageHeight) / 2f
 
-        val screenX = if (invertX) {
-            (imageWidth - nnPoint.x) * scale + offsetX
-        } else {
-            nnPoint.x * scale + offsetX
-        }
         val screenY = if (invertY) {
             (imageHeight - nnPoint.y) * scale + offsetY
         } else {

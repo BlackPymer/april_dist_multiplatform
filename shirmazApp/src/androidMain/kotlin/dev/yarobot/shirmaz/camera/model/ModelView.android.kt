@@ -40,7 +40,6 @@ actual class ModelView actual constructor(
                 modelRenderer?.onSurfaceAvailable()
             }
         })
-        //modelRenderer?.onSurfaceAvailable()
     }
 
 
@@ -55,11 +54,7 @@ actual class ModelView actual constructor(
 
     private fun detectPose(image: PlatformImage, imageHeight: Float, imageWidth: Float) {
         poseDetector.processImage(image) { poses, error ->
-            println("!!!!! start")
             poses?.let {
-                it.forEach { pose ->
-                    println("!!${pose.float3DPose()} ${pose.type}")
-                }
                 modelRenderer?.bindBones(
                     modelPosition = poses,
                     imageHeight = imageHeight,
