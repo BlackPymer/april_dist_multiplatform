@@ -23,7 +23,7 @@ import java.util.concurrent.Executor
 @SuppressLint("NewApi")
 @Composable
 actual fun CameraView(
-    onImageCaptured: (PlatformImage) -> Unit,
+    onImageCaptured: (image: PlatformImage) -> Unit,
     modelView: @Composable () -> Unit,
     screenHeight: Float,
     screenWidth: Float
