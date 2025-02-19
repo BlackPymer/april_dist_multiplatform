@@ -30,13 +30,14 @@ class BoneController(private val modelViewer: ModelViewer) {
 
                 val boneInstance = transformManager.getInstance(boneIndex)
                 if (boneInstance == 0) error("Bone $this is not part of the TransformManager.")
-                val currentTransform = FloatBuffer.allocate(16)
+                val currentTransform = FloatArray(16)
+                transformManager.getTransform(boneInstance, currentTransform)
 
-                currentTransform.put(value.x)
-                currentTransform.put(value.y)
-                currentTransform.put(value.z)
+                currentTransform[12] = value.x
+                currentTransform[13] = value.y
+                currentTransform[14] = value.z
 
-                renderableManager.setBonesAsMatrices(boneInstance, currentTransform, 1, boneIndex)
+                transformManager.setTransform(boneInstance, currentTransform)
             }
             modelViewer.animator?.updateBoneMatrices()
         }
