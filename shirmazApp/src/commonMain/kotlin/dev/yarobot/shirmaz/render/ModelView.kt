@@ -1,13 +1,21 @@
-package dev.yarobot.shirmaz.camera.model
+package dev.yarobot.shirmaz.render
 
 import androidx.compose.runtime.Composable
 import dev.yarobot.shirmaz.camera.CameraScreenState
 import dev.yarobot.shirmaz.platform.PlatformImage
 
 
-expect class ModelView(screenHeight: Float, screenWidth: Float) {
+interface ModelView {
+    val screenHeight: Float
+    val screenWidth: Float
+
     @Composable
     fun ModelRendererInit(state: CameraScreenState)
 
     fun updateModelPosition(image: PlatformImage)
 }
+
+expect fun createModelView(
+    screenHeight: Float,
+    screenWidth: Float
+): ModelView

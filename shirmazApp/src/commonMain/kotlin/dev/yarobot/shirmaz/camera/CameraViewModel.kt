@@ -7,9 +7,6 @@ import dev.icerock.moko.permissions.PermissionState
 import dev.icerock.moko.permissions.PermissionsController
 import dev.yarobot.shirmaz.camera.model.Models
 import dev.yarobot.shirmaz.camera.model.ThreeDModel
-import dev.yarobot.shirmaz.platform.PlatformImage
-import dev.yarobot.shirmaz.platform.float3DPose
-import dev.yarobot.shirmaz.platform.type
 import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetectorOptions
 import dev.yarobot.shirmaz.posedetection.createPoseDetector
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +33,7 @@ class CameraViewModel : ViewModel() {
     )
 
     val state = _state.onStart {
-        loadModel(Models.longSleeves1)
+        loadModel(Models.mia)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -46,7 +43,6 @@ class CameraViewModel : ViewModel() {
     fun onIntent(intent: CameraIntent) {
         when (intent) {
             is CameraIntent.RequestCamera -> requestCamera(intent.controller)
-            is CameraIntent.OnImageCaptured -> detectPose(intent.image)
         }
     }
 
@@ -88,24 +84,6 @@ class CameraViewModel : ViewModel() {
                         Res.readBytes("files/$modelName")
                     )
                 )
-            }
-        }
-    }
-
-    private fun detectPose(image: PlatformImage) {
-        viewModelScope.launch {
-            withContext(Dispatchers.Default) {
-                poseDetector.processImage(image) { poses, error ->
-                    println("!!!!! start")
-                    poses?.let {
-                        it.forEach { pose ->
-                            println("${pose.float3DPose()} ${pose.type}")
-                        }
-                    }
-                    error?.let {
-                        println(it)
-                    }
-                }
             }
         }
     }

@@ -4,15 +4,17 @@ import com.google.android.filament.utils.Float3
 import com.google.android.filament.utils.Mat4
 import com.google.android.filament.utils.ModelViewer
 import com.google.android.filament.utils.rotation
-import com.google.android.filament.utils.translation
-import com.google.android.filament.utils.x
+import java.nio.FloatBuffer
 
 class BoneController(private val modelViewer: ModelViewer) {
+    private val renderableManager = modelViewer.engine.renderableManager
+    private val transformManager = modelViewer.engine.transformManager
+    private val assets = modelViewer.asset
 
     var String.rotation: Float3?
-        get() = modelViewer.asset?.getFirstEntityByName(this)?.getTransform()?.rotation
+        get() = assets?.getFirstEntityByName(this)?.getTransform()?.rotation
         set(value) {
-            modelViewer.asset?.getFirstEntityByName(this)?.let { entity ->
+            assets?.getFirstEntityByName(this)?.let { entity ->
                 val defaultTransform = entity.getTransform()
                 val transform = defaultTransform * rotation(value ?: Float3())
                 entity.setTransform(transform)
@@ -21,39 +23,35 @@ class BoneController(private val modelViewer: ModelViewer) {
         }
 
     var String.position: Float3?
-        get() = modelViewer.asset?.getFirstEntityByName(this)?.getTransform()?.translation
+        get() = assets?.getFirstEntityByName(this)?.getTransform()?.translation
         set(value) {
-            require(value != null) { "Position must not be null." }
+            value?.let {
+                val boneIndex = assets?.getFirstEntityByName(this) ?: return@let
 
-            val boneIndex = modelViewer.asset?.getFirstEntityByName(this)
-                ?: throw IllegalArgumentException("Bone with name $this not found.")
+                val boneInstance = transformManager.getInstance(boneIndex)
+                if (boneInstance == 0) error("Bone $this is not part of the TransformManager.")
+                val currentTransform = FloatBuffer.allocate(16)
 
-            val transformManager = modelViewer.engine.transformManager
-            val boneInstance = transformManager.getInstance(boneIndex)
-            if (boneInstance == 0) throw IllegalArgumentException("Bone $this is not part of the TransformManager.")
+                currentTransform.put(value.x)
+                currentTransform.put(value.y)
+                currentTransform.put(value.z)
 
-            val currentTransform = FloatArray(16)
-            transformManager.getTransform(boneInstance, currentTransform)
-
-            currentTransform[12] = value.x
-            currentTransform[13] = value.y
-            currentTransform[14] = value.z
-
-            transformManager.setTransform(boneInstance, currentTransform)
-
+                renderableManager.setBonesAsMatrices(boneInstance, currentTransform, 1, boneIndex)
+            }
             modelViewer.animator?.updateBoneMatrices()
         }
 
 
     private fun Int.getTransform(): Mat4 {
-        val transformManager = modelViewer.engine.transformManager
         val arr = FloatArray(16)
         transformManager.getTransform(transformManager.getInstance(this), arr)
         return Mat4.of(*arr)
     }
 
     private fun Int.setTransform(mat: Mat4) {
-        val transformManager = modelViewer.engine.transformManager
-        transformManager.setTransform(transformManager.getInstance(this), mat.toFloatArray())
+        renderableManager.setBonesAsQuaternions(
+            transformManager.getInstance(this),
+            FloatBuffer.wrap(mat.toFloatArray()), 1, this
+        )
     }
 }

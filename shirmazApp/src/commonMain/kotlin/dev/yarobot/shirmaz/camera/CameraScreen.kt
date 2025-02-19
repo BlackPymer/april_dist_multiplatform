@@ -15,9 +15,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.yarobot.shirmaz.ui.LocalPermissionsController
-import dev.yarobot.shirmaz.camera.model.ModelView
 import dev.yarobot.shirmaz.platform.getScreenHeight
 import dev.yarobot.shirmaz.platform.getScreenWidth
+import dev.yarobot.shirmaz.render.createModelView
 import org.jetbrains.compose.resources.stringResource
 import shirmaz.shirmazapp.generated.resources.Res
 import shirmaz.shirmazapp.generated.resources.camera_not_granted
@@ -44,7 +44,7 @@ private fun ScreenContent(
     }
     val screenHeight = getScreenHeight()
     val screenWidth = getScreenWidth()
-    val modelView = remember { ModelView(screenHeight = screenHeight, screenWidth = screenWidth) }
+    val modelView = remember { createModelView(screenHeight = screenHeight, screenWidth = screenWidth) }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
