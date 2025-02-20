@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -61,17 +62,17 @@ fun CameraScreen() {
     val state by viewModel.state.collectAsState()
     ScreenContent(
         onIntent = { viewModel.onIntent(it) },
-        state = remember(state) { state },
+        state = remember(state) { state }
     )
 }
 
 @Composable
 private fun ScreenContent(
     onIntent: (CameraIntent) -> Unit,
-    state: CameraScreenState,
+    state: CameraScreenState
 ) {
     val permissionsController = LocalPermissionsController.current
-    LaunchedEffect(permissionsController) {
+    LaunchedEffect(state.cameraProvideState) {
         onIntent(CameraIntent.RequestCamera(permissionsController))
     }
     Box(

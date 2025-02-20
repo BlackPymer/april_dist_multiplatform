@@ -75,10 +75,7 @@ class CameraViewModel : ViewModel() {
 
     fun onIntent(intent: CameraIntent) {
         when (intent) {
-            is CameraIntent.RequestCamera -> intent.permissionsController.requestCamera()
-            is CameraIntent.CheckCameraPermission -> intent.permissionsController
-                .proceedCameraState()
-
+            is CameraIntent.RequestCamera -> requestCamera(intent.controller)
             is CameraIntent.OnImageCaptured -> detectPose(intent.image)
 
             is CameraIntent.TakePicture -> takePicture()
@@ -102,23 +99,32 @@ class CameraViewModel : ViewModel() {
         }
     }
 
-    private fun PermissionsController.requestCamera() {
+
+    private fun requestCamera(controller: PermissionsController) {
         viewModelScope.launch {
-            this@requestCamera.providePermission(Permission.CAMERA)
+            kotlin.runCatching {
+                controller.providePermission(Permission.CAMERA)
+            }.onSuccess {
+                proceedCameraState(controller)
+            }.onFailure {
+                proceedCameraState(controller)
+            }
         }
-        this.proceedCameraState()
     }
 
-    private fun PermissionsController.proceedCameraState() =
-        viewModelScope.launch {
-            when (this@proceedCameraState.getPermissionState(Permission.CAMERA)) {
-                PermissionState.Granted -> {
-                    _state.update {
-                        it.copy(cameraProvideState = CameraProvideState.Granted)
-                    }
+    private suspend fun proceedCameraState(controller: PermissionsController) =
+        when (controller.getPermissionState(Permission.CAMERA)) {
+            PermissionState.Granted -> {
+                _state.update {
+                    it.copy(cameraProvideState = CameraProvideState.Granted)
                 }
-
-                else -> _state.update { it.copy(cameraProvideState = CameraProvideState.NotGranted) }
+            }
+            PermissionState.DeniedAlways -> controller.openAppSettings()
+            PermissionState.Denied -> controller.openAppSettings()
+            else -> {
+                _state.update {
+                    it.copy(cameraProvideState = CameraProvideState.NotGranted)
+                }
             }
         }
 
@@ -160,8 +166,8 @@ class CameraViewModel : ViewModel() {
 
     private fun detectPose(image: PlatformImage) {
         viewModelScope.launch {
-            withContext(Dispatchers.Default){
-                poseDetector.processImage(image){ poses, error ->
+            withContext(Dispatchers.Default) {
+                poseDetector.processImage(image) { poses, error ->
                     println("!!!!! start")
                     poses?.let {
                         it.forEach { pose ->

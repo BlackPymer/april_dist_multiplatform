@@ -14,12 +14,16 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.ObjCObjectVar
 import platform.Foundation.NSError
 import kotlinx.cinterop.*
+import platform.darwin.dispatch_queue_create
+import platform.darwin.dispatch_queue_t
+import platform.darwin.dispatch_sync
 
+@Suppress("CAST_NEVER_SUCCEEDS")
 @OptIn(ExperimentalForeignApi::class)
 class IOSPoseDetector(override val options: ShirmazPoseDetectorOptions) : ShirmazPoseDetector {
     private val poseDetectorOption = MLKPoseDetectorOptions()
     private val poseDetector: MLKPoseDetector
-
+    private val queue: dispatch_queue_t = dispatch_queue_create("PoseDetectorQueue", null)
     init {
         poseDetectorOption.setDetectorMode(
             when (options) {
@@ -40,12 +44,14 @@ class IOSPoseDetector(override val options: ShirmazPoseDetectorOptions) : Shirma
     ) {
         val errorPtr = nativeHeap.alloc<ObjCObjectVar<NSError?>>()
         errorPtr.value = null
-        val results = poseDetector.resultsInImage(
-            image = image as objcnames.protocols.MLKCompatibleImageProtocol,
-            error = errorPtr.ptr
-        ) as List<MLKPose>?
-        val processedResults = results?.firstOrNull()?.landmarks as List<MLKPoseLandmark>?
-        onProcess(processedResults, errorPtr.value)
+        dispatch_sync(queue){
+            val results = poseDetector.resultsInImage(
+                image = image as objcnames.protocols.MLKCompatibleImageProtocol,
+                error = errorPtr.ptr
+            ) as List<MLKPose>?
+            val processedResults = results?.firstOrNull()?.landmarks as List<MLKPoseLandmark>?
+            onProcess(processedResults, errorPtr.value)
+        }
     }
 }
 
