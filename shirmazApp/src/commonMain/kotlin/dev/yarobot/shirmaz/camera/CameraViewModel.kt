@@ -75,7 +75,7 @@ class CameraViewModel : ViewModel() {
 
     fun onIntent(intent: CameraIntent) {
         when (intent) {
-            is CameraIntent.RequestCamera -> requestCamera(intent.controller)
+            is CameraIntent.RequestCamera -> requestCamera(intent.permissionsController)
             is CameraIntent.OnImageCaptured -> detectPose(intent.image)
 
             is CameraIntent.TakePicture -> takePicture()
