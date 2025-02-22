@@ -64,7 +64,8 @@ kotlin {
             implementation(libs.pose.detection.accurate)
             implementation(libs.pose.detection)
             implementation(libs.bundles.android.camera)
-            implementation(libs.bundles.android.filament)
+            implementation(libs.sceneview.base)
+            implementation(libs.sceneview.ar)
         }
         commonMain.dependencies {
             implementation(compose.runtime)

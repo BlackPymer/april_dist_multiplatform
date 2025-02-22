@@ -1,7 +1,7 @@
 package dev.yarobot.shirmaz.render
 
 import androidx.compose.runtime.Composable
-import dev.yarobot.shirmaz.camera.CameraScreenState
+import dev.yarobot.shirmaz.camera.model.ThreeDModel
 import dev.yarobot.shirmaz.platform.PlatformImage
 
 
@@ -10,7 +10,7 @@ interface ModelView {
     val screenWidth: Float
 
     @Composable
-    fun ModelRendererInit(state: CameraScreenState)
+    fun ModelRendererInit(model: ThreeDModel)
 
     fun updateModelPosition(image: PlatformImage)
 }

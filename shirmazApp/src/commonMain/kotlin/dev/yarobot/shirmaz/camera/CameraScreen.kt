@@ -57,7 +57,7 @@ private fun ScreenContent(
                     },
                     modelView = {
                         state.currentModel?.let {
-                            modelView.ModelRendererInit(state)
+                            modelView.ModelRendererInit(it)
                         }
                     },
                     screenHeight = screenHeight,
