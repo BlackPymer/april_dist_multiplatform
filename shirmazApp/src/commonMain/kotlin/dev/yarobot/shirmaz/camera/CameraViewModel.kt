@@ -33,7 +33,7 @@ class CameraViewModel : ViewModel() {
     )
 
     val state = _state.onStart {
-        loadModel(Models.mia)
+        loadModel(Models.tshirt1)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),

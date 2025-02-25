@@ -6,17 +6,19 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.google.android.filament.Engine
+import com.google.android.filament.utils.pow
 import com.google.ar.core.Anchor
+import com.google.mlkit.vision.common.PointF3D
 import dev.yarobot.shirmaz.camera.Bones
 import dev.yarobot.shirmaz.camera.model.ThreeDModel
 import dev.yarobot.shirmaz.platform.PlatformImage
 import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetectorOptions
 import dev.yarobot.shirmaz.posedetection.createPoseDetector
 import io.github.sceneview.Scene
-import io.github.sceneview.animation.Transition.animatePosition
 import io.github.sceneview.animation.Transition.animateRotation
 import io.github.sceneview.ar.node.AnchorNode
 import io.github.sceneview.loaders.MaterialLoader
@@ -34,6 +36,8 @@ import io.github.sceneview.rememberNode
 import io.github.sceneview.rememberOnGestureListener
 import java.nio.Buffer
 import java.nio.ByteBuffer
+import kotlin.math.PI
+import kotlin.math.atan
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 
@@ -54,6 +58,14 @@ private class AndroidModelView(
 
     private var modelRenderer: ModelRenderer? = null
 
+    private val leftArmDefaultRotation = Rotation(0f, 0f, -90f)
+    private val rightArmDefaultRotation = Rotation(0f, 0f, 90f)
+
+    private var leftArmRotation = mutableStateOf(leftArmDefaultRotation)
+    private var rightArmRotation = mutableStateOf(rightArmDefaultRotation)
+
+    private var spinePosition = mutableStateOf(Position(0f, 0f, 0f))
+
     @Composable
     override fun ModelRendererInit(model: ThreeDModel) {
         val engine = rememberEngine()
@@ -67,29 +79,20 @@ private class AndroidModelView(
             lookAt(centerNode)
             centerNode.addChildNode(this)
         }
-
         val cameraTransition = rememberInfiniteTransition(label = "CameraTransition")
         val cameraRotation by cameraTransition.animateRotation(
-            initialValue = Rotation(y = 0.0f),
-            targetValue = Rotation(y = 90.0f),
+            initialValue = Rotation(z = 0.0f),
+            targetValue = Rotation(z = 360f),
             animationSpec = infiniteRepeatable(
-                animation = tween(durationMillis = 7.seconds.toInt(DurationUnit.MILLISECONDS))
-            )
-        )
-
-        val spinePosition by cameraTransition.animatePosition(
-            initialValue = Position(x = 0.0f, y = 0.0f, z = 0.0f),
-            targetValue = Position(x = 0.1f, y = 0.1f, z = 0.1f),
-            animationSpec = infiniteRepeatable(
-                animation = tween(durationMillis = 7.seconds.toInt(DurationUnit.MILLISECONDS))
+                animation = tween(durationMillis = 1.seconds.toInt(DurationUnit.MILLISECONDS))
             )
         )
 
         val modelNode = ModelNode(
             modelInstance = modelLoader.createModelInstance(ByteBuffer.wrap(model.bytes)),
-            scaleToUnits = 0.5f
+            scaleToUnits = 18f
         )
-
+        modelNode.position = Position(x = -0.42f, y = 1f, z = 0f)
         Scene(
             modifier = Modifier.fillMaxSize(),
             engine = engine,
@@ -107,12 +110,12 @@ private class AndroidModelView(
             environmentLoader = environmentLoader,
             onFrame = {
                 modelNode.nodes.forEach {
-                    if (it.name == Bones.leftShoulder) {
-                        it.rotation = cameraRotation
+                    when (it.name) {
+                        Bones.leftArm -> it.rotation = leftArmRotation.value
+                        Bones.rightArm -> it.rotation = rightArmRotation.value
+                        Bones.spine -> it.position = spinePosition.value
                     }
-                    if (it.name == Bones.spine){
-                        it.position = spinePosition
-                    }
+
                 }
                 cameraNode.lookAt(centerNode)
             },
@@ -163,23 +166,59 @@ private class AndroidModelView(
     }
 
     override fun updateModelPosition(image: PlatformImage) {
-        detectPose(
-            image = image,
-            imageHeight = image.height.toFloat(),
-            imageWidth = image.width.toFloat()
-        )
+        detectPose(image = image)
     }
 
-    private fun detectPose(image: PlatformImage, imageHeight: Float, imageWidth: Float) {
+    private fun detectPose(image: PlatformImage) {
         poseDetector.processImage(image) { poses, error ->
-            modelRenderer?.bindBones(
-                modelPosition = poses,
-                imageHeight = imageHeight,
-                imageWidth = imageWidth
-            )
             error?.let {
                 println(it)
             }
+            poses?.forEachIndexed { index, it -> println("!!${it.position3D} - $index") }
+            println("!!${image.height}x${image.width}")
+            if (poses != null && poses.size > 24) {
+                spinePosition.value =
+                    convertToBones(average(poses[23].position3D, poses[24].position3D))
+                leftArmRotation.value = calculateAngle(
+                    poses[11].position3D,
+                    poses[13].position3D,
+                    leftArmDefaultRotation
+                )
+
+                rightArmRotation.value = calculateAngle(
+                    poses[12].position3D,
+                    poses[14].position3D,
+                    rightArmDefaultRotation
+                ) - Position(0f, 0f, 180f)
+                println("!!${rightArmRotation.value.z}")
+            }
         }
     }
+
+
+    private fun average(point1: PointF3D, point2: PointF3D) =
+        PointF3D.from(
+            (point1.x + point2.x) / 2,
+            (point1.y + point2.y) / 2,
+            (point1.z + point2.z) / 2
+        )
+
+
+    private fun convertToBones(point: PointF3D): Position {
+        val maxValue = Position(2.7f, -6.1f, 0f)
+        val imageWidth = 960f
+        val imageHeight = 1280f
+        return Position(
+            maxValue.x * point.x * screenWidth / pow(imageWidth, 2f),
+            maxValue.y * point.y / imageHeight,
+            0f
+        )
+    }
+
+    private fun calculateAngle(point1: PointF3D, point2: PointF3D, defaultRotation: Rotation) =
+        Rotation(
+            defaultRotation.x,
+            defaultRotation.y,
+            defaultRotation.z + (90 - atan((point2.y - point1.y) / (point2.x - point1.x)) * 180f / PI.toFloat())
+        )
 }
