@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.google.android.filament.Engine
+import com.google.android.filament.utils.Float2
 import com.google.android.filament.utils.pow
 import com.google.ar.core.Anchor
 import com.google.mlkit.vision.common.PointF3D
@@ -79,14 +80,6 @@ private class AndroidModelView(
             lookAt(centerNode)
             centerNode.addChildNode(this)
         }
-        val cameraTransition = rememberInfiniteTransition(label = "CameraTransition")
-        val cameraRotation by cameraTransition.animateRotation(
-            initialValue = Rotation(z = 0.0f),
-            targetValue = Rotation(z = 360f),
-            animationSpec = infiniteRepeatable(
-                animation = tween(durationMillis = 1.seconds.toInt(DurationUnit.MILLISECONDS))
-            )
-        )
 
         val modelNode = ModelNode(
             modelInstance = modelLoader.createModelInstance(ByteBuffer.wrap(model.bytes)),
@@ -176,9 +169,14 @@ private class AndroidModelView(
             }
             poses?.forEachIndexed { index, it -> println("!!${it.position3D} - $index") }
             println("!!${image.height}x${image.width}")
+            println("!!screen: $screenHeight x $screenWidth")
             if (poses != null && poses.size > 24) {
                 spinePosition.value =
-                    convertToBones(average(poses[23].position3D, poses[24].position3D))
+                    convertToBones(
+                        average(poses[23].position3D, poses[24].position3D),
+                        imageWidth = image.height.toFloat(),
+                        imageHeight = image.width.toFloat()
+                    )
                 leftArmRotation.value = calculateAngle(
                     poses[11].position3D,
                     poses[13].position3D,
@@ -190,7 +188,6 @@ private class AndroidModelView(
                     poses[14].position3D,
                     rightArmDefaultRotation
                 ) - Position(0f, 0f, 180f)
-                println("!!${rightArmRotation.value.z}")
             }
         }
     }
@@ -204,12 +201,11 @@ private class AndroidModelView(
         )
 
 
-    private fun convertToBones(point: PointF3D): Position {
-        val maxValue = Position(2.7f, -6.1f, 0f)
-        val imageWidth = 960f
-        val imageHeight = 1280f
+    private fun convertToBones(point: PointF3D, imageHeight: Float, imageWidth: Float): Position {
+        val maxValue = Position(2.8f, -6.1f, 0f)
+
         return Position(
-            maxValue.x * point.x * screenWidth / pow(imageWidth, 2f),
+            maxValue.x * point.x / imageWidth,
             maxValue.y * point.y / imageHeight,
             0f
         )
