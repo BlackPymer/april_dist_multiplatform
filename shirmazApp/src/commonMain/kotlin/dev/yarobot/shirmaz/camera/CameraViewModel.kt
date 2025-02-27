@@ -18,6 +18,7 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import shirmaz.shirmazapp.generated.resources.Res
 import shirmaz.shirmazapp.generated.resources.clothes
+import shirmaz.shirmazapp.generated.resources.dark_t_shirt_name
 import shirmaz.shirmazapp.generated.resources.mia
 import shirmaz.shirmazapp.generated.resources.mia_name
 import shirmaz.shirmazapp.generated.resources.jacket_name
@@ -42,12 +43,17 @@ class CameraViewModel : ViewModel() {
                     nameRes = (Res.string.jacket_name),
                     painterRes = (Res.drawable.clothes),
                     modelName = Models.LEATHER_JACKET
+                ),
+                Shirt(
+                    nameRes = (Res.string.dark_t_shirt_name),
+                    painterRes = (Res.drawable.clothes),
+                    modelName = Models.DARK_T_SHIRT
                 )
             ),
             currentShirt = null,
             currentModel = null,
             saving = false,
-            currentCamera = CameraType.FRONT,
+            currentCamera = CameraType.BACK,
         )
     )
 

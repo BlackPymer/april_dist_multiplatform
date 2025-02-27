@@ -29,6 +29,7 @@ actual fun CameraView(
             screenWidth = screenWidth.toInt()
         )
     }
+    modelView()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val surfaceRequest by viewModel.surfaceRequest.collectAsStateWithLifecycle()
@@ -46,6 +47,5 @@ actual fun CameraView(
         surfaceRequest?.let { request ->
             CameraXViewfinder(surfaceRequest = request)
         }
-        modelView()
     }
 }
