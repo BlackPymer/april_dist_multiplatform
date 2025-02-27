@@ -1,5 +1,6 @@
 package dev.yarobot.shirmaz.camera
 
+import android.annotation.SuppressLint
 import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.core.CameraSelector
 import androidx.compose.foundation.layout.Box
@@ -14,6 +15,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.yarobot.shirmaz.camera.model.CameraType
 import dev.yarobot.shirmaz.platform.PlatformImage
 
+@SuppressLint("NewApi")
 @Composable
 actual fun CameraView(
     modifier: Modifier,
@@ -29,8 +31,10 @@ actual fun CameraView(
             screenWidth = screenWidth.toInt()
         )
     }
-    modelView()
     val context = LocalContext.current
+
+    modelView()
+
     val lifecycleOwner = LocalLifecycleOwner.current
     val surfaceRequest by viewModel.surfaceRequest.collectAsStateWithLifecycle()
 
@@ -48,4 +52,5 @@ actual fun CameraView(
             CameraXViewfinder(surfaceRequest = request)
         }
     }
+    viewModel.cameraAnalyzeUseCase.setAnalyzer(context.mainExecutor,onImageCaptured)
 }

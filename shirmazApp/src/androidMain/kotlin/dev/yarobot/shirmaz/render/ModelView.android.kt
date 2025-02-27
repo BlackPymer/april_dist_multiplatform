@@ -48,11 +48,11 @@ actual fun createModelView(
     screenHeight = screenHeight
 )
 
-
 private class AndroidModelView(
     override val screenHeight: Float,
     override val screenWidth: Float
 ) : ModelView {
+
     private val poseDetector = createPoseDetector(ShirmazPoseDetectorOptions.STREAM)
 
     private val leftArmDefaultRotation = Rotation(0f, 0f, -90f)
@@ -60,8 +60,10 @@ private class AndroidModelView(
 
     private var leftArmRotation = mutableStateOf(leftArmDefaultRotation)
     private var rightArmRotation = mutableStateOf(rightArmDefaultRotation)
-
     private var spinePosition = mutableStateOf(Position(0f, 0f, 0f))
+
+    // Флаг, определяющий, есть ли валидные данные поз
+    private var isPoseValid = mutableStateOf(false)
 
     @Composable
     override fun ModelRendererInit(model: ThreeDModel) {
@@ -82,6 +84,7 @@ private class AndroidModelView(
             scaleToUnits = 18f
         )
         modelNode.position = Position(x = -0.42f, y = 1f, z = 0f)
+
         Scene(
             modifier = Modifier.fillMaxSize(),
             engine = engine,
@@ -101,11 +104,15 @@ private class AndroidModelView(
             ),
             environmentLoader = environmentLoader,
             onFrame = {
-                modelNode.nodes.forEach {
-                    when (it.name) {
-                        Bones.leftArm -> it.rotation = leftArmRotation.value
-                        Bones.rightArm -> it.rotation = rightArmRotation.value
-                        Bones.spine -> it.position = spinePosition.value
+                // Управляем видимостью модели в зависимости от валидности данных поз
+                modelNode.isVisible = isPoseValid.value
+                if (isPoseValid.value) {
+                    modelNode.nodes.forEach { node ->
+                        when (node.name) {
+                            Bones.leftArm -> node.rotation = leftArmRotation.value
+                            Bones.rightArm -> node.rotation = rightArmRotation.value
+                            Bones.spine -> node.position = spinePosition.value
+                        }
                     }
                 }
                 cameraNode.lookAt(centerNode)
@@ -165,10 +172,14 @@ private class AndroidModelView(
             error?.let {
                 println(it)
             }
-            poses?.forEachIndexed { index, it -> println("!!${it.position3D} - $index") }
+            poses?.forEachIndexed { index, it ->
+                println("!!${it.position3D} - $index")
+            }
             println("!!${image.height}x${image.width}")
             println("!!screen: $screenHeight x $screenWidth")
-            if (poses != null && poses.size > 24) {
+
+            if (poses != null && poses.size >= 24) {
+                isPoseValid.value = true
                 spinePosition.value =
                     convertToBones(
                         average(poses[23].position3D, poses[24].position3D),
@@ -180,16 +191,16 @@ private class AndroidModelView(
                     poses[13].position3D,
                     leftArmDefaultRotation
                 )
-
                 rightArmRotation.value = calculateAngle(
                     poses[12].position3D,
                     poses[14].position3D,
                     rightArmDefaultRotation
                 ) - Position(0f, 0f, 180f)
+            } else {
+                isPoseValid.value = false
             }
         }
     }
-
 
     private fun average(point1: PointF3D, point2: PointF3D) =
         PointF3D.from(
@@ -197,7 +208,6 @@ private class AndroidModelView(
             (point1.y + point2.y) / 2,
             (point1.z + point2.z) / 2
         )
-
 
     private fun convertToBones(point: PointF3D, imageHeight: Float, imageWidth: Float): Position {
         val maxValue = Position(2.8f, -6.1f, 0f)

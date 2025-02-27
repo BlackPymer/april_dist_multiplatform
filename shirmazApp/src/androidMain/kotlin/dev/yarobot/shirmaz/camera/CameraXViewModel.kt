@@ -39,7 +39,7 @@ class CameraXViewModel(
         )
         .build()
 
-    private val cameraAnalyzeUseCase = ImageAnalysis.Builder()
+    val cameraAnalyzeUseCase = ImageAnalysis.Builder()
         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
         .setResolutionSelector(resolutionSelector)
         .build()
