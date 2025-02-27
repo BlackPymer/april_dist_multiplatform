@@ -7,7 +7,8 @@
     <string name="save_cd">Save</string>
     <string name="deselect_shirt_cd">Deselect shirt</string>
     <string name="null_shirt">No shirt</string>
-    <string name="shirt1_name">Shirt 1</string>
-    <string name="shirt2_name">Shirt 2</string>
-    <string name="shirt3_name">Shirt 3</string>
+
+    <string name="mia_name">Mia Model</string>
+    <string name="jacket_name">Jacket Model</string>
+    <string name="t_shirt_name">T-Shirt Model</string>
 </resources>

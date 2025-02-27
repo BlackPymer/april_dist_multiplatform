@@ -2,6 +2,7 @@ package dev.yarobot.shirmaz.camera
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -39,9 +40,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import dev.yarobot.shirmaz.camera.model.ModelView
 import dev.yarobot.shirmaz.platform.getScreenHeight
 import dev.yarobot.shirmaz.platform.getScreenWidth
 import dev.yarobot.shirmaz.render.createModelView
@@ -53,10 +54,6 @@ import dev.yarobot.shirmaz.ui.icons.PhotoSearch
 import dev.yarobot.shirmaz.ui.icons.RefreshDot
 import dev.yarobot.shirmaz.ui.icons.ShirmazIcons
 import org.jetbrains.compose.resources.painterResource
-import dev.yarobot.shirmaz.ui.LocalPermissionsController
-import dev.yarobot.shirmaz.platform.getScreenHeight
-import dev.yarobot.shirmaz.platform.getScreenWidth
-import dev.yarobot.shirmaz.render.createModelView
 import org.jetbrains.compose.resources.stringResource
 import shirmaz.shirmazapp.generated.resources.Res
 import shirmaz.shirmazapp.generated.resources.back_cd
@@ -86,9 +83,6 @@ internal fun ScreenContent(
     onIntent: (CameraIntent) -> Unit,
     state: CameraScreenState
 ) {
-    val screenHeight = getScreenHeight()
-    val screenWidth = getScreenWidth()
-    val modelView = remember { createModelView(screenHeight = screenHeight, screenWidth = screenWidth) }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -130,6 +124,10 @@ private fun BoxScope.GrantedView(
     state: CameraScreenState,
     onIntent: (CameraIntent) -> Unit
 ) {
+    val screenHeight = getScreenHeight()
+    val screenWidth = getScreenWidth()
+    val modelView =
+        remember { createModelView(screenHeight = screenHeight, screenWidth = screenWidth) }
     CameraView(
         cameraType = remember(state.currentCamera) { state.currentCamera },
         onImageCaptured = {
@@ -137,7 +135,7 @@ private fun BoxScope.GrantedView(
         },
         modelView = {
             state.currentModel?.let {
-                ModelView(state.currentModel)
+                modelView.ModelRendererInit(state.currentModel)
             }
         },
         screenHeight = screenHeight,
@@ -200,23 +198,27 @@ private fun Carousel(
         }
         items(
             items = state.shirts,
-            key = { it.nameRes }
+            key = { it.modelName.toString() }
         ) { shirt ->
             CarouselElement(
                 onIntent = onIntent,
                 shirt = shirt,
                 isSelected = state.currentShirt == shirt,
             ) {
-                Column(verticalArrangement = Arrangement.Center) {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     Image(
                         modifier = Modifier
                             .size(ShirmazTheme.dimension.shirtPicture)
-                            .align(Alignment.CenterHorizontally),
+                            .clip(MaterialTheme.shapes.medium),
                         painter = painterResource(shirt.painterRes),
-                        contentDescription = stringResource(shirt.nameRes)
+                        contentDescription = stringResource(shirt.nameRes),
+                        contentScale = ContentScale.FillHeight
                     )
                     Text(
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        modifier = Modifier.basicMarquee(),
                         color = ShirmazTheme.colors.text,
                         text = stringResource(shirt.nameRes),
                         style = MaterialTheme.typography.labelSmall

@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import dev.yarobot.shirmaz.camera.model.ThreeDModel
 import dev.yarobot.shirmaz.platform.PlatformImage
 
-
 interface ModelView {
     val screenHeight: Float
     val screenWidth: Float

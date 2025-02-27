@@ -39,8 +39,6 @@ import java.nio.Buffer
 import java.nio.ByteBuffer
 import kotlin.math.PI
 import kotlin.math.atan
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.DurationUnit
 
 actual fun createModelView(
     screenHeight: Float,
@@ -56,8 +54,6 @@ private class AndroidModelView(
     override val screenWidth: Float
 ) : ModelView {
     private val poseDetector = createPoseDetector(ShirmazPoseDetectorOptions.STREAM)
-
-    private var modelRenderer: ModelRenderer? = null
 
     private val leftArmDefaultRotation = Rotation(0f, 0f, -90f)
     private val rightArmDefaultRotation = Rotation(0f, 0f, 90f)
@@ -96,6 +92,9 @@ private class AndroidModelView(
                 orbitHomePosition = cameraNode.worldPosition,
                 targetPosition = centerNode.worldPosition
             ),
+            onViewCreated = {
+                setZOrderOnTop(false)
+            },
             childNodes = listOf(
                 centerNode,
                 rememberNode { modelNode }
@@ -108,7 +107,6 @@ private class AndroidModelView(
                         Bones.rightArm -> it.rotation = rightArmRotation.value
                         Bones.spine -> it.position = spinePosition.value
                     }
-
                 }
                 cameraNode.lookAt(centerNode)
             },

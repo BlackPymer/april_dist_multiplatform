@@ -111,7 +111,6 @@ android {
 }
 
 dependencies {
-    implementation(libs.core.ktx)
     implementation(libs.androidx.window)
     debugImplementation(compose.uiTooling)
 }

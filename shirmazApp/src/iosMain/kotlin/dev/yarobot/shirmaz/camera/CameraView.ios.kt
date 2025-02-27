@@ -60,6 +60,7 @@ private val deviceTypes = listOf(
 @OptIn(ExperimentalForeignApi::class)
 @Composable
 actual fun CameraView(
+    modifier: Modifier,
     cameraType: CameraType,
     onImageCaptured: (image: PlatformImage) -> Unit,
     modelView: @Composable () -> Unit,

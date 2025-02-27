@@ -8,67 +8,54 @@ import dev.icerock.moko.permissions.PermissionsController
 import dev.yarobot.shirmaz.camera.model.CameraType
 import dev.yarobot.shirmaz.camera.model.Models
 import dev.yarobot.shirmaz.camera.model.ThreeDModel
-import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetectorOptions
-import dev.yarobot.shirmaz.posedetection.createPoseDetector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import shirmaz.shirmazapp.generated.resources.Res
 import shirmaz.shirmazapp.generated.resources.clothes
-import shirmaz.shirmazapp.generated.resources.shirt1_name
-import shirmaz.shirmazapp.generated.resources.shirt2_name
-import shirmaz.shirmazapp.generated.resources.shirt3_name
+import shirmaz.shirmazapp.generated.resources.mia
+import shirmaz.shirmazapp.generated.resources.mia_name
+import shirmaz.shirmazapp.generated.resources.jacket_name
+import shirmaz.shirmazapp.generated.resources.t_shirt_name
 
 class CameraViewModel : ViewModel() {
-    private val poseDetector = createPoseDetector(ShirmazPoseDetectorOptions.STREAM)
-
     private val _state = MutableStateFlow(
         CameraScreenState(
             cameraProvideState = CameraProvideState.NotGranted,
             shirts = listOf(
                 Shirt(
-                    nameRes = (Res.string.shirt1_name),
+                    nameRes = (Res.string.t_shirt_name),
                     painterRes = (Res.drawable.clothes),
-                    modelName = Models.sampleModel
+                    modelName = Models.T_SHIRT
+               ),
+                Shirt(
+                    nameRes = (Res.string.mia_name),
+                    painterRes = (Res.drawable.mia),
+                    modelName = Models.MAI_CHARACTER
                 ),
                 Shirt(
-                    nameRes = (Res.string.shirt2_name),
+                    nameRes = (Res.string.jacket_name),
                     painterRes = (Res.drawable.clothes),
-                    modelName = Models.sampleModel
-                ),
-                Shirt(
-                    nameRes = (Res.string.shirt3_name),
-                    painterRes = (Res.drawable.clothes),
-                    modelName = Models.sampleModel
+                    modelName = Models.LEATHER_JACKET
                 )
             ),
             currentShirt = null,
             currentModel = null,
             saving = false,
             currentCamera = CameraType.FRONT,
-            modelPosition = null
         )
     )
 
-    val state = _state.onStart {
-        loadModel(Models.darkTshirt)
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = _state.value
-    )
+    val state = _state.asStateFlow()
 
     fun onIntent(intent: CameraIntent) {
         when (intent) {
             is CameraIntent.RequestCamera -> requestCamera(intent.permissionsController)
-
             is CameraIntent.TakePicture -> takePicture()
             is CameraIntent.OpenGallery -> {}
             is CameraIntent.ChooseShirt -> intent.shirt.chooseAsCurrent()
@@ -128,9 +115,14 @@ class CameraViewModel : ViewModel() {
 
     private fun Shirt?.chooseAsCurrent() {
         _state.update {
-            it.copy(currentShirt = this)
+            it.copy(
+                currentShirt = this,
+                currentModel = null
+            )
         }
-        loadModel()
+        this?.modelName?.let {
+            loadModel(this.modelName)
+        }
     }
 
 
