@@ -1,5 +1,6 @@
 package dev.yarobot.shirmaz.ui
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -7,7 +8,6 @@ import dev.icerock.moko.permissions.PermissionsController
 import dev.icerock.moko.permissions.compose.BindEffect
 import dev.icerock.moko.permissions.compose.PermissionsControllerFactory
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
-
 
 @Composable
 fun ShirmazTheme(content: @Composable () -> Unit) {
@@ -21,7 +21,9 @@ fun ShirmazTheme(content: @Composable () -> Unit) {
         LocalShirmazColors provides shirmazColors,
         LocalShirmazDimension provides shirmazDimension,
     ) {
-        content()
+        MaterialTheme(typography = shirmazTypography) {
+            content()
+        }
     }
 }
 object ShirmazTheme{

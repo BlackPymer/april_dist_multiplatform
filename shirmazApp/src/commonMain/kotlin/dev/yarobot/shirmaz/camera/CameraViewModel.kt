@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dev.icerock.moko.permissions.Permission
 import dev.icerock.moko.permissions.PermissionState
 import dev.icerock.moko.permissions.PermissionsController
+import dev.yarobot.shirmaz.camera.model.CameraType
 import dev.yarobot.shirmaz.camera.model.Models
 import dev.yarobot.shirmaz.camera.model.ThreeDModel
 import dev.yarobot.shirmaz.platform.PlatformImage
@@ -24,11 +25,9 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import shirmaz.shirmazapp.generated.resources.Res
 import shirmaz.shirmazapp.generated.resources.clothes
-import shirmaz.shirmazapp.generated.resources.null_shirt
 import shirmaz.shirmazapp.generated.resources.shirt1_name
 import shirmaz.shirmazapp.generated.resources.shirt2_name
 import shirmaz.shirmazapp.generated.resources.shirt3_name
-import shirmaz.shirmazapp.generated.resources.unclothes_no_text
 
 class CameraViewModel : ViewModel() {
     private val poseDetector = createPoseDetector(ShirmazPoseDetectorOptions.STREAM)
@@ -37,11 +36,6 @@ class CameraViewModel : ViewModel() {
         CameraScreenState(
             cameraProvideState = CameraProvideState.NotGranted,
             shirts = listOf(
-                Shirt(
-                    nameRes = (Res.string.null_shirt),
-                    painterRes = (Res.drawable.unclothes_no_text),
-                    modelName = null
-                ),
                 Shirt(
                     nameRes = (Res.string.shirt1_name),
                     painterRes = (Res.drawable.clothes),
@@ -60,8 +54,8 @@ class CameraViewModel : ViewModel() {
             ),
             currentShirt = null,
             currentModel = null,
-            isCarouselVisible = false,
-            saving = false
+            saving = false,
+            currentCamera = CameraType.FRONT
         )
     )
 
@@ -80,10 +74,10 @@ class CameraViewModel : ViewModel() {
 
             is CameraIntent.TakePicture -> takePicture()
             is CameraIntent.OpenGallery -> {}
-            is CameraIntent.ChangeCorouselVisability -> changeCorouselVisability()
             is CameraIntent.ChooseShirt -> intent.shirt.chooseAsCurrent()
             is CameraIntent.BackToToolbar -> backToToolbar()
             is CameraIntent.SaveImage -> {}
+            CameraIntent.ChangeCamera -> changeCamera()
         }
     }
 
@@ -95,10 +89,17 @@ class CameraViewModel : ViewModel() {
 
     private fun takePicture() {
         _state.update {
-            it.copy(saving = true, isCarouselVisible = true)
+            it.copy(saving = true)
         }
     }
 
+    private fun changeCamera() {
+        val currentCamera = if (state.value.currentCamera == CameraType.FRONT)
+            CameraType.BACK else CameraType.FRONT
+        _state.update {
+            it.copy(currentCamera = currentCamera)
+        }
+    }
 
     private fun requestCamera(controller: PermissionsController) {
         viewModelScope.launch {
@@ -119,6 +120,7 @@ class CameraViewModel : ViewModel() {
                     it.copy(cameraProvideState = CameraProvideState.Granted)
                 }
             }
+
             PermissionState.DeniedAlways -> controller.openAppSettings()
             PermissionState.Denied -> controller.openAppSettings()
             else -> {
@@ -128,13 +130,7 @@ class CameraViewModel : ViewModel() {
             }
         }
 
-    private fun changeCorouselVisability() {
-        _state.update {
-            it.copy(isCarouselVisible = !it.isCarouselVisible)
-        }
-    }
-
-    private fun Shirt.chooseAsCurrent() {
+    private fun Shirt?.chooseAsCurrent() {
         _state.update {
             it.copy(currentShirt = this)
         }

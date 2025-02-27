@@ -1,16 +1,32 @@
 package dev.yarobot.shirmaz.camera
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -20,187 +36,211 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import dev.yarobot.shirmaz.ui.LocalPermissionsController
 import dev.yarobot.shirmaz.camera.model.ModelView
+import dev.yarobot.shirmaz.ui.LocalPermissionsController
+import dev.yarobot.shirmaz.ui.ShirmazTheme
+import dev.yarobot.shirmaz.ui.icons.ArrowBack
+import dev.yarobot.shirmaz.ui.icons.Cloth
+import dev.yarobot.shirmaz.ui.icons.PhotoSearch
+import dev.yarobot.shirmaz.ui.icons.RefreshDot
+import dev.yarobot.shirmaz.ui.icons.ShirmazIcons
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import shirmaz.shirmazapp.generated.resources.Res
+import shirmaz.shirmazapp.generated.resources.back_cd
 import shirmaz.shirmazapp.generated.resources.camera_not_granted
 import shirmaz.shirmazapp.generated.resources.camera_request
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.runtime.currentComposer
-import androidx.compose.ui.graphics.painter.Painter
-import dev.yarobot.shirmaz.ui.ShirmazTheme
-import org.jetbrains.compose.resources.DrawableResource
-import shirmaz.shirmazapp.generated.resources.arrow
-import shirmaz.shirmazapp.generated.resources.back_cd
 import shirmaz.shirmazapp.generated.resources.carousel_cd
-import shirmaz.shirmazapp.generated.resources.clothes
-import shirmaz.shirmazapp.generated.resources.gallery
+import shirmaz.shirmazapp.generated.resources.deselect_shirt_cd
 import shirmaz.shirmazapp.generated.resources.gallery_cd
 import shirmaz.shirmazapp.generated.resources.save_cd
-import shirmaz.shirmazapp.generated.resources.unclothes
 
 @Composable
 fun CameraScreen() {
     val viewModel = viewModel { CameraViewModel() }
     val state by viewModel.state.collectAsState()
+    val permissionsController = LocalPermissionsController.current
+    LaunchedEffect(state.cameraProvideState) {
+        viewModel.onIntent(CameraIntent.RequestCamera(permissionsController))
+    }
     ScreenContent(
-        onIntent = { viewModel.onIntent(it) },
-        state = remember(state) { state }
+        onIntent = viewModel::onIntent,
+        state = state
     )
 }
 
 @Composable
-private fun ScreenContent(
+internal fun ScreenContent(
     onIntent: (CameraIntent) -> Unit,
     state: CameraScreenState
 ) {
-    val permissionsController = LocalPermissionsController.current
-    LaunchedEffect(state.cameraProvideState) {
-        onIntent(CameraIntent.RequestCamera(permissionsController))
-    }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         when (state.cameraProvideState) {
-            is CameraProvideState.Granted -> {
-                CameraView(
-                    onImageCaptured = {
-                        onIntent(CameraIntent.OnImageCaptured(it))
-                    }
-                ) {
-                    state.currentModel?.let {
-                        ModelView(remember(state) { state.currentModel })
-                    }
-                    Column(
-                        modifier = Modifier.align(Alignment.BottomCenter),
-                        verticalArrangement = Arrangement.Bottom,
-                    ) {
-                        if (state.isCarouselVisible) {
-                            Carousel(onIntent = onIntent, state = state)
-                        }
-                        if (state.saving) {
-                            SavingPanel(onIntent = onIntent, state = state)
-                        } else {
-                            ToolBar(onIntent = onIntent, state = state)
-                        }
-                    }
-                }
+            CameraProvideState.Granted -> {
+                GrantedView(
+                    state = state,
+                    onIntent = onIntent
+                )
             }
 
-            else -> {
-                Column(
-                    modifier = Modifier,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(text = stringResource(Res.string.camera_not_granted))
-                    TextButton(
-                        onClick = { onIntent(CameraIntent.RequestCamera(permissionsController)) }
-                    ) {
-                        Text(text = stringResource(Res.string.camera_request))
-                    }
-                }
+            CameraProvideState.NotGranted -> {
+                NotGrantedView(onIntent)
             }
         }
     }
 }
 
 @Composable
-private fun Carousel(onIntent: (CameraIntent) -> Unit, state: CameraScreenState) {
-    val scrollState = rememberScrollState()
+fun NotGrantedView(onIntent: (CameraIntent) -> Unit) {
+    val permissionsController = LocalPermissionsController.current
+    Column(
+        modifier = Modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(text = stringResource(Res.string.camera_not_granted))
+        TextButton(
+            onClick = { onIntent(CameraIntent.RequestCamera(permissionsController)) }
+        ) {
+            Text(text = stringResource(Res.string.camera_request))
+        }
+    }
+}
 
-    Row(
+@Composable
+private fun BoxScope.GrantedView(
+    state: CameraScreenState,
+    onIntent: (CameraIntent) -> Unit
+) {
+    CameraView(
+        cameraType = remember(state.currentCamera) { state.currentCamera },
+        onImageCaptured = {
+            onIntent(CameraIntent.OnImageCaptured(it))
+        }
+    ) {
+        state.currentModel?.let {
+            ModelView(state.currentModel)
+        }
+    }
+    Column(
+        modifier = Modifier.align(Alignment.BottomCenter),
+        verticalArrangement = Arrangement.Bottom,
+    ) {
+        Carousel(
+            state = remember(
+                state.shirts,
+                state.currentShirt
+            ) { state },
+            onIntent = onIntent,
+        )
+        if (remember(state.saving) { state.saving }) {
+            SavingPanel(onIntent = onIntent)
+        } else {
+            ToolBar(onIntent = onIntent)
+        }
+    }
+}
+
+@Composable
+private fun Carousel(
+    onIntent: (CameraIntent) -> Unit,
+    state: CameraScreenState
+) {
+    LazyRow(
         modifier = Modifier
             .fillMaxWidth()
-            .horizontalScroll(scrollState)
-            .padding(ShirmazTheme.dimension.carouselPaddingFromLeftScreenBorder),
-
+            .padding(
+                start = ShirmazTheme.dimension.carouselPaddingLeft,
+                bottom = ShirmazTheme.dimension.carouselPaddingBottom
+            ),
         horizontalArrangement = Arrangement.spacedBy(ShirmazTheme.dimension.itemSpacing)
     ) {
-        state.shirts.forEach { shirt ->
-            CarouselElement(onIntent = onIntent, state = state, shirt = shirt)
+        item {
+            CarouselElement(
+                onIntent = onIntent,
+                shirt = null,
+                isSelected = state.currentShirt == null,
+            ) {
+                Icon(
+                    modifier = Modifier.size(ShirmazTheme.dimension.sideCarouselButtonSize)
+                        .offset(0.dp, 2.dp).blur(4.dp),
+                    imageVector = ShirmazIcons.Cloth,
+                    tint = Color.Black.copy(alpha = 0.25f),
+                    contentDescription = null
+                )
+                Icon(
+                    modifier = Modifier.size(ShirmazTheme.dimension.sideCarouselButtonSize),
+                    imageVector = ShirmazIcons.Cloth,
+                    tint = Color.White,
+                    contentDescription = stringResource(Res.string.deselect_shirt_cd)
+                )
+            }
+        }
+        items(
+            items = state.shirts,
+            key = { it.nameRes }
+        ) { shirt ->
+            CarouselElement(
+                onIntent = onIntent,
+                shirt = shirt,
+                isSelected = state.currentShirt == shirt,
+            ) {
+                Column(verticalArrangement = Arrangement.Center) {
+                    Image(
+                        modifier = Modifier
+                            .size(ShirmazTheme.dimension.shirtPicture)
+                            .align(Alignment.CenterHorizontally),
+                        painter = painterResource(shirt.painterRes),
+                        contentDescription = stringResource(shirt.nameRes)
+                    )
+                    Text(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        color = ShirmazTheme.colors.text,
+                        text = stringResource(shirt.nameRes),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+            }
         }
     }
-    Spacer(
-        modifier = Modifier
-            .then(
-                Modifier.height(
-                    if (!state.saving) ShirmazTheme.dimension.carouselPaddingFromToolbar
-                    else ShirmazTheme.dimension.carouselPaddingFromSavingPanel
-                )
-            )
-    )
-
 }
 
 @Composable
-private fun RowScope.CarouselElement(
+private fun CarouselElement(
     onIntent: (CameraIntent) -> Unit,
-    state: CameraScreenState,
-    shirt: Shirt
+    shirt: Shirt?,
+    isSelected: Boolean,
+    content: @Composable BoxScope.() -> Unit
 ) {
-    Column(
-        modifier =
-        Modifier
-            .align(Alignment.CenterVertically)
+    Box(
+        modifier = Modifier
             .height(ShirmazTheme.dimension.shirtButtonHeight)
             .width(ShirmazTheme.dimension.shirtButtonWidth)
             .clip(RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius))
             .background(ShirmazTheme.colors.shirtBackground)
             .clickable { onIntent(CameraIntent.ChooseShirt(shirt)) }
             .border(
-                ShirmazTheme.dimension.borderThikness,
-                if (state.currentShirt == shirt) ShirmazTheme.colors.takePictureButton
+                width = ShirmazTheme.dimension.borderThikness,
+                color = if (isSelected) ShirmazTheme.colors.takePictureButton
                 else Color.Transparent,
-                RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius)
+                shape = RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius)
             ),
-        verticalArrangement = Arrangement.Center
-
+        contentAlignment = Alignment.Center
     ) {
-        Image(
-            modifier = Modifier
-                .size(ShirmazTheme.dimension.shirtPicture)
-                .align(Alignment.CenterHorizontally),
-            painter = painterResource(shirt.painterRes),
-            contentDescription = stringResource(shirt.nameRes)
-        )
-        if (shirt.modelName != null) {
-            Text(
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally),
-                color = ShirmazTheme.colors.text,
-                text = stringResource(shirt.nameRes),
-                fontSize = ShirmazTheme.dimension.carouselButtonFontSize
-
-            )
-        }
+        content()
     }
 }
 
-
 @Composable
-private fun ToolBar(
-    onIntent: (CameraIntent) -> Unit,
-    state: CameraScreenState
-) {
+private fun ToolBar(onIntent: (CameraIntent) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -209,30 +249,26 @@ private fun ToolBar(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        GalleryButton(onIntent = onIntent)
+        IconButton(onClick = { onIntent(CameraIntent.OpenGallery) }) {
+            Icon(
+                modifier = Modifier.size(ShirmazTheme.dimension.sideCarouselButtonSize),
+                imageVector = ShirmazIcons.PhotoSearch,
+                contentDescription = stringResource(Res.string.gallery_cd),
+                tint = Color.White
+            )
+        }
         TakePictureButton(onIntent = onIntent)
-        if (state.isCarouselVisible) {
-            CarouselButton(onIntent = onIntent, image = Res.drawable.unclothes)
-        } else {
-            CarouselButton(onIntent = onIntent, image = Res.drawable.clothes)
+        IconButton(onClick = { onIntent(CameraIntent.ChangeCamera) }) {
+            Icon(
+                modifier = Modifier.size(ShirmazTheme.dimension.sideCarouselButtonSize),
+                imageVector = ShirmazIcons.RefreshDot,
+                contentDescription = stringResource(Res.string.carousel_cd),
+                tint = Color.White
+            )
         }
     }
 }
 
-@Composable
-private fun GalleryButton(modifier: Modifier = Modifier, onIntent: (CameraIntent) -> Unit) {
-    IconButton(
-        modifier = modifier.size(ShirmazTheme.dimension.galleryButton),
-        onClick = { onIntent(CameraIntent.OpenGallery) }
-
-    ) {
-        Image(
-            modifier = modifier,
-            painter = painterResource(Res.drawable.gallery),
-            contentDescription = stringResource(Res.string.gallery_cd)
-        )
-    }
-}
 
 @Composable
 private fun TakePictureButton(
@@ -266,93 +302,56 @@ private fun TakePictureButton(
 }
 
 @Composable
-private fun CarouselButton(
-    modifier: Modifier = Modifier,
-    onIntent: (CameraIntent) -> Unit,
-    image: DrawableResource
-) {
-    IconButton(
-        modifier = modifier.size(ShirmazTheme.dimension.carouselButton),
-        onClick = { onIntent(CameraIntent.ChangeCorouselVisability) }
-    ) {
-        val painter: Painter = painterResource(image)
-        Image(
-            modifier = modifier,
-            painter = painter,
-            contentDescription = stringResource(Res.string.carousel_cd)
-        )
-    }
-}
-
-
-@Composable
-private fun SavingPanel(onIntent: (CameraIntent) -> Unit, state: CameraScreenState) {
+private fun SavingPanel(onIntent: (CameraIntent) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(ShirmazTheme.dimension.toolBarHeight),
+            .height(ShirmazTheme.dimension.savingPanelHeight),
         horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Top
     ) {
-        BackButton(onIntent = onIntent)
-        SaveButton(onIntent = onIntent)
-    }
-}
-
-@Composable
-private fun RowScope.BackButton(
-    modifier: Modifier = Modifier,
-    onIntent: (CameraIntent) -> Unit
-) {
-    Button(
-        modifier = modifier
-            .align(Alignment.CenterVertically)
-            .height(ShirmazTheme.dimension.savingButtonsHeight)
-            .width(ShirmazTheme.dimension.savingButtonsWidth),
-        colors = ButtonDefaults.buttonColors(containerColor = ShirmazTheme.colors.toolBar),
-        shape = RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius),
-
-        onClick = { onIntent(CameraIntent.BackToToolbar) }
-    ) {
-        Row(
-            modifier = Modifier
-                .align(Alignment.CenterVertically),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
+        ShirmazButton(
+            onClick = { onIntent(CameraIntent.BackToToolbar) },
         ) {
-            Image(
-                modifier = modifier,
-                painter = painterResource(Res.drawable.arrow),
+            Icon(
+                imageVector = ShirmazIcons.ArrowBack,
                 contentDescription = stringResource(Res.string.back_cd)
             )
             Text(
+                modifier = Modifier.padding(horizontal = 8.dp),
                 text = stringResource(Res.string.back_cd),
                 color = ShirmazTheme.colors.text,
-                fontSize = ShirmazTheme.dimension.savingButtonsFontSize
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Spacer(Modifier.width(ShirmazIcons.ArrowBack.defaultWidth))
+        }
+        ShirmazButton(
+            onClick = { onIntent(CameraIntent.SaveImage) },
+        ) {
+            Text(
+                text = stringResource(Res.string.save_cd),
+                color = ShirmazTheme.colors.text,
+                style = MaterialTheme.typography.bodyMedium
             )
         }
     }
 }
 
 @Composable
-private fun RowScope.SaveButton(
+fun ShirmazButton(
     modifier: Modifier = Modifier,
-    onIntent: (CameraIntent) -> Unit
+    onClick: () -> Unit,
+    content: @Composable RowScope.() -> Unit
 ) {
     Button(
         modifier = modifier
-            .align(Alignment.CenterVertically)
             .height(ShirmazTheme.dimension.savingButtonsHeight)
             .width(ShirmazTheme.dimension.savingButtonsWidth),
         colors = ButtonDefaults.buttonColors(containerColor = ShirmazTheme.colors.toolBar),
         shape = RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius),
-
-        onClick = { onIntent(CameraIntent.SaveImage) }
+        onClick = onClick
     ) {
-        Text(
-            text = stringResource(Res.string.save_cd),
-            color = ShirmazTheme.colors.text,
-            fontSize = ShirmazTheme.dimension.savingButtonsFontSize
-        )
+        content()
     }
 }
+

@@ -1,6 +1,5 @@
 package dev.yarobot.shirmaz.ui
 
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 data class ShirmazColors(
