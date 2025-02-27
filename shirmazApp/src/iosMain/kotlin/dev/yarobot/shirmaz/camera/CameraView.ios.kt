@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.viewinterop.UIKitInteropProperties
 import androidx.compose.ui.viewinterop.UIKitViewController
 import cocoapods.MLKitVision.MLKVisionImage
+import dev.yarobot.shirmaz.camera.model.CameraType
 import dev.yarobot.shirmaz.platform.PlatformImage
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.AVFoundation.AVCaptureConnection
@@ -59,6 +60,7 @@ private val deviceTypes = listOf(
 @OptIn(ExperimentalForeignApi::class)
 @Composable
 actual fun CameraView(
+    cameraType: CameraType,
     onImageCaptured: (image: PlatformImage) -> Unit,
     modelView: @Composable () -> Unit,
     screenHeight: Float,

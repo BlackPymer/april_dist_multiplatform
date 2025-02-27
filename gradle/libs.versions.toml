@@ -9,9 +9,6 @@ targetSdk = "35"
 app-versionCode = "1"
 app-versionName = "1.0.0"
 
-android-compileSdk = "34"
-android-minSdk = "24"
-android-targetSdk = "34"
 androidx-activityCompose = "1.9.3"
 androidx-appcompat = "1.7.0"
 androidx-constraintlayout = "2.2.0"
@@ -25,7 +22,7 @@ junit = "4.13.2"
 kotlinx-coroutines = "1.9.0"
 
 moko-permissions = "0.18.1"
-cameraLifecycle = "1.4.0"
+camerax = "1.5.0-alpha06"
 
 jetbrains-viewmodel = "2.8.2"
 
@@ -61,11 +58,12 @@ androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle
 
 moko-permissions = { module = "dev.icerock.moko:permissions-compose", version.ref = "moko-permissions" }
 
-androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "cameraLifecycle" }
-androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "cameraLifecycle" }
-androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraLifecycle" }
-androidx-camera-extensions = { group = "androidx.camera", name = "camera-extensions", version.ref = "cameraLifecycle" }
-androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraLifecycle" }
+androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "camerax" }
+androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camerax" }
+androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camerax" }
+androidx-camera-extensions = { group = "androidx.camera", name = "camera-extensions", version.ref = "camerax" }
+androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
+androidx-camera-compose = { module = "androidx.camera:camera-compose", version.ref = "camerax" }
 
 sceneview-base = { module = "io.github.sceneview:sceneview", version.ref = "sceneview" }
 sceneview-ar = { module = "io.github.sceneview:arsceneview", version.ref = "sceneview" }
@@ -73,7 +71,6 @@ sceneview-ar = { module = "io.github.sceneview:arsceneview", version.ref = "scen
 jetbrains-viewmodel = {module ="org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "jetbrains-viewmodel"}
 pose-detection = { group = "com.google.mlkit", name = "pose-detection", version.ref = "poseDetection" }
 pose-detection-accurate = { group = "com.google.mlkit", name = "pose-detection-accurate", version.ref = "poseDetection" }
-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-window = { group = "androidx.window", name = "window", version.ref = "window" }
 
 [plugins]
@@ -87,5 +84,5 @@ kotlinCocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = 
 [bundles]
 android-camera = [
     "androidx-camera-core", "androidx-camera-camera2", "androidx-camera-view",
-    "androidx-camera-extensions", "androidx-camera-lifecycle"
+    "androidx-camera-extensions", "androidx-camera-lifecycle", "androidx-camera-compose"
 ]
