@@ -1,6 +1,6 @@
 package dev.yarobot.shirmaz.ui
 
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -18,9 +18,19 @@ fun ShirmazTheme(content: @Composable () -> Unit) {
     BindEffect(controller)
     CompositionLocalProvider(
         LocalPermissionsController provides controller,
+        LocalShirmazColors provides shirmazColors,
+        LocalShirmazDimension provides shirmazDimension,
     ) {
-        MaterialTheme {
+        MaterialTheme(typography = shirmazTypography) {
             content()
         }
     }
+}
+object ShirmazTheme{
+    val colors
+        @Composable
+        get() = LocalShirmazColors.current
+    val dimension
+        @Composable
+        get() = LocalShirmazDimension.current
 }
