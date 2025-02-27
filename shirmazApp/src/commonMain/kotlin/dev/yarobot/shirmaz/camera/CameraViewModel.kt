@@ -58,7 +58,7 @@ class CameraViewModel : ViewModel() {
     )
 
     val state = _state.onStart {
-        loadModel(Models.tshirt1)
+        loadModel(Models.darkTshirt)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
