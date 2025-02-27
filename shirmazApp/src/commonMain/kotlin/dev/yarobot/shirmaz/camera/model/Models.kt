@@ -4,4 +4,5 @@ object Models {
     val longSleeves1 = "longSleeves1.glb"
     val mia = "mia.glb"
     val tshirt1 = "foootlbolka.glb"
+    val darkTshirt = "darkFoootbolka.glb"
 }
