@@ -17,12 +17,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import shirmaz.shirmazapp.generated.resources.Res
+import shirmaz.shirmazapp.generated.resources.blue_t_shirt_name
 import shirmaz.shirmazapp.generated.resources.clothes
 import shirmaz.shirmazapp.generated.resources.dark_t_shirt_name
-import shirmaz.shirmazapp.generated.resources.mia
-import shirmaz.shirmazapp.generated.resources.mia_name
-import shirmaz.shirmazapp.generated.resources.jacket_name
-import shirmaz.shirmazapp.generated.resources.t_shirt_name
+import shirmaz.shirmazapp.generated.resources.red_t_shirt_name
+import shirmaz.shirmazapp.generated.resources.white_t_shirt_name
+import shirmaz.shirmazapp.generated.resources.yellow_t_shirt_name
 
 class CameraViewModel : ViewModel() {
     private val _state = MutableStateFlow(
@@ -30,24 +30,29 @@ class CameraViewModel : ViewModel() {
             cameraProvideState = CameraProvideState.NotGranted,
             shirts = listOf(
                 Shirt(
-                    nameRes = (Res.string.t_shirt_name),
+                    nameRes = (Res.string.red_t_shirt_name),
                     painterRes = (Res.drawable.clothes),
-                    modelName = Models.T_SHIRT
-               ),
-                Shirt(
-                    nameRes = (Res.string.mia_name),
-                    painterRes = (Res.drawable.mia),
-                    modelName = Models.MAI_CHARACTER
+                    modelName = Models.RED_T_SHIRT
                 ),
                 Shirt(
-                    nameRes = (Res.string.jacket_name),
+                    nameRes = (Res.string.blue_t_shirt_name),
                     painterRes = (Res.drawable.clothes),
-                    modelName = Models.LEATHER_JACKET
+                    modelName = Models.BLUE_T_SHIRT
+                ),
+                Shirt(
+                    nameRes = (Res.string.yellow_t_shirt_name),
+                    painterRes = (Res.drawable.clothes),
+                    modelName = Models.YELLOW_T_SHIRT
                 ),
                 Shirt(
                     nameRes = (Res.string.dark_t_shirt_name),
                     painterRes = (Res.drawable.clothes),
                     modelName = Models.DARK_T_SHIRT
+                ),
+                Shirt(
+                    nameRes = (Res.string.white_t_shirt_name),
+                    painterRes = (Res.drawable.clothes),
+                    modelName = Models.WHITE_T_SHIRT
                 )
             ),
             currentShirt = null,
@@ -110,6 +115,7 @@ class CameraViewModel : ViewModel() {
                     it.copy(cameraProvideState = CameraProvideState.Granted)
                 }
             }
+
             PermissionState.DeniedAlways -> controller.openAppSettings()
             PermissionState.Denied -> controller.openAppSettings()
             else -> {

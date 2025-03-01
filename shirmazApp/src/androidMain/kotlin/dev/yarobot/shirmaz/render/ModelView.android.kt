@@ -210,7 +210,7 @@ private class AndroidModelView(
         )
 
     private fun convertToBones(point: PointF3D, imageHeight: Float, imageWidth: Float): Position {
-        val maxValue = Position(2.8f, -6.1f, 0f)
+        val maxValue = Position(2.8f, -6.2f, 0f)
 
         return Position(
             maxValue.x * point.x / imageWidth,

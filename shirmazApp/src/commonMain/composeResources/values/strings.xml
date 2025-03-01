@@ -10,6 +10,9 @@
 
     <string name="mia_name">Mia</string>
     <string name="jacket_name">Jacket</string>
-    <string name="t_shirt_name">Red T-Shirt</string>
+    <string name="red_t_shirt_name">Red T-Shirt</string>
     <string name="dark_t_shirt_name">Dark T-Shirt</string>
+    <string name="white_t_shirt_name">White T-Shirt</string>
+    <string name="yellow_t_shirt_name">Yellow T-Shirt</string>
+    <string name="blue_t_shirt_name">Blue T-Shirt</string>
 </resources>
