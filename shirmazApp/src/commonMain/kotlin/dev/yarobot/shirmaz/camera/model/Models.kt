@@ -8,5 +8,6 @@ object Models {
     const val YELLOW_T_SHIRT = "yellowTShirt.glb"
     const val BLUE_T_SHIRT = "blueTShirt.glb"
     const val WHITE_T_SHIRT = "whiteTShirt.glb"
-
+    const val GRAY_T_SHIRT = "grayTShirt.glb"
+    const val GREEN_T_SHIRT = "greenTShirt.glb"
 }

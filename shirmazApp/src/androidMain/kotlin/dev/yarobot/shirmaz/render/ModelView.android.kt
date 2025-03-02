@@ -62,7 +62,6 @@ private class AndroidModelView(
     private var rightArmRotation = mutableStateOf(rightArmDefaultRotation)
     private var spinePosition = mutableStateOf(Position(0f, 0f, 0f))
 
-    // Флаг, определяющий, есть ли валидные данные поз
     private var isPoseValid = mutableStateOf(false)
 
     @Composable
@@ -104,7 +103,6 @@ private class AndroidModelView(
             ),
             environmentLoader = environmentLoader,
             onFrame = {
-                // Управляем видимостью модели в зависимости от валидности данных поз
                 modelNode.isVisible = isPoseValid.value
                 if (isPoseValid.value) {
                     modelNode.nodes.forEach { node ->
@@ -125,42 +123,6 @@ private class AndroidModelView(
                 }
             )
         )
-    }
-
-    fun createAnchorNode(
-        engine: Engine,
-        modelLoader: ModelLoader,
-        materialLoader: MaterialLoader,
-        anchor: Anchor,
-        model: Buffer
-    ): AnchorNode {
-        val anchorNode = AnchorNode(engine = engine, anchor = anchor)
-        val modelNode = ModelNode(
-            modelInstance = modelLoader.createModelInstance(model),
-            // Scale to fit in a 0.5 meters cube
-            scaleToUnits = 0.5f
-        ).apply {
-            // Model Node needs to be editable for independent rotation from the anchor rotation
-            isEditable = true
-            editableScaleRange = 0.2f..0.75f
-        }
-        val boundingBoxNode = CubeNode(
-            engine,
-            size = modelNode.extents,
-            center = modelNode.center,
-            materialInstance = materialLoader.createColorInstance(Color.White.copy(alpha = 0.5f))
-        ).apply {
-            isVisible = false
-        }
-        modelNode.addChildNode(boundingBoxNode)
-        anchorNode.addChildNode(modelNode)
-
-        listOf(modelNode, anchorNode).forEach {
-            it.onEditingChanged = { editingTransforms ->
-                boundingBoxNode.isVisible = editingTransforms.isNotEmpty()
-            }
-        }
-        return anchorNode
     }
 
     override fun updateModelPosition(image: PlatformImage) {
