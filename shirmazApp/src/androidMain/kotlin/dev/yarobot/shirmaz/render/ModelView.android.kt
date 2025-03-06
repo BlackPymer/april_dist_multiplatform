@@ -198,7 +198,7 @@ private class AndroidModelView(
         val shoulderDistance = leftShoulder.x - rightShoulder.x
         val height = spine.y - average(leftShoulder, rightShoulder).y
         return Scale(
-            x = defaultModelScale.x * shoulderDistance / defaultShoulderDistance / imageWidth * defaultImageWidth,
+            x = -defaultModelScale.x * shoulderDistance / defaultShoulderDistance / imageWidth * defaultImageWidth,
             y = defaultModelScale.y * height / defaultHeight / imageHeight * defaultImageHeight,
             z = defaultModelScale.z
         )
