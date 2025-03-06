@@ -66,6 +66,7 @@ kotlin {
             implementation(libs.pose.detection)
             implementation(libs.bundles.android.camera)
             implementation(libs.bundles.android.filament)
+            implementation(libs.androidx.splashscreen)
         }
         commonMain.dependencies {
             implementation(compose.runtime)

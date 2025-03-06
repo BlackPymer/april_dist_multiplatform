@@ -1,5 +1,6 @@
 package dev.yarobot.shirmaz.camera
 
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 import dev.yarobot.shirmaz.camera.model.CameraType
 import dev.yarobot.shirmaz.platform.PlatformImage
@@ -8,5 +9,5 @@ import dev.yarobot.shirmaz.platform.PlatformImage
 expect fun CameraView(
     cameraType: CameraType,
     onImageCaptured: (image: PlatformImage) -> Unit,
-    modelView: @Composable () -> Unit
+    modelView: @Composable BoxScope.() -> Unit
 )

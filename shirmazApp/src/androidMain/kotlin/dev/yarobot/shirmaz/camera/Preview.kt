@@ -7,8 +7,6 @@ import dev.yarobot.shirmaz.ui.ShirmazTheme
 import shirmaz.shirmazapp.generated.resources.Res
 import shirmaz.shirmazapp.generated.resources.clothes
 import shirmaz.shirmazapp.generated.resources.shirt1_name
-import shirmaz.shirmazapp.generated.resources.shirt2_name
-import shirmaz.shirmazapp.generated.resources.shirt3_name
 
 @Preview(showBackground = true)
 @Composable
@@ -21,7 +19,6 @@ private fun PreviewGranted() {
                 currentShirt = null,
                 currentCamera = CameraType.FRONT,
                 saving = false,
-                shirts = listOf()
             ),
             onIntent = {}
         )
@@ -39,7 +36,6 @@ private fun PreviewDenied() {
                 currentShirt = null,
                 currentCamera = CameraType.FRONT,
                 saving = false,
-                shirts = listOf()
             ),
             onIntent = {}
         )
@@ -56,7 +52,6 @@ private fun PreviewSaving() {
                 currentModel = null,
                 currentShirt = null,
                 saving = true,
-                shirts = listOf(),
                 currentCamera = CameraType.FRONT
             ),
             onIntent = {}
@@ -68,9 +63,6 @@ private fun PreviewSaving() {
 @Composable
 private fun PreviewWithShirts() {
     ShirmazTheme {
-        val shirt = Shirt(Res.string.shirt1_name, Res.drawable.clothes, "Shirt 1")
-        val shirt2 = shirt.copy(nameRes = Res.string.shirt2_name, modelName = "Shirt 2")
-        val shirt3 = shirt.copy(nameRes = Res.string.shirt3_name, modelName = "Shirt 3")
         ScreenContent(
             state = CameraScreenState(
                 cameraProvideState = CameraProvideState.Granted,
@@ -78,7 +70,6 @@ private fun PreviewWithShirts() {
                 currentShirt = null,
                 currentCamera = CameraType.FRONT,
                 saving = false,
-                shirts = listOf(shirt, shirt2, shirt3)
             ),
             onIntent = {}
         )

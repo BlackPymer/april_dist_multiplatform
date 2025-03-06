@@ -35,6 +35,8 @@ mlkit-pod-mlkit = "7.0.0"
 
 poseDetection = "18.0.0-beta5"
 
+splashscreen = "1.0.1"
+
 [libraries]
 # Gradle plugins
 gradleplugins-android = { module = "com.android.tools.build:gradle", version.ref = "agp" }
@@ -53,6 +55,7 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
+androidx-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "splashscreen" }
 
 moko-permissions = { module = "dev.icerock.moko:permissions-compose", version.ref = "moko-permissions" }
 

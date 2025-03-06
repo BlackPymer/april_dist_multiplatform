@@ -6,7 +6,6 @@ import dev.icerock.moko.permissions.Permission
 import dev.icerock.moko.permissions.PermissionState
 import dev.icerock.moko.permissions.PermissionsController
 import dev.yarobot.shirmaz.camera.model.CameraType
-import dev.yarobot.shirmaz.camera.model.Models
 import dev.yarobot.shirmaz.camera.model.ThreeDModel
 import dev.yarobot.shirmaz.platform.PlatformImage
 import dev.yarobot.shirmaz.platform.float3DPose
@@ -24,10 +23,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import shirmaz.shirmazapp.generated.resources.Res
-import shirmaz.shirmazapp.generated.resources.clothes
-import shirmaz.shirmazapp.generated.resources.shirt1_name
-import shirmaz.shirmazapp.generated.resources.shirt2_name
-import shirmaz.shirmazapp.generated.resources.shirt3_name
 
 class CameraViewModel : ViewModel() {
     private val poseDetector = createPoseDetector(ShirmazPoseDetectorOptions.STREAM)
@@ -35,23 +30,6 @@ class CameraViewModel : ViewModel() {
     private val _state = MutableStateFlow(
         CameraScreenState(
             cameraProvideState = CameraProvideState.NotGranted,
-            shirts = listOf(
-                Shirt(
-                    nameRes = (Res.string.shirt1_name),
-                    painterRes = (Res.drawable.clothes),
-                    modelName = Models.sampleModel
-                ),
-                Shirt(
-                    nameRes = (Res.string.shirt2_name),
-                    painterRes = (Res.drawable.clothes),
-                    modelName = Models.sampleModel
-                ),
-                Shirt(
-                    nameRes = (Res.string.shirt3_name),
-                    painterRes = (Res.drawable.clothes),
-                    modelName = Models.sampleModel
-                )
-            ),
             currentShirt = null,
             currentModel = null,
             saving = false,
