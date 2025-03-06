@@ -61,6 +61,8 @@ private class AndroidModelView(
     private val defaultModelScale = Scale(x = 0.0065205214f, y = 0.0065205214f, z = 0.0065205214f)
     private val defaultShoulderDistance = 145f
     private val defaultHeight = 230f
+    private val defaultImageHeight = 1280f
+    private val defaultImageWidth = 960f
 
     private var leftArmRotation = mutableStateOf(leftArmDefaultRotation)
     private var rightArmRotation = mutableStateOf(rightArmDefaultRotation)
@@ -154,7 +156,9 @@ private class AndroidModelView(
                 modelScale.value = calculateScale(
                     leftShoulder = poses[12].position3D,
                     rightShoulder = poses[11].position3D,
-                    spine = average(poses[23].position3D, poses[24].position3D)
+                    spine = average(poses[23].position3D, poses[24].position3D),
+                    imageHeight = image.width.toFloat(),
+                    imageWidth = image.height.toFloat()
                 )
                 isPoseValid.value = true
                 spinePosition.value =
@@ -187,13 +191,15 @@ private class AndroidModelView(
     private fun calculateScale(
         leftShoulder: PointF3D,
         rightShoulder: PointF3D,
-        spine: PointF3D
+        spine: PointF3D,
+        imageWidth: Float,
+        imageHeight: Float
     ): Scale {
         val shoulderDistance = leftShoulder.x - rightShoulder.x
         val height = spine.y - average(leftShoulder, rightShoulder).y
         return Scale(
-            x = defaultModelScale.x * shoulderDistance / defaultShoulderDistance,
-            y = defaultModelScale.y * height / defaultHeight,
+            x = defaultModelScale.x * shoulderDistance / defaultShoulderDistance / imageWidth * defaultImageWidth,
+            y = defaultModelScale.y * height / defaultHeight / imageHeight * defaultImageHeight,
             z = defaultModelScale.z
         )
     }
