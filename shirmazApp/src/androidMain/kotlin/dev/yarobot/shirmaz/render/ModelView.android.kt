@@ -26,6 +26,7 @@ import io.github.sceneview.loaders.MaterialLoader
 import io.github.sceneview.loaders.ModelLoader
 import io.github.sceneview.math.Position
 import io.github.sceneview.math.Rotation
+import io.github.sceneview.math.Scale
 import io.github.sceneview.node.CubeNode
 import io.github.sceneview.node.ModelNode
 import io.github.sceneview.rememberCameraManipulator
@@ -57,12 +58,18 @@ private class AndroidModelView(
 
     private val leftArmDefaultRotation = Rotation(0f, 0f, -90f)
     private val rightArmDefaultRotation = Rotation(0f, 0f, 90f)
+    private val defaultModelScale = Scale(x = 0.0065205214f, y = 0.0065205214f, z = 0.0065205214f)
+    private val defaultShoulderDistance = 145f
+    private val defaultHeight = 230f
 
     private var leftArmRotation = mutableStateOf(leftArmDefaultRotation)
     private var rightArmRotation = mutableStateOf(rightArmDefaultRotation)
-    private var spinePosition = mutableStateOf(Position(0f, 0f, 0f))
-
+    private var spinePosition = mutableStateOf(Position(0f, -6.2f, 0f))
+    private var shoulderPosition = mutableStateOf(Position(0f, 2f, 0f))
+    private var modelScale =
+        mutableStateOf(defaultModelScale)
     private var isPoseValid = mutableStateOf(false)
+
 
     @Composable
     override fun ModelRendererInit(model: ThreeDModel) {
@@ -82,8 +89,7 @@ private class AndroidModelView(
             modelInstance = modelLoader.createModelInstance(ByteBuffer.wrap(model.bytes)),
             scaleToUnits = 18f
         )
-        modelNode.position = Position(x = -0.42f, y = 1f, z = 0f)
-
+        modelNode.position = Position(x = -0.42f, y = 1.05f, z = 0f)
         Scene(
             modifier = Modifier.fillMaxSize(),
             engine = engine,
@@ -105,13 +111,17 @@ private class AndroidModelView(
             onFrame = {
                 modelNode.isVisible = isPoseValid.value
                 if (isPoseValid.value) {
+                    modelNode.scale = modelScale.value
                     modelNode.nodes.forEach { node ->
                         when (node.name) {
                             Bones.leftArm -> node.rotation = leftArmRotation.value
                             Bones.rightArm -> node.rotation = rightArmRotation.value
+                            Bones.leftShoulder -> node.position = shoulderPosition.value
+                            Bones.rightShoulder -> node.position = shoulderPosition.value
                             Bones.spine -> node.position = spinePosition.value
                         }
                     }
+
                 }
                 cameraNode.lookAt(centerNode)
             },
@@ -139,8 +149,13 @@ private class AndroidModelView(
             }
             println("!!${image.height}x${image.width}")
             println("!!screen: $screenHeight x $screenWidth")
-
+            println("!!modelScale: ${modelScale.value}")
             if (poses != null && poses.size >= 24) {
+                modelScale.value = calculateScale(
+                    leftShoulder = poses[12].position3D,
+                    rightShoulder = poses[11].position3D,
+                    spine = average(poses[23].position3D, poses[24].position3D)
+                )
                 isPoseValid.value = true
                 spinePosition.value =
                     convertToBones(
@@ -158,10 +173,29 @@ private class AndroidModelView(
                     poses[14].position3D,
                     rightArmDefaultRotation
                 ) - Position(0f, 0f, 180f)
+                shoulderPosition.value = convertToBones(
+                    average(poses[12].position3D, poses[11].position3D),
+                    imageWidth = image.height.toFloat(),
+                    imageHeight = image.width.toFloat()
+                ) - spinePosition.value
             } else {
                 isPoseValid.value = false
             }
         }
+    }
+
+    private fun calculateScale(
+        leftShoulder: PointF3D,
+        rightShoulder: PointF3D,
+        spine: PointF3D
+    ): Scale {
+        val shoulderDistance = leftShoulder.x - rightShoulder.x
+        val height = spine.y - average(leftShoulder, rightShoulder).y
+        return Scale(
+            x = defaultModelScale.x * shoulderDistance / defaultShoulderDistance,
+            y = defaultModelScale.y * height / defaultHeight,
+            z = defaultModelScale.z
+        )
     }
 
     private fun average(point1: PointF3D, point2: PointF3D) =
@@ -171,12 +205,16 @@ private class AndroidModelView(
             (point1.z + point2.z) / 2
         )
 
-    private fun convertToBones(point: PointF3D, imageHeight: Float, imageWidth: Float): Position {
-        val maxValue = Position(2.8f, -6.2f, 0f)
+    private fun convertToBones(
+        point: PointF3D,
+        imageHeight: Float,
+        imageWidth: Float
+    ): Position {
+        val maxValue = Position(2.9f, -7f, 0f)
 
         return Position(
-            maxValue.x * point.x / imageWidth,
-            maxValue.y * point.y / imageHeight,
+            maxValue.x * point.x / imageWidth * defaultModelScale.x / modelScale.value.x,
+            maxValue.y * point.y / imageHeight * defaultModelScale.y / modelScale.value.y,
             0f
         )
     }
