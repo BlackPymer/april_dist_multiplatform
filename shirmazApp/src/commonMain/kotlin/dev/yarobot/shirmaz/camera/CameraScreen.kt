@@ -186,7 +186,7 @@ private fun Carousel(
         }
         items(
             items = state.shirts,
-            key = { it.nameRes }
+            key = { it.nameRes.key }
         ) { shirt ->
             CarouselElement(
                 onIntent = onIntent,
