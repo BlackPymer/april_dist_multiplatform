@@ -198,27 +198,23 @@ private fun Carousel(
         }
         items(
             items = state.shirts,
-            key = { it.modelName.toString() }
+            key = { it.nameRes }
         ) { shirt ->
             CarouselElement(
                 onIntent = onIntent,
                 shirt = shirt,
                 isSelected = state.currentShirt == shirt,
             ) {
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+                Column(verticalArrangement = Arrangement.Center) {
                     Image(
                         modifier = Modifier
                             .size(ShirmazTheme.dimension.shirtPicture)
-                            .clip(MaterialTheme.shapes.medium),
+                            .align(Alignment.CenterHorizontally),
                         painter = painterResource(shirt.painterRes),
-                        contentDescription = stringResource(shirt.nameRes),
-                        contentScale = ContentScale.FillHeight
+                        contentDescription = stringResource(shirt.nameRes)
                     )
                     Text(
-                        modifier = Modifier.basicMarquee(),
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
                         color = ShirmazTheme.colors.text,
                         text = stringResource(shirt.nameRes),
                         style = MaterialTheme.typography.labelSmall
