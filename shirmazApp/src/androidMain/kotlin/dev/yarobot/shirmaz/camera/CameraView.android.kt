@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -16,25 +17,28 @@ import dev.yarobot.shirmaz.platform.PlatformImage
 
 @Composable
 actual fun CameraView(
+    modifier: Modifier,
     cameraType: CameraType,
-    onImageCaptured: (image: PlatformImage) -> Unit,
+    onImageCaptured: (PlatformImage) -> Unit,
     modelView: @Composable BoxScope.() -> Unit,
 ) {
     val viewModel = viewModel { CameraXViewModel() }
     val context = LocalContext.current
+    viewModel.setAnalyzeUseCase(onImageCaptured)
     val lifecycleOwner = LocalLifecycleOwner.current
     val surfaceRequest by viewModel.surfaceRequest.collectAsStateWithLifecycle()
 
     LaunchedEffect(lifecycleOwner, cameraType) {
         viewModel.bindToCamera(
-            context.applicationContext, lifecycleOwner,
+            context.applicationContext,
+            lifecycleOwner,
             when (cameraType) {
                 CameraType.FRONT -> CameraSelector.DEFAULT_FRONT_CAMERA
                 CameraType.BACK -> CameraSelector.DEFAULT_BACK_CAMERA
             }
         )
     }
-    Box{
+    Box(modifier) {
         surfaceRequest?.let { request ->
             CameraXViewfinder(surfaceRequest = request)
         }

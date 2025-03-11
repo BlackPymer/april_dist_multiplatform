@@ -7,17 +7,10 @@ import dev.icerock.moko.permissions.PermissionState
 import dev.icerock.moko.permissions.PermissionsController
 import dev.yarobot.shirmaz.camera.model.CameraType
 import dev.yarobot.shirmaz.camera.model.ThreeDModel
-import dev.yarobot.shirmaz.platform.PlatformImage
-import dev.yarobot.shirmaz.platform.float3DPose
-import dev.yarobot.shirmaz.platform.type
-import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetectorOptions
-import dev.yarobot.shirmaz.posedetection.createPoseDetector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -25,8 +18,6 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 import shirmaz.shirmazapp.generated.resources.Res
 
 class CameraViewModel : ViewModel() {
-    private val poseDetector = createPoseDetector(ShirmazPoseDetectorOptions.STREAM)
-
     private val _state = MutableStateFlow(
         CameraScreenState(
             cameraProvideState = CameraProvideState.NotGranted,
@@ -37,19 +28,11 @@ class CameraViewModel : ViewModel() {
         )
     )
 
-    val state = _state.onStart {
-        loadModel()
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = _state.value
-    )
+    val state = _state.asStateFlow()
 
     fun onIntent(intent: CameraIntent) {
         when (intent) {
             is CameraIntent.RequestCamera -> requestCamera(intent.permissionsController)
-            is CameraIntent.OnImageCaptured -> detectPose(intent.image)
-
             is CameraIntent.TakePicture -> takePicture()
             is CameraIntent.OpenGallery -> {}
             is CameraIntent.ChooseShirt -> intent.shirt.chooseAsCurrent()
@@ -110,48 +93,26 @@ class CameraViewModel : ViewModel() {
 
     private fun Shirt?.chooseAsCurrent() {
         _state.update {
-            it.copy(currentShirt = this)
+            it.copy(
+                currentShirt = this,
+                currentModel = null
+            )
         }
-        loadModel()
+        this?.modelName?.let {
+            loadModel(this.modelName)
+        }
     }
 
 
     @OptIn(ExperimentalResourceApi::class)
-    private fun loadModel() = viewModelScope.launch {
+    private fun loadModel(modelName: String) = viewModelScope.launch {
         withContext(Dispatchers.IO) {
-            if (_state.value.currentShirt?.modelName == null) {
-                _state.update {
-                    it.copy(
-                        currentModel = null
+            _state.update {
+                it.copy(
+                    currentModel = ThreeDModel(
+                        Res.readBytes("files/$modelName")
                     )
-                }
-            }
-            _state.value.currentShirt?.modelName?.let { name ->
-                _state.update {
-                    it.copy(
-                        currentModel = ThreeDModel(
-                            Res.readBytes("files/${name}")
-                        )
-                    )
-                }
-            }
-        }
-    }
-
-    private fun detectPose(image: PlatformImage) {
-        viewModelScope.launch {
-            withContext(Dispatchers.Default) {
-                poseDetector.processImage(image) { poses, error ->
-                    println("!!!!! start")
-                    poses?.let {
-                        it.forEach { pose ->
-                            println("${pose.float3DPose()} ${pose.type}")
-                        }
-                    }
-                    error?.let {
-                        println(it)
-                    }
-                }
+                )
             }
         }
     }

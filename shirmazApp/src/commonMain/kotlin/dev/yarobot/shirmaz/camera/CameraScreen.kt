@@ -2,6 +2,7 @@ package dev.yarobot.shirmaz.camera
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -41,7 +42,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import dev.yarobot.shirmaz.camera.model.ModelView
+import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetectorOptions
+import dev.yarobot.shirmaz.posedetection.createPoseDetector
+import dev.yarobot.shirmaz.render.createModelView
 import dev.yarobot.shirmaz.ui.LocalPermissionsController
 import dev.yarobot.shirmaz.ui.ShirmazTheme
 import dev.yarobot.shirmaz.ui.icons.ArrowBack
@@ -120,16 +123,21 @@ private fun BoxScope.GrantedView(
     state: CameraScreenState,
     onIntent: (CameraIntent) -> Unit
 ) {
+    val modelView = remember {
+        createModelView(createPoseDetector(ShirmazPoseDetectorOptions.STREAM))
+    }
     CameraView(
         cameraType = remember(state.currentCamera) { state.currentCamera },
         onImageCaptured = {
-            onIntent(CameraIntent.OnImageCaptured(it))
-        }
-    ) {
-        state.currentModel?.let {
-            ModelView(state.currentModel)
-        }
-    }
+            modelView.updateModelPosition(it)
+        },
+        modelView = {
+            state.currentModel?.let {
+                modelView.ModelRendererInit(state.currentModel)
+            }
+        },
+    )
+
     Column(
         modifier = Modifier.align(Alignment.BottomCenter),
         verticalArrangement = Arrangement.Bottom,
@@ -199,7 +207,9 @@ private fun Carousel(
                         contentDescription = stringResource(shirt.nameRes)
                     )
                     Text(
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .basicMarquee(),
                         color = ShirmazTheme.colors.text,
                         text = stringResource(shirt.nameRes),
                         style = MaterialTheme.typography.labelSmall

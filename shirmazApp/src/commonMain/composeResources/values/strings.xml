@@ -7,7 +7,14 @@
     <string name="save_cd">Save</string>
     <string name="deselect_shirt_cd">Deselect shirt</string>
     <string name="null_shirt">No shirt</string>
-    <string name="shirt1_name">Shirt 1</string>
-    <string name="shirt2_name">Shirt 2</string>
-    <string name="shirt3_name">Shirt 3</string>
+
+    <string name="mia_name">Mia</string>
+    <string name="jacket_name">Jacket</string>
+    <string name="red_t_shirt_name">Red T-Shirt</string>
+    <string name="dark_t_shirt_name">Dark T-Shirt</string>
+    <string name="white_t_shirt_name">White T-Shirt</string>
+    <string name="yellow_t_shirt_name">Yellow T-Shirt</string>
+    <string name="blue_t_shirt_name">Blue T-Shirt</string>
+    <string name="gray_t_shirt_name">Gray T-Shirt</string>
+    <string name="green_t_shirt_name">Green T-Shirt</string>
 </resources>

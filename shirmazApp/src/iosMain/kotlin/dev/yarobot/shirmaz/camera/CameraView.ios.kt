@@ -61,9 +61,10 @@ private val deviceTypes = listOf(
 @OptIn(ExperimentalForeignApi::class)
 @Composable
 actual fun CameraView(
+    modifier: Modifier,
     cameraType: CameraType,
-    onImageCaptured: (image: PlatformImage) -> Unit,
-    modelView: @Composable BoxScope.() -> Unit
+    onImageCaptured: (PlatformImage) -> Unit,
+    modelView: @Composable (BoxScope.() -> Unit),
 ) {
     val camera: AVCaptureDevice? = remember {
         discoverySessionWithDeviceTypes(
@@ -79,7 +80,7 @@ actual fun CameraView(
             """
             Camera is not available on simulator.
             Please try to run on a real iOS device.
-        """.trimIndent(), color = Color.White
+        """.trimIndent(), color = Color.Black
         )
     }
 }

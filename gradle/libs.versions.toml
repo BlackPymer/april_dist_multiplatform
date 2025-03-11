@@ -26,7 +26,7 @@ camerax = "1.5.0-alpha06"
 
 jetbrains-viewmodel = "2.8.2"
 
-filament = "1.56.0"
+sceneview = "2.2.1"
 mlkit-pod-posedetection = "1.0.0-beta14"
 mlkit-pod-common = "12.0.0"
 mlkit-pod-vision = "8.0.0"
@@ -34,6 +34,8 @@ mlkit-pod-image = "1.0.0-beta6"
 mlkit-pod-mlkit = "7.0.0"
 
 poseDetection = "18.0.0-beta5"
+coreKtx = "1.13.0"
+window = "1.3.0"
 
 splashscreen = "1.0.1"
 
@@ -66,13 +68,13 @@ androidx-camera-extensions = { group = "androidx.camera", name = "camera-extensi
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
 androidx-camera-compose = { module = "androidx.camera:camera-compose", version.ref = "camerax" }
 
-google-filament = { module = "com.google.android.filament:filament-android", version.ref = "filament"}
-google-filament-utils = {module = "com.google.android.filament:filament-utils-android", version.ref = "filament"}
-google-gltfio = {module = "com.google.android.filament:gltfio-android", version.ref = "filament"}
+sceneview-base = { module = "io.github.sceneview:sceneview", version.ref = "sceneview" }
+sceneview-ar = { module = "io.github.sceneview:arsceneview", version.ref = "sceneview" }
 
 jetbrains-viewmodel = {module ="org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "jetbrains-viewmodel"}
 pose-detection = { group = "com.google.mlkit", name = "pose-detection", version.ref = "poseDetection" }
 pose-detection-accurate = { group = "com.google.mlkit", name = "pose-detection-accurate", version.ref = "poseDetection" }
+androidx-window = { group = "androidx.window", name = "window", version.ref = "window" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -83,8 +85,6 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 kotlinCocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
 
 [bundles]
-android-filament =["google-filament", "google-filament-utils", "google-gltfio"]
-
 android-camera = [
     "androidx-camera-core", "androidx-camera-camera2", "androidx-camera-view",
     "androidx-camera-extensions", "androidx-camera-lifecycle", "androidx-camera-compose"
