@@ -16,9 +16,8 @@ private class AndroidPoseDetector(override val options: ShirmazPoseDetectorOptio
     private val poseDetectorOption: PoseDetectorOptions = PoseDetectorOptions.Builder()
         .setDetectorMode(
             when (options) {
-                is ShirmazPoseDetectorOptions.STREAM -> PoseDetectorOptions.STREAM_MODE
-                is ShirmazPoseDetectorOptions.SINGLE_IMAGE -> PoseDetectorOptions.SINGLE_IMAGE_MODE
-                else -> PoseDetectorOptions.STREAM_MODE
+                ShirmazPoseDetectorOptions.STREAM -> PoseDetectorOptions.STREAM_MODE
+                ShirmazPoseDetectorOptions.SINGLE_IMAGE -> PoseDetectorOptions.SINGLE_IMAGE_MODE
             }
         )
         .build()

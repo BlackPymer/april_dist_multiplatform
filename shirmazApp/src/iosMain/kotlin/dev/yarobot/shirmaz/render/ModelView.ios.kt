@@ -1,8 +1,9 @@
 package dev.yarobot.shirmaz.render
 
+import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetector
+
 actual fun createModelView(
-    screenHeight: Float,
-    screenWidth: Float
+    poseDetector: ShirmazPoseDetector
 ): ModelView {
     TODO("Not yet implemented")
 }

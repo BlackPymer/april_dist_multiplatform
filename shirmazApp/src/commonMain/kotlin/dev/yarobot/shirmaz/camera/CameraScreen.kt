@@ -40,11 +40,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import dev.yarobot.shirmaz.platform.getScreenHeight
-import dev.yarobot.shirmaz.platform.getScreenWidth
+import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetectorOptions
+import dev.yarobot.shirmaz.posedetection.createPoseDetector
 import dev.yarobot.shirmaz.render.createModelView
 import dev.yarobot.shirmaz.ui.LocalPermissionsController
 import dev.yarobot.shirmaz.ui.ShirmazTheme
@@ -124,10 +123,9 @@ private fun BoxScope.GrantedView(
     state: CameraScreenState,
     onIntent: (CameraIntent) -> Unit
 ) {
-    val screenHeight = getScreenHeight()
-    val screenWidth = getScreenWidth()
-    val modelView =
-        remember { createModelView(screenHeight = screenHeight, screenWidth = screenWidth) }
+    val modelView = remember {
+        createModelView(createPoseDetector(ShirmazPoseDetectorOptions.STREAM))
+    }
     CameraView(
         cameraType = remember(state.currentCamera) { state.currentCamera },
         onImageCaptured = {
@@ -138,8 +136,6 @@ private fun BoxScope.GrantedView(
                 modelView.ModelRendererInit(state.currentModel)
             }
         },
-        screenHeight = screenHeight,
-        screenWidth = screenWidth
     )
 
     Column(
@@ -211,7 +207,9 @@ private fun Carousel(
                         contentDescription = stringResource(shirt.nameRes)
                     )
                     Text(
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .basicMarquee(),
                         color = ShirmazTheme.colors.text,
                         text = stringResource(shirt.nameRes),
                         style = MaterialTheme.typography.labelSmall

@@ -1,33 +1,24 @@
 package dev.yarobot.shirmaz.render
 
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import com.google.android.filament.Engine
-import com.google.android.filament.utils.Float2
-import com.google.android.filament.utils.pow
-import com.google.ar.core.Anchor
 import com.google.mlkit.vision.common.PointF3D
 import dev.yarobot.shirmaz.camera.Bones
+import dev.yarobot.shirmaz.camera.model.CameraSize
 import dev.yarobot.shirmaz.camera.model.ThreeDModel
+import dev.yarobot.shirmaz.platform.LEFT_ELBOW
+import dev.yarobot.shirmaz.platform.LEFT_HIP
+import dev.yarobot.shirmaz.platform.LEFT_SHOULDER
 import dev.yarobot.shirmaz.platform.PlatformImage
-import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetectorOptions
-import dev.yarobot.shirmaz.posedetection.createPoseDetector
+import dev.yarobot.shirmaz.platform.RIGHT_ELBOW
+import dev.yarobot.shirmaz.platform.RIGHT_HIP
+import dev.yarobot.shirmaz.platform.RIGHT_SHOULDER
+import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetector
 import io.github.sceneview.Scene
-import io.github.sceneview.animation.Transition.animateRotation
-import io.github.sceneview.ar.node.AnchorNode
-import io.github.sceneview.loaders.MaterialLoader
-import io.github.sceneview.loaders.ModelLoader
 import io.github.sceneview.math.Position
 import io.github.sceneview.math.Rotation
 import io.github.sceneview.math.Scale
-import io.github.sceneview.node.CubeNode
 import io.github.sceneview.node.ModelNode
 import io.github.sceneview.rememberCameraManipulator
 import io.github.sceneview.rememberCameraNode
@@ -35,43 +26,32 @@ import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberEnvironmentLoader
 import io.github.sceneview.rememberModelLoader
 import io.github.sceneview.rememberNode
-import io.github.sceneview.rememberOnGestureListener
-import java.nio.Buffer
 import java.nio.ByteBuffer
 import kotlin.math.PI
 import kotlin.math.atan
 
 actual fun createModelView(
-    screenHeight: Float,
-    screenWidth: Float
+    poseDetector: ShirmazPoseDetector
 ): ModelView = AndroidModelView(
-    screenWidth = screenWidth,
-    screenHeight = screenHeight
+    poseDetector = poseDetector
 )
 
 private class AndroidModelView(
-    override val screenHeight: Float,
-    override val screenWidth: Float
+    override val poseDetector: ShirmazPoseDetector
 ) : ModelView {
-
-    private val poseDetector = createPoseDetector(ShirmazPoseDetectorOptions.STREAM)
 
     private val leftArmDefaultRotation = Rotation(0f, 0f, -90f)
     private val rightArmDefaultRotation = Rotation(0f, 0f, 90f)
     private val defaultModelScale = Scale(x = 0.0065205214f, y = 0.0065205214f, z = 0.0065205214f)
     private val defaultShoulderDistance = 145f
     private val defaultHeight = 230f
-    private val defaultImageHeight = 1280f
-    private val defaultImageWidth = 960f
 
-    private var leftArmRotation = mutableStateOf(leftArmDefaultRotation)
-    private var rightArmRotation = mutableStateOf(rightArmDefaultRotation)
-    private var spinePosition = mutableStateOf(Position(0f, -6.2f, 0f))
-    private var shoulderPosition = mutableStateOf(Position(0f, 2f, 0f))
-    private var modelScale =
-        mutableStateOf(defaultModelScale)
-    private var isPoseValid = mutableStateOf(false)
-
+    private var leftArmRotation = leftArmDefaultRotation
+    private var rightArmRotation = rightArmDefaultRotation
+    private var spinePosition = Position(0f, -6.2f, 0f)
+    private var shoulderPosition = Position(0f, 2f, 0f)
+    private var modelScale = defaultModelScale
+    private var isPoseValid = false
 
     @Composable
     override fun ModelRendererInit(model: ThreeDModel) {
@@ -111,29 +91,21 @@ private class AndroidModelView(
             ),
             environmentLoader = environmentLoader,
             onFrame = {
-                modelNode.isVisible = isPoseValid.value
-                if (isPoseValid.value) {
-                    modelNode.scale = modelScale.value
-                    modelNode.nodes.forEach { node ->
+                modelNode.apply {
+                    isVisible = isPoseValid
+                    scale = modelScale
+                    nodes.forEach { node ->
                         when (node.name) {
-                            Bones.leftArm -> node.rotation = leftArmRotation.value
-                            Bones.rightArm -> node.rotation = rightArmRotation.value
-                            Bones.leftShoulder -> node.position = shoulderPosition.value
-                            Bones.rightShoulder -> node.position = shoulderPosition.value
-                            Bones.spine -> node.position = spinePosition.value
+                            Bones.leftArm -> node.rotation = leftArmRotation
+                            Bones.rightArm -> node.rotation = rightArmRotation
+                            Bones.leftShoulder -> node.position = shoulderPosition
+                            Bones.rightShoulder -> node.position = shoulderPosition
+                            Bones.spine -> node.position = spinePosition
                         }
                     }
-
                 }
                 cameraNode.lookAt(centerNode)
-            },
-            onGestureListener = rememberOnGestureListener(
-                onDoubleTap = { _, node ->
-                    node?.apply {
-                        scale *= 2.0f
-                    }
-                }
-            )
+            }
         )
     }
 
@@ -143,47 +115,32 @@ private class AndroidModelView(
 
     private fun detectPose(image: PlatformImage) {
         poseDetector.processImage(image) { poses, error ->
-            error?.let {
-                println(it)
-            }
-            poses?.forEachIndexed { index, it ->
-                println("!!${it.position3D} - $index")
-            }
-            println("!!${image.height}x${image.width}")
-            println("!!screen: $screenHeight x $screenWidth")
-            println("!!modelScale: ${modelScale.value}")
-            if (poses != null && poses.size >= 24) {
-                modelScale.value = calculateScale(
-                    leftShoulder = poses[12].position3D,
-                    rightShoulder = poses[11].position3D,
-                    spine = average(poses[23].position3D, poses[24].position3D),
-                    imageHeight = image.width.toFloat(),
-                    imageWidth = image.height.toFloat()
+            isPoseValid = !poses.isNullOrEmpty()
+            if (!poses.isNullOrEmpty()) {
+                println(poses[RIGHT_SHOULDER].position3D)
+                println(poses[LEFT_SHOULDER].position3D)
+                println("!!!! ${image.width} w ${image.height} h")
+                modelScale = calculateScale(
+                    leftShoulder = poses[RIGHT_SHOULDER].position3D,
+                    rightShoulder = poses[LEFT_SHOULDER].position3D,
+                    spine = averageOf(poses[LEFT_HIP].position3D, poses[24].position3D),
                 )
-                isPoseValid.value = true
-                spinePosition.value =
-                    convertToBones(
-                        average(poses[23].position3D, poses[24].position3D),
-                        imageWidth = image.height.toFloat(),
-                        imageHeight = image.width.toFloat()
-                    )
-                leftArmRotation.value = calculateAngle(
-                    poses[11].position3D,
-                    poses[13].position3D,
+                spinePosition = averageOf(poses[LEFT_HIP].position3D, poses[RIGHT_HIP].position3D)
+                    .toPosition()
+                leftArmRotation = calculateAngle(
+                    poses[LEFT_SHOULDER].position3D,
+                    poses[LEFT_ELBOW].position3D,
                     leftArmDefaultRotation
                 )
-                rightArmRotation.value = calculateAngle(
-                    poses[12].position3D,
-                    poses[14].position3D,
+                rightArmRotation = calculateAngle(
+                    poses[RIGHT_SHOULDER].position3D,
+                    poses[RIGHT_ELBOW].position3D,
                     rightArmDefaultRotation
                 ) - Position(0f, 0f, 180f)
-                shoulderPosition.value = convertToBones(
-                    average(poses[12].position3D, poses[11].position3D),
-                    imageWidth = image.height.toFloat(),
-                    imageHeight = image.width.toFloat()
-                ) - spinePosition.value
-            } else {
-                isPoseValid.value = false
+                shoulderPosition = averageOf(
+                    poses[RIGHT_SHOULDER].position3D,
+                    poses[LEFT_SHOULDER].position3D
+                ).toPosition() - spinePosition
             }
         }
     }
@@ -192,35 +149,28 @@ private class AndroidModelView(
         leftShoulder: PointF3D,
         rightShoulder: PointF3D,
         spine: PointF3D,
-        imageWidth: Float,
-        imageHeight: Float
     ): Scale {
         val shoulderDistance = leftShoulder.x - rightShoulder.x
-        val height = spine.y - average(leftShoulder, rightShoulder).y
+        val height = spine.y - averageOf(leftShoulder, rightShoulder).y
         return Scale(
-            x = -defaultModelScale.x * shoulderDistance / defaultShoulderDistance / imageWidth * defaultImageWidth,
-            y = defaultModelScale.y * height / defaultHeight / imageHeight * defaultImageHeight,
+            x = -defaultModelScale.x * shoulderDistance / defaultShoulderDistance / CameraSize.WIDTH * CameraSize.WIDTH,
+            y = defaultModelScale.y * height / defaultHeight / CameraSize.HEIGHT * CameraSize.HEIGHT,
             z = defaultModelScale.z
         )
     }
 
-    private fun average(point1: PointF3D, point2: PointF3D) =
+    private fun averageOf(firstPoint: PointF3D, secondPoint: PointF3D) =
         PointF3D.from(
-            (point1.x + point2.x) / 2,
-            (point1.y + point2.y) / 2,
-            (point1.z + point2.z) / 2
+            (firstPoint.x + secondPoint.x) / 2,
+            (firstPoint.y + secondPoint.y) / 2,
+            (firstPoint.z + secondPoint.z) / 2
         )
 
-    private fun convertToBones(
-        point: PointF3D,
-        imageHeight: Float,
-        imageWidth: Float
-    ): Position {
+    private fun PointF3D.toPosition(): Position {
         val maxValue = Position(2.9f, -7f, 0f)
-
         return Position(
-            maxValue.x * point.x / imageWidth * defaultModelScale.x / modelScale.value.x,
-            maxValue.y * point.y / imageHeight * defaultModelScale.y / modelScale.value.y,
+            maxValue.x * this.x / CameraSize.WIDTH * defaultModelScale.x / modelScale.x,
+            maxValue.y * this.y / CameraSize.HEIGHT * defaultModelScale.y / modelScale.y,
             0f
         )
     }

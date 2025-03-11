@@ -1,5 +1,6 @@
 package dev.yarobot.shirmaz.camera
 
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -62,10 +63,8 @@ private val deviceTypes = listOf(
 actual fun CameraView(
     modifier: Modifier,
     cameraType: CameraType,
-    onImageCaptured: (image: PlatformImage) -> Unit,
-    modelView: @Composable () -> Unit,
-    screenHeight: Float,
-    screenWidth: Float
+    onImageCaptured: (PlatformImage) -> Unit,
+    modelView: @Composable (BoxScope.() -> Unit),
 ) {
     val camera: AVCaptureDevice? = remember {
         discoverySessionWithDeviceTypes(
@@ -81,7 +80,7 @@ actual fun CameraView(
             """
             Camera is not available on simulator.
             Please try to run on a real iOS device.
-        """.trimIndent(), color = Color.White
+        """.trimIndent(), color = Color.Black
         )
     }
 }

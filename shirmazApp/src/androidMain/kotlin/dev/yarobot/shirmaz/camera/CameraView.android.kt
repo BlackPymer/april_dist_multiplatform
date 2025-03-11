@@ -1,9 +1,9 @@
 package dev.yarobot.shirmaz.camera
 
-import android.annotation.SuppressLint
 import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.core.CameraSelector
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -15,32 +15,23 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.yarobot.shirmaz.camera.model.CameraType
 import dev.yarobot.shirmaz.platform.PlatformImage
 
-@SuppressLint("NewApi")
 @Composable
 actual fun CameraView(
     modifier: Modifier,
     cameraType: CameraType,
-    onImageCaptured: (image: PlatformImage) -> Unit,
-    modelView: @Composable () -> Unit,
-    screenHeight: Float,
-    screenWidth: Float
+    onImageCaptured: (PlatformImage) -> Unit,
+    modelView: @Composable BoxScope.() -> Unit,
 ) {
-    val viewModel = viewModel {
-        CameraXViewModel(
-            screenHeight = screenHeight.toInt(),
-            screenWidth = screenWidth.toInt()
-        )
-    }
+    val viewModel = viewModel { CameraXViewModel() }
     val context = LocalContext.current
-
-    modelView()
-
+    viewModel.setAnalyzeUseCase(onImageCaptured)
     val lifecycleOwner = LocalLifecycleOwner.current
     val surfaceRequest by viewModel.surfaceRequest.collectAsStateWithLifecycle()
 
     LaunchedEffect(lifecycleOwner, cameraType) {
         viewModel.bindToCamera(
-            context.applicationContext, lifecycleOwner,
+            context.applicationContext,
+            lifecycleOwner,
             when (cameraType) {
                 CameraType.FRONT -> CameraSelector.DEFAULT_FRONT_CAMERA
                 CameraType.BACK -> CameraSelector.DEFAULT_BACK_CAMERA
@@ -51,6 +42,6 @@ actual fun CameraView(
         surfaceRequest?.let { request ->
             CameraXViewfinder(surfaceRequest = request)
         }
+        modelView()
     }
-    viewModel.cameraAnalyzeUseCase.setAnalyzer(context.mainExecutor,onImageCaptured)
 }

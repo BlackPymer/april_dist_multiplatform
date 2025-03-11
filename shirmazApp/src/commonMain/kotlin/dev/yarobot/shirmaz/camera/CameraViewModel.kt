@@ -7,17 +7,10 @@ import dev.icerock.moko.permissions.PermissionState
 import dev.icerock.moko.permissions.PermissionsController
 import dev.yarobot.shirmaz.camera.model.CameraType
 import dev.yarobot.shirmaz.camera.model.ThreeDModel
-import dev.yarobot.shirmaz.platform.PlatformImage
-import dev.yarobot.shirmaz.platform.float3DPose
-import dev.yarobot.shirmaz.platform.type
-import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetectorOptions
-import dev.yarobot.shirmaz.posedetection.createPoseDetector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -35,13 +28,7 @@ class CameraViewModel : ViewModel() {
         )
     )
 
-    val state = _state.onStart {
-        loadModel()
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = _state.value
-    )
+    val state = _state.asStateFlow()
 
     fun onIntent(intent: CameraIntent) {
         when (intent) {

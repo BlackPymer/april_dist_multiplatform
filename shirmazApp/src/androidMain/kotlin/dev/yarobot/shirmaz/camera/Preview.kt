@@ -4,9 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import dev.yarobot.shirmaz.camera.model.CameraType
 import dev.yarobot.shirmaz.ui.ShirmazTheme
-import shirmaz.shirmazapp.generated.resources.Res
-import shirmaz.shirmazapp.generated.resources.clothes
-import shirmaz.shirmazapp.generated.resources.shirt1_name
 
 @Preview(showBackground = true)
 @Composable

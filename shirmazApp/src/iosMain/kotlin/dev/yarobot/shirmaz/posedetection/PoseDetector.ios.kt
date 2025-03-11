@@ -27,9 +27,8 @@ class IOSPoseDetector(override val options: ShirmazPoseDetectorOptions) : Shirma
     init {
         poseDetectorOption.setDetectorMode(
             when (options) {
-                is ShirmazPoseDetectorOptions.STREAM -> MLKPoseDetectorModeStream
-                is ShirmazPoseDetectorOptions.SINGLE_IMAGE -> MLKPoseDetectorModeSingleImage
-                else -> MLKPoseDetectorModeStream
+                ShirmazPoseDetectorOptions.STREAM -> MLKPoseDetectorModeStream
+                ShirmazPoseDetectorOptions.SINGLE_IMAGE -> MLKPoseDetectorModeSingleImage
             }
         )
         poseDetector = MLKPoseDetector

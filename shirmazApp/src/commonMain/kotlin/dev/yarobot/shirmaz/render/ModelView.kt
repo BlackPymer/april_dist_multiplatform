@@ -3,10 +3,10 @@ package dev.yarobot.shirmaz.render
 import androidx.compose.runtime.Composable
 import dev.yarobot.shirmaz.camera.model.ThreeDModel
 import dev.yarobot.shirmaz.platform.PlatformImage
+import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetector
 
 interface ModelView {
-    val screenHeight: Float
-    val screenWidth: Float
+    val poseDetector: ShirmazPoseDetector
 
     @Composable
     fun ModelRendererInit(model: ThreeDModel)
@@ -15,6 +15,5 @@ interface ModelView {
 }
 
 expect fun createModelView(
-    screenHeight: Float,
-    screenWidth: Float
+    poseDetector: ShirmazPoseDetector
 ): ModelView
