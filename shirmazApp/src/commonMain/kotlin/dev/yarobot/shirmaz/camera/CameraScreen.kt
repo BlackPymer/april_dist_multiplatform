@@ -135,10 +135,7 @@ private fun BoxScope.GrantedView(
         verticalArrangement = Arrangement.Bottom,
     ) {
         Carousel(
-            state = remember(
-                state.shirts,
-                state.currentShirt
-            ) { state },
+            state = remember(state.currentShirt) { state },
             onIntent = onIntent,
         )
         if (remember(state.saving) { state.saving }) {
@@ -185,8 +182,8 @@ private fun Carousel(
             }
         }
         items(
-            items = state.shirts,
-            key = { it.nameRes.key }
+            items = shirts,
+            key = { it.modelName }
         ) { shirt ->
             CarouselElement(
                 onIntent = onIntent,

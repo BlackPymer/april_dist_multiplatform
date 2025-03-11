@@ -3,6 +3,7 @@ package dev.yarobot.shirmaz.camera
 import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.core.CameraSelector
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -17,7 +18,7 @@ import dev.yarobot.shirmaz.platform.PlatformImage
 actual fun CameraView(
     cameraType: CameraType,
     onImageCaptured: (image: PlatformImage) -> Unit,
-    modelView: @Composable () -> Unit,
+    modelView: @Composable BoxScope.() -> Unit,
 ) {
     val viewModel = viewModel { CameraXViewModel() }
     val context = LocalContext.current

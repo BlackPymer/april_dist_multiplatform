@@ -6,7 +6,6 @@ import dev.yarobot.shirmaz.camera.model.ThreeDModel
 data class CameraScreenState(
     val cameraProvideState: CameraProvideState,
     val currentModel: ThreeDModel?,
-    val shirts: List<Shirt>,
     val currentShirt: Shirt?,
     val saving: Boolean,
     val currentCamera: CameraType
