@@ -6,6 +6,7 @@ import org.jetbrains.compose.resources.StringResource
 import shirmaz.shirmazapp.generated.resources.BLUERED
 import shirmaz.shirmazapp.generated.resources.GREENRED
 import shirmaz.shirmazapp.generated.resources.GREYRAD
+import shirmaz.shirmazapp.generated.resources.REDBLACK
 import shirmaz.shirmazapp.generated.resources.REDWHITE
 import shirmaz.shirmazapp.generated.resources.Res
 import shirmaz.shirmazapp.generated.resources.WHITERED
@@ -40,11 +41,11 @@ val shirts = listOf(
         painterRes = Res.drawable.YELLOWRED,
         modelName = Models.YELLOW_T_SHIRT
     ),
-//    Shirt(
-//        nameRes = Res.string.dark_t_shirt_name,
-//        painterRes = Res.drawable.REDBLACK,
-//        modelName = Models.DARK_T_SHIRT
-//    ),
+    Shirt(
+        nameRes = Res.string.dark_t_shirt_name,
+        painterRes = Res.drawable.REDBLACK,
+        modelName = Models.DARK_T_SHIRT
+    ),
     Shirt(
         nameRes = Res.string.white_t_shirt_name,
         painterRes = Res.drawable.REDWHITE,

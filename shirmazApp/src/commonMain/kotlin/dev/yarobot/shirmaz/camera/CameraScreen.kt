@@ -191,7 +191,7 @@ private fun Carousel(
         }
         items(
             items = shirts,
-            key = { it.modelName }
+            key = { it.nameRes.key }
         ) { shirt ->
             CarouselElement(
                 onIntent = onIntent,
