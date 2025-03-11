@@ -6,81 +6,42 @@ import dev.icerock.moko.permissions.Permission
 import dev.icerock.moko.permissions.PermissionState
 import dev.icerock.moko.permissions.PermissionsController
 import dev.yarobot.shirmaz.camera.model.CameraType
-import dev.yarobot.shirmaz.camera.model.Models
 import dev.yarobot.shirmaz.camera.model.ThreeDModel
+import dev.yarobot.shirmaz.platform.PlatformImage
+import dev.yarobot.shirmaz.platform.float3DPose
+import dev.yarobot.shirmaz.platform.type
+import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetectorOptions
+import dev.yarobot.shirmaz.posedetection.createPoseDetector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import shirmaz.shirmazapp.generated.resources.BLUERED
-import shirmaz.shirmazapp.generated.resources.GREENRED
-import shirmaz.shirmazapp.generated.resources.GREYRAD
-import shirmaz.shirmazapp.generated.resources.REDBLACK
-import shirmaz.shirmazapp.generated.resources.REDWHITE
 import shirmaz.shirmazapp.generated.resources.Res
-import shirmaz.shirmazapp.generated.resources.WHITERED
-import shirmaz.shirmazapp.generated.resources.YELLOWRED
-import shirmaz.shirmazapp.generated.resources.blue_t_shirt_name
-import shirmaz.shirmazapp.generated.resources.dark_t_shirt_name
-import shirmaz.shirmazapp.generated.resources.gray_t_shirt_name
-import shirmaz.shirmazapp.generated.resources.green_t_shirt_name
-import shirmaz.shirmazapp.generated.resources.red_t_shirt_name
-import shirmaz.shirmazapp.generated.resources.white_t_shirt_name
-import shirmaz.shirmazapp.generated.resources.yellow_t_shirt_name
 
 class CameraViewModel : ViewModel() {
     private val _state = MutableStateFlow(
         CameraScreenState(
             cameraProvideState = CameraProvideState.NotGranted,
-            shirts = listOf(
-                Shirt(
-                    nameRes = (Res.string.red_t_shirt_name),
-                    painterRes = (Res.drawable.WHITERED),
-                    modelName = Models.RED_T_SHIRT
-                ),
-                Shirt(
-                    nameRes = (Res.string.blue_t_shirt_name),
-                    painterRes = (Res.drawable.BLUERED),
-                    modelName = Models.BLUE_T_SHIRT
-                ),
-                Shirt(
-                    nameRes = (Res.string.yellow_t_shirt_name),
-                    painterRes = (Res.drawable.YELLOWRED),
-                    modelName = Models.YELLOW_T_SHIRT
-                ),
-                Shirt(
-                    nameRes = (Res.string.dark_t_shirt_name),
-                    painterRes = (Res.drawable.REDBLACK),
-                    modelName = Models.DARK_T_SHIRT
-                ),
-                Shirt(
-                    nameRes = (Res.string.white_t_shirt_name),
-                    painterRes = (Res.drawable.REDWHITE),
-                    modelName = Models.WHITE_T_SHIRT
-                ),
-                Shirt(
-                    nameRes = (Res.string.gray_t_shirt_name),
-                    painterRes = (Res.drawable.GREYRAD),
-                    modelName = Models.GRAY_T_SHIRT
-                ),
-                Shirt(
-                    nameRes = (Res.string.green_t_shirt_name),
-                    painterRes = (Res.drawable.GREENRED),
-                    modelName = Models.GREEN_T_SHIRT
-                )
-            ),
             currentShirt = null,
             currentModel = null,
             saving = false,
-            currentCamera = CameraType.BACK,
+            currentCamera = CameraType.FRONT
         )
     )
 
-    val state = _state.asStateFlow()
+    val state = _state.onStart {
+        loadModel()
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = _state.value
+    )
 
     fun onIntent(intent: CameraIntent) {
         when (intent) {

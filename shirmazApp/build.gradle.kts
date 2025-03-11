@@ -65,6 +65,7 @@ kotlin {
             implementation(libs.pose.detection.accurate)
             implementation(libs.pose.detection)
             implementation(libs.bundles.android.camera)
+            implementation(libs.androidx.splashscreen)
             implementation(libs.sceneview.base)
             implementation(libs.sceneview.ar)
         }
