@@ -130,30 +130,19 @@ private fun BoxScope.GrantedView(
         createModelView(createPoseDetector(ShirmazPoseDetectorOptions.STREAM))
     }
     val lastImageCaptured = remember { mutableStateOf<PlatformImage?>(null) }
-    if (!state.saving) {
-        CameraView(
-            cameraType = remember(state.currentCamera) { state.currentCamera },
-            onImageCaptured = { image ->
-                modelView.updateModelPosition(image)
-                lastImageCaptured.value = image
-            },
-            modelView = {
-                state.currentModel?.let {
-                    modelView.ModelRendererInit(state.currentModel)
-                }
-            },
-        )
-        println("!!${lastImageCaptured.value}")
-    } else {
-        lastImageCaptured.value?.let { image ->
-            Image(
-                bitmap = image.toImageBitmap(),
-                contentDescription = "",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
-        }
-    }
+    CameraView(
+        cameraType = remember(state.currentCamera) { state.currentCamera },
+        onImageCaptured = { image ->
+            modelView.updateModelPosition(image)
+            lastImageCaptured.value = image
+        },
+        modelView = {
+            state.currentModel?.let {
+                modelView.ModelRendererInit(state.currentModel)
+            }
+        },
+    )
+
 
     Column(
         modifier = Modifier.align(Alignment.BottomCenter),

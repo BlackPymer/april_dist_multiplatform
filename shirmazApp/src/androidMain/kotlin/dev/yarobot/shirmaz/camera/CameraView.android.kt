@@ -1,7 +1,14 @@
 package dev.yarobot.shirmaz.camera
 
+import android.content.ContentValues
+import android.icu.text.SimpleDateFormat
+import android.net.Uri
+import android.provider.MediaStore
+import android.util.Log
 import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
@@ -9,11 +16,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.yarobot.shirmaz.camera.model.CameraType
 import dev.yarobot.shirmaz.platform.PlatformImage
+import java.util.Date
+import java.util.Locale
 
 @Composable
 actual fun CameraView(
@@ -46,3 +56,4 @@ actual fun CameraView(
         modelView()
     }
 }
+
