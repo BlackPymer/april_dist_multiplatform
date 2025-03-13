@@ -21,6 +21,7 @@ actual fun CameraView(
     cameraType: CameraType,
     onImageCaptured: (PlatformImage) -> Unit,
     modelView: @Composable BoxScope.() -> Unit,
+    imageToDisplay: PlatformImage?
 ) {
     val viewModel = viewModel { CameraXViewModel() }
     val context = LocalContext.current

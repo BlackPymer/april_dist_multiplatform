@@ -34,14 +34,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import dev.yarobot.shirmaz.platform.PlatformImage
 import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetectorOptions
 import dev.yarobot.shirmaz.posedetection.createPoseDetector
 import dev.yarobot.shirmaz.render.createModelView
@@ -126,17 +129,31 @@ private fun BoxScope.GrantedView(
     val modelView = remember {
         createModelView(createPoseDetector(ShirmazPoseDetectorOptions.STREAM))
     }
-    CameraView(
-        cameraType = remember(state.currentCamera) { state.currentCamera },
-        onImageCaptured = {
-            modelView.updateModelPosition(it)
-        },
-        modelView = {
-            state.currentModel?.let {
-                modelView.ModelRendererInit(state.currentModel)
-            }
-        },
-    )
+    val lastImageCaptured = remember { mutableStateOf<PlatformImage?>(null) }
+    if (!state.saving) {
+        CameraView(
+            cameraType = remember(state.currentCamera) { state.currentCamera },
+            onImageCaptured = { image ->
+                modelView.updateModelPosition(image)
+                lastImageCaptured.value = image
+            },
+            modelView = {
+                state.currentModel?.let {
+                    modelView.ModelRendererInit(state.currentModel)
+                }
+            },
+        )
+        println("!!${lastImageCaptured.value}")
+    } else {
+        lastImageCaptured.value?.let { image ->
+            Image(
+                bitmap = image.toImageBitmap(),
+                contentDescription = "",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        }
+    }
 
     Column(
         modifier = Modifier.align(Alignment.BottomCenter),
