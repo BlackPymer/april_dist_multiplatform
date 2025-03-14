@@ -41,7 +41,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.yarobot.shirmaz.platform.PlatformImage
@@ -136,13 +135,14 @@ private fun BoxScope.GrantedView(
             modelView.updateModelPosition(image)
             lastImageCaptured.value = image
         },
-        modelView = {
-            state.currentModel?.let {
-                modelView.ModelRendererInit(state.currentModel)
-            }
+        onPictureTaken = { image ->
+            println(image.toString())
         },
+        capturePhotoStarted = remember(state.saving) { state.saving }
     )
-
+    state.currentModel?.let { shirt ->
+        modelView.ModelRendererInit(shirt)
+    }
 
     Column(
         modifier = Modifier.align(Alignment.BottomCenter),
@@ -239,7 +239,10 @@ private fun CarouselElement(
             .width(ShirmazTheme.dimension.shirtButtonWidth)
             .clip(RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius))
             .background(ShirmazTheme.colors.shirtBackground)
-            .clickable { onIntent(CameraIntent.ChooseShirt(shirt)) }
+            .clickable {
+                if (isSelected) return@clickable
+                onIntent(CameraIntent.ChooseShirt(shirt))
+            }
             .border(
                 width = ShirmazTheme.dimension.borderThikness,
                 color = if (isSelected) ShirmazTheme.colors.takePictureButton

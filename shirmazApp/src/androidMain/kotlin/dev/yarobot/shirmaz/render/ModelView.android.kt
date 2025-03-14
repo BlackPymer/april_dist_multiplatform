@@ -16,6 +16,7 @@ import dev.yarobot.shirmaz.platform.RIGHT_HIP
 import dev.yarobot.shirmaz.platform.RIGHT_SHOULDER
 import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetector
 import io.github.sceneview.Scene
+import io.github.sceneview.gesture.GestureDetector.SimpleOnGestureListener
 import io.github.sceneview.math.Position
 import io.github.sceneview.math.Rotation
 import io.github.sceneview.math.Scale
@@ -26,6 +27,7 @@ import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberEnvironmentLoader
 import io.github.sceneview.rememberModelLoader
 import io.github.sceneview.rememberNode
+import io.github.sceneview.rememberOnGestureListener
 import java.nio.ByteBuffer
 import kotlin.math.PI
 import kotlin.math.atan
@@ -60,7 +62,6 @@ private class AndroidModelView(
         val environmentLoader = rememberEnvironmentLoader(engine)
 
         val centerNode = rememberNode(engine)
-
         val cameraNode = rememberCameraNode(engine) {
             position = Position(y = -0.5f, z = 2.0f)
             lookAt(centerNode)
@@ -105,7 +106,10 @@ private class AndroidModelView(
                     }
                 }
                 cameraNode.lookAt(centerNode)
-            }
+            },
+            onGestureListener = rememberOnGestureListener(
+                creator = { SimpleOnGestureListener() }
+            )
         )
     }
 
