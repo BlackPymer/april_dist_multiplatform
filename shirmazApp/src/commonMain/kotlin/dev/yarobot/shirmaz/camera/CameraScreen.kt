@@ -73,6 +73,9 @@ fun CameraScreen() {
     LaunchedEffect(state.cameraProvideState) {
         viewModel.onIntent(CameraIntent.RequestCamera(permissionsController))
     }
+    LaunchedEffect(state.storageProvideState) {
+        viewModel.onIntent(CameraIntent.RequestStorage(permissionsController))
+    }
     ScreenContent(
         onIntent = viewModel::onIntent,
         state = state
@@ -82,7 +85,7 @@ fun CameraScreen() {
 @Composable
 internal fun ScreenContent(
     onIntent: (CameraIntent) -> Unit,
-    state: CameraScreenState
+    state: CameraScreenState,
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -90,10 +93,13 @@ internal fun ScreenContent(
     ) {
         when (state.cameraProvideState) {
             CameraProvideState.Granted -> {
-                GrantedView(
-                    state = state,
-                    onIntent = onIntent
-                )
+                if(state.storageProvideState ==StorageProvideState.Granted)
+                    GrantedView(
+                        state = state,
+                        onIntent = onIntent
+                    )
+                else
+                    NotGrantedView(onIntent)
             }
 
             CameraProvideState.NotGranted -> {

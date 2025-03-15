@@ -21,6 +21,7 @@ class CameraViewModel : ViewModel() {
     private val _state = MutableStateFlow(
         CameraScreenState(
             cameraProvideState = CameraProvideState.NotGranted,
+            storageProvideState = StorageProvideState.NotGranted,
             currentShirt = null,
             currentModel = null,
             saving = false,
@@ -39,7 +40,7 @@ class CameraViewModel : ViewModel() {
             is CameraIntent.ChooseShirt -> intent.shirt.chooseAsCurrent()
             is CameraIntent.BackToToolbar -> backToToolbar()
             is CameraIntent.SaveImage -> saveImage()
-            CameraIntent.ChangeCamera -> changeCamera()
+            is CameraIntent.ChangeCamera -> changeCamera()
         }
     }
 
@@ -95,14 +96,31 @@ class CameraViewModel : ViewModel() {
     private fun requestStorage(controller: PermissionsController) {
         viewModelScope.launch {
             kotlin.runCatching {
-                controller.providePermission(Permission.STORAGE)
+                controller.providePermission(Permission.WRITE_STORAGE)
             }.onSuccess {
-                proceedCameraState(controller)
+                proceedStorageState(controller)
             }.onFailure {
-                proceedCameraState(controller)
+                proceedStorageState(controller)
             }
         }
     }
+
+    private suspend fun proceedStorageState(controller: PermissionsController) =
+        when (controller.getPermissionState(Permission.WRITE_STORAGE)) {
+            PermissionState.Granted -> {
+                _state.update {
+                    it.copy(storageProvideState = StorageProvideState.Granted)
+                }
+            }
+
+            PermissionState.DeniedAlways -> controller.openAppSettings()
+            PermissionState.Denied -> controller.openAppSettings()
+            else -> {
+                _state.update {
+                    it.copy(storageProvideState = StorageProvideState.NotGranted)
+                }
+            }
+        }
 
     private fun Shirt?.chooseAsCurrent() {
         _state.update {

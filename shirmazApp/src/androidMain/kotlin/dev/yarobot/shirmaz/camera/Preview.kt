@@ -12,6 +12,7 @@ private fun PreviewGranted() {
         ScreenContent(
             state = CameraScreenState(
                 cameraProvideState = CameraProvideState.Granted,
+                storageProvideState = StorageProvideState.Granted,
                 currentModel = null,
                 currentShirt = null,
                 currentCamera = CameraType.FRONT,
@@ -29,6 +30,7 @@ private fun PreviewDenied() {
         ScreenContent(
             state = CameraScreenState(
                 cameraProvideState = CameraProvideState.NotGranted,
+                storageProvideState = StorageProvideState.NotGranted,
                 currentModel = null,
                 currentShirt = null,
                 currentCamera = CameraType.FRONT,
@@ -46,6 +48,7 @@ private fun PreviewSaving() {
         ScreenContent(
             state = CameraScreenState(
                 cameraProvideState = CameraProvideState.Granted,
+                storageProvideState = StorageProvideState.Granted,
                 currentModel = null,
                 currentShirt = null,
                 saving = true,
@@ -63,6 +66,7 @@ private fun PreviewWithShirts() {
         ScreenContent(
             state = CameraScreenState(
                 cameraProvideState = CameraProvideState.Granted,
+                storageProvideState = StorageProvideState.Granted,
                 currentModel = null,
                 currentShirt = null,
                 currentCamera = CameraType.FRONT,

@@ -1,4 +1,6 @@
 package dev.yarobot.shirmaz.camera
 
-interface StorageProvideState {
+sealed interface StorageProvideState {
+    data object NotGranted: StorageProvideState
+    data object Granted: StorageProvideState
 }
