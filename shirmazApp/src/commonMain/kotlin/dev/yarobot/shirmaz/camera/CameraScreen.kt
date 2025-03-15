@@ -41,9 +41,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import dev.yarobot.shirmaz.platform.PlatformImage
 import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetectorOptions
 import dev.yarobot.shirmaz.posedetection.createPoseDetector
 import dev.yarobot.shirmaz.render.createModelView
@@ -128,18 +128,20 @@ private fun BoxScope.GrantedView(
     val modelView = remember {
         createModelView(createPoseDetector(ShirmazPoseDetectorOptions.STREAM))
     }
-    val lastImageCaptured = remember { mutableStateOf<PlatformImage?>(null) }
+    val lastImageCaptured = remember { mutableStateOf<ImageBitmap?>(null) }
     CameraView(
         cameraType = remember(state.currentCamera) { state.currentCamera },
         onImageCaptured = { image ->
             modelView.updateModelPosition(image)
-            lastImageCaptured.value = image
         },
         onPictureTaken = { image ->
-            println(image.toString())
+            lastImageCaptured.value = image
         },
         capturePhotoStarted = remember(state.saving) { state.saving }
     )
+    if (state.saving) {
+        lastImageCaptured.value?.let { image -> Image(bitmap = image, contentDescription = "") }
+    }
     state.currentModel?.let { shirt ->
         modelView.ModelRendererInit(shirt)
     }

@@ -4,6 +4,7 @@ import dev.icerock.moko.permissions.PermissionsController
 
 sealed interface CameraIntent {
     data class RequestCamera(val permissionsController: PermissionsController) : CameraIntent
+    data class RequestStorage(val permissionsController: PermissionsController) : CameraIntent
 
     data object ChangeCamera : CameraIntent
     data object TakePicture : CameraIntent

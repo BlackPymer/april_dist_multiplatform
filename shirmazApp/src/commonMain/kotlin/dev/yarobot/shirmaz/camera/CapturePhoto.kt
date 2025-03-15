@@ -1,11 +1,7 @@
 package dev.yarobot.shirmaz.camera
 
-import dev.yarobot.shirmaz.platform.ActualContext
-import dev.yarobot.shirmaz.platform.CaptureImage
-import dev.yarobot.shirmaz.platform.URI
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.ImageBitmap
 
-expect fun capturePhoto(
-    context: ActualContext,
-    imageCapture: CaptureImage,
-    onImageCaptured: (URI) -> Unit
-)
+@Composable
+expect fun capturePhoto(): ImageBitmap?

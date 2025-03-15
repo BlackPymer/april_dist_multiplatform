@@ -1,6 +1,7 @@
 package dev.yarobot.shirmaz.camera
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.util.Size
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
@@ -55,11 +56,11 @@ class CameraXViewModel() : ViewModel() {
         cameraAnalyzeUseCase.setAnalyzer(backgroundExecutor, analyzer)
     }
 
-    fun takePicture(onTakenPicture: (PlatformImage) -> Unit) {
+    fun takePicture(onTakenPicture: (Bitmap) -> Unit) {
         imageCaptureUseCase.takePicture(backgroundExecutor, object : OnImageCapturedCallback() {
-            override fun onCaptureSuccess(image: ImageProxy) {
-                onTakenPicture(image)
-                image.close()
+            override fun onPostviewBitmapAvailable(bitmap: Bitmap) {
+                super.onPostviewBitmapAvailable(bitmap)
+                onTakenPicture(bitmap)
             }
         })
     }

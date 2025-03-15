@@ -33,11 +33,12 @@ class CameraViewModel : ViewModel() {
     fun onIntent(intent: CameraIntent) {
         when (intent) {
             is CameraIntent.RequestCamera -> requestCamera(intent.permissionsController)
+            is CameraIntent.RequestStorage -> requestStorage(intent.permissionsController)
             is CameraIntent.TakePicture -> takePicture()
             is CameraIntent.OpenGallery -> {}
             is CameraIntent.ChooseShirt -> intent.shirt.chooseAsCurrent()
             is CameraIntent.BackToToolbar -> backToToolbar()
-            is CameraIntent.SaveImage -> {}
+            is CameraIntent.SaveImage -> saveImage()
             CameraIntent.ChangeCamera -> changeCamera()
         }
     }
@@ -91,6 +92,18 @@ class CameraViewModel : ViewModel() {
             }
         }
 
+    private fun requestStorage(controller: PermissionsController) {
+        viewModelScope.launch {
+            kotlin.runCatching {
+                controller.providePermission(Permission.STORAGE)
+            }.onSuccess {
+                proceedCameraState(controller)
+            }.onFailure {
+                proceedCameraState(controller)
+            }
+        }
+    }
+
     private fun Shirt?.chooseAsCurrent() {
         _state.update {
             it.copy(
@@ -115,5 +128,9 @@ class CameraViewModel : ViewModel() {
                 )
             }
         }
+    }
+
+    private fun saveImage(){
+
     }
 }
