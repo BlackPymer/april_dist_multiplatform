@@ -171,7 +171,7 @@ private class AndroidModelView(
         )
 
     private fun PointF3D.toPosition(): Position {
-        val maxValue = Position(2.9f, -7f, 0f)
+        val maxValue = Position(2.8f, -6.8f, 0f)
         return Position(
             maxValue.x * this.x / CameraSize.HEIGHT * defaultModelScale.x / modelScale.x,
             maxValue.y * this.y / CameraSize.WIDTH * defaultModelScale.y / modelScale.y,

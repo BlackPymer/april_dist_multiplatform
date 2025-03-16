@@ -6,8 +6,6 @@ import dev.yarobot.shirmaz.platform.ActualContext
 import dev.yarobot.shirmaz.platform.CaptureImage
 import dev.yarobot.shirmaz.platform.URI
 
-@Composable
-actual fun capturePhoto(
-): ImageBitmap? {
-    return null
+
+actual fun savePhoto(imageBitmap: ImageBitmap) {
 }

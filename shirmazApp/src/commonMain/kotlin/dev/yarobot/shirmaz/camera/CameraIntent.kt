@@ -1,5 +1,6 @@
 package dev.yarobot.shirmaz.camera
 
+import androidx.compose.ui.graphics.ImageBitmap
 import dev.icerock.moko.permissions.PermissionsController
 
 sealed interface CameraIntent {

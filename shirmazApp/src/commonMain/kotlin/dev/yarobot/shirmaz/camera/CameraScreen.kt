@@ -162,7 +162,7 @@ private fun BoxScope.GrantedView(
             onIntent = onIntent,
         )
         if (remember(state.saving) { state.saving }) {
-            SavingPanel(onIntent = onIntent)
+            SavingPanel(onIntent = onIntent, imageBitmap = lastImageCaptured.value)
         } else {
             ToolBar(onIntent = onIntent)
         }
@@ -327,7 +327,7 @@ private fun TakePictureButton(
 }
 
 @Composable
-private fun SavingPanel(onIntent: (CameraIntent) -> Unit) {
+private fun SavingPanel(onIntent: (CameraIntent) -> Unit,imageBitmap: ImageBitmap?) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -352,6 +352,9 @@ private fun SavingPanel(onIntent: (CameraIntent) -> Unit) {
         }
         ShirmazButton(
             onClick = {
+                if (imageBitmap != null) {
+                    savePhoto(imageBitmap)
+                }
                 onIntent(CameraIntent.SaveImage)
             }
         ) {

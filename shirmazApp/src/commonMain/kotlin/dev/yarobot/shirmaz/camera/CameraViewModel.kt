@@ -1,5 +1,6 @@
 package dev.yarobot.shirmaz.camera
 
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.icerock.moko.permissions.Permission
@@ -7,6 +8,7 @@ import dev.icerock.moko.permissions.PermissionState
 import dev.icerock.moko.permissions.PermissionsController
 import dev.yarobot.shirmaz.camera.model.CameraType
 import dev.yarobot.shirmaz.camera.model.ThreeDModel
+import dev.yarobot.shirmaz.platform.ActualContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -118,6 +120,10 @@ class CameraViewModel : ViewModel() {
     }
 
     private fun saveImage(){
-
+        _state.update {
+            it.copy(
+                saving = false
+            )
+        }
     }
 }
