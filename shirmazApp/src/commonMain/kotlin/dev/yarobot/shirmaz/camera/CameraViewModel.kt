@@ -21,7 +21,6 @@ class CameraViewModel : ViewModel() {
     private val _state = MutableStateFlow(
         CameraScreenState(
             cameraProvideState = CameraProvideState.NotGranted,
-            storageProvideState = StorageProvideState.NotGranted,
             currentShirt = null,
             currentModel = null,
             saving = false,
@@ -34,7 +33,6 @@ class CameraViewModel : ViewModel() {
     fun onIntent(intent: CameraIntent) {
         when (intent) {
             is CameraIntent.RequestCamera -> requestCamera(intent.permissionsController)
-            is CameraIntent.RequestStorage -> requestStorage(intent.permissionsController)
             is CameraIntent.TakePicture -> takePicture()
             is CameraIntent.OpenGallery -> {}
             is CameraIntent.ChooseShirt -> intent.shirt.chooseAsCurrent()
@@ -89,35 +87,6 @@ class CameraViewModel : ViewModel() {
             else -> {
                 _state.update {
                     it.copy(cameraProvideState = CameraProvideState.NotGranted)
-                }
-            }
-        }
-
-    private fun requestStorage(controller: PermissionsController) {
-        viewModelScope.launch {
-            kotlin.runCatching {
-                controller.providePermission(Permission.WRITE_STORAGE)
-            }.onSuccess {
-                proceedStorageState(controller)
-            }.onFailure {
-                proceedStorageState(controller)
-            }
-        }
-    }
-
-    private suspend fun proceedStorageState(controller: PermissionsController) =
-        when (controller.getPermissionState(Permission.WRITE_STORAGE)) {
-            PermissionState.Granted -> {
-                _state.update {
-                    it.copy(storageProvideState = StorageProvideState.Granted)
-                }
-            }
-
-            PermissionState.DeniedAlways -> controller.openAppSettings()
-            PermissionState.Denied -> controller.openAppSettings()
-            else -> {
-                _state.update {
-                    it.copy(storageProvideState = StorageProvideState.NotGranted)
                 }
             }
         }

@@ -73,9 +73,6 @@ fun CameraScreen() {
     LaunchedEffect(state.cameraProvideState) {
         viewModel.onIntent(CameraIntent.RequestCamera(permissionsController))
     }
-    LaunchedEffect(state.storageProvideState) {
-        viewModel.onIntent(CameraIntent.RequestStorage(permissionsController))
-    }
     ScreenContent(
         onIntent = viewModel::onIntent,
         state = state
@@ -87,41 +84,45 @@ internal fun ScreenContent(
     onIntent: (CameraIntent) -> Unit,
     state: CameraScreenState,
 ) {
+    val permissionsController = LocalPermissionsController.current
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         when (state.cameraProvideState) {
             CameraProvideState.Granted -> {
-                if(state.storageProvideState ==StorageProvideState.Granted)
-                    GrantedView(
-                        state = state,
-                        onIntent = onIntent
-                    )
-                else
-                    NotGrantedView(onIntent)
+                GrantedView(
+                    state = state,
+                    onIntent = onIntent
+                )
             }
-
             CameraProvideState.NotGranted -> {
-                NotGrantedView(onIntent)
+                NotGrantedView(
+                    onClick = { onIntent(CameraIntent.RequestCamera(permissionsController)) },
+                    messageText = stringResource(Res.string.camera_not_granted),
+                    buttonText = stringResource(Res.string.camera_request)
+                )
             }
         }
     }
 }
 
 @Composable
-fun NotGrantedView(onIntent: (CameraIntent) -> Unit) {
-    val permissionsController = LocalPermissionsController.current
+fun NotGrantedView(
+    onClick: () -> Unit,
+    messageText: String,
+    buttonText: String
+) {
     Column(
         modifier = Modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = stringResource(Res.string.camera_not_granted))
+        Text(text = messageText)
         TextButton(
-            onClick = { onIntent(CameraIntent.RequestCamera(permissionsController)) }
+            onClick = onClick
         ) {
-            Text(text = stringResource(Res.string.camera_request))
+            Text(text = buttonText)
         }
     }
 }
@@ -350,7 +351,9 @@ private fun SavingPanel(onIntent: (CameraIntent) -> Unit) {
             Spacer(Modifier.width(ShirmazIcons.ArrowBack.defaultWidth))
         }
         ShirmazButton(
-            onClick = { onIntent(CameraIntent.SaveImage) },
+            onClick = {
+                onIntent(CameraIntent.SaveImage)
+            }
         ) {
             Text(
                 text = stringResource(Res.string.save_cd),
