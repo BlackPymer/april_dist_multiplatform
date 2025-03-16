@@ -48,7 +48,11 @@ actual fun savePhoto(imageBitmap: ImageBitmap) {
         }
 
         filePath?.let { path ->
-            MediaScannerConnection.scanFile(context, arrayOf(path), null) { scannedPath, scannedUri ->
+            MediaScannerConnection.scanFile(
+                context,
+                arrayOf(path),
+                null
+            ) { scannedPath, scannedUri ->
                 println("Scanned file: $scannedPath")
                 println("-> URI: $scannedUri")
             }
