@@ -2,14 +2,18 @@ package dev.yarobot.shirmaz.camera
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Matrix
+import android.util.Log
 import android.util.Size
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCapture.OnImageCapturedCallback
+import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.core.SurfaceRequest
+import androidx.camera.core.UseCaseGroup
 import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -30,11 +34,12 @@ class CameraXViewModel() : ViewModel() {
     private val _surfaceRequest = MutableStateFlow<SurfaceRequest?>(null)
     val surfaceRequest: StateFlow<SurfaceRequest?> = _surfaceRequest
 
-    private val cameraPreviewUseCase = Preview.Builder().build().apply {
-        setSurfaceProvider { newSurfaceRequest ->
-            _surfaceRequest.update { newSurfaceRequest }
+    private val cameraPreviewUseCase = Preview.Builder()
+        .build().apply {
+            setSurfaceProvider { newSurfaceRequest ->
+                _surfaceRequest.update { newSurfaceRequest }
+            }
         }
-    }
 
     private val resolutionSelector = ResolutionSelector.Builder()
         .setResolutionStrategy(
@@ -45,7 +50,9 @@ class CameraXViewModel() : ViewModel() {
         )
         .build()
 
-    private val imageCaptureUseCase = ImageCapture.Builder().build()
+    private val imageCaptureUseCase = ImageCapture.Builder()
+        .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+        .build()
 
     private val cameraAnalyzeUseCase = ImageAnalysis.Builder()
         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
@@ -57,13 +64,42 @@ class CameraXViewModel() : ViewModel() {
     }
 
     fun takePicture(onTakenPicture: (Bitmap) -> Unit) {
-        imageCaptureUseCase.takePicture(backgroundExecutor, object : OnImageCapturedCallback() {
-            override fun onPostviewBitmapAvailable(bitmap: Bitmap) {
-                super.onPostviewBitmapAvailable(bitmap)
-                onTakenPicture(bitmap)
+        imageCaptureUseCase.takePicture(
+            backgroundExecutor,
+            object : OnImageCapturedCallback() {
+                override fun onCaptureSuccess(imageProxy: ImageProxy) {
+                    val rotationDegrees = imageProxy.imageInfo.rotationDegrees
+                    val rotatedImage = imageProxy.toBitmap().rotate(rotationDegrees)
+                    onTakenPicture(rotatedImage)
+                }
+
+                override fun onError(exception: ImageCaptureException) {
+                    Log.e(
+                        "CameraXViewModel",
+                        "Image capture failed: ${exception.message}",
+                        exception
+                    )
+                }
             }
-        })
+        )
     }
+
+    private fun Bitmap.rotate(degrees: Int): Bitmap {
+        return if (degrees != 0) {
+            val matrix = Matrix().apply {
+                postRotate(degrees.toFloat())
+            }
+            Bitmap.createBitmap(this, 0, 0, this.width, this.height, matrix, true)
+        } else {
+            this
+        }
+    }
+
+    private val useCaseGroup = UseCaseGroup.Builder()
+        .addUseCase(cameraPreviewUseCase)
+        .addUseCase(imageCaptureUseCase)
+        .addUseCase(cameraAnalyzeUseCase)
+        .build()
 
     suspend fun bindToCamera(
         appContext: Context,
@@ -71,12 +107,11 @@ class CameraXViewModel() : ViewModel() {
         cameraSelector: CameraSelector
     ) {
         val processCameraProvider = ProcessCameraProvider.awaitInstance(appContext)
+
         processCameraProvider.bindToLifecycle(
             lifecycleOwner,
             cameraSelector,
-            cameraPreviewUseCase,
-            cameraAnalyzeUseCase,
-            imageCaptureUseCase
+            useCaseGroup
         )
         try {
             awaitCancellation()

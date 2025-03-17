@@ -8,7 +8,6 @@ import dev.icerock.moko.permissions.PermissionState
 import dev.icerock.moko.permissions.PermissionsController
 import dev.yarobot.shirmaz.camera.model.CameraType
 import dev.yarobot.shirmaz.camera.model.ThreeDModel
-import dev.yarobot.shirmaz.platform.ActualContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,7 +25,8 @@ class CameraViewModel : ViewModel() {
             currentShirt = null,
             currentModel = null,
             saving = false,
-            currentCamera = CameraType.FRONT
+            currentCamera = CameraType.FRONT,
+            capturedPhoto = null
         )
     )
 
@@ -41,6 +41,13 @@ class CameraViewModel : ViewModel() {
             is CameraIntent.BackToToolbar -> backToToolbar()
             is CameraIntent.SaveImage -> saveImage()
             is CameraIntent.ChangeCamera -> changeCamera()
+            is CameraIntent.SetImage -> setImage(intent.imageBitmap)
+        }
+    }
+
+    private fun setImage(imageBitmap: ImageBitmap) {
+        _state.update {
+            it.copy(capturedPhoto = imageBitmap)
         }
     }
 
@@ -122,7 +129,8 @@ class CameraViewModel : ViewModel() {
     private fun saveImage(){
         _state.update {
             it.copy(
-                saving = false
+                saving = false,
+                capturedPhoto = null
             )
         }
     }

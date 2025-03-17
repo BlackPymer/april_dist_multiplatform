@@ -1,6 +1,5 @@
 package dev.yarobot.shirmaz.camera
 
-import android.graphics.Bitmap
 import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.core.CameraSelector
 import androidx.compose.runtime.Composable
@@ -22,8 +21,7 @@ actual fun CameraView(
     cameraType: CameraType,
     onImageCaptured: (PlatformImage) -> Unit,
     onPictureTaken: (ImageBitmap) -> Unit,
-    capturePhotoStarted: Boolean,
-    imageToDisplay: PlatformImage?
+    capturePhotoStarted: Boolean
 ) {
     val viewModel = viewModel { CameraXViewModel() }
     val context = LocalContext.current
@@ -33,20 +31,20 @@ actual fun CameraView(
     val surfaceRequest by viewModel.surfaceRequest.collectAsStateWithLifecycle()
     LaunchedEffect(capturePhotoStarted) {
         if (capturePhotoStarted) {
-            viewModel.takePicture { bitmap -> onPictureTaken(bitmap.asImageBitmap()) }
+            viewModel.takePicture { bitmap ->
+                onPictureTaken(bitmap.asImageBitmap())
+            }
         }
     }
-    if (!capturePhotoStarted) {
-        LaunchedEffect(lifecycleOwner, cameraType) {
-            viewModel.bindToCamera(
-                context.applicationContext,
-                lifecycleOwner,
-                when (cameraType) {
-                    CameraType.FRONT -> CameraSelector.DEFAULT_FRONT_CAMERA
-                    CameraType.BACK -> CameraSelector.DEFAULT_BACK_CAMERA
-                }
-            )
-        }
+    LaunchedEffect(lifecycleOwner, cameraType) {
+        viewModel.bindToCamera(
+            context.applicationContext,
+            lifecycleOwner,
+            when (cameraType) {
+                CameraType.FRONT -> CameraSelector.DEFAULT_FRONT_CAMERA
+                CameraType.BACK -> CameraSelector.DEFAULT_BACK_CAMERA
+            }
+        )
     }
     surfaceRequest?.let { request ->
         CameraXViewfinder(surfaceRequest = request)

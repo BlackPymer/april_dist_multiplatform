@@ -13,5 +13,4 @@ expect fun CameraView(
     onImageCaptured: (image: PlatformImage) -> Unit,
     onPictureTaken: (image: ImageBitmap) -> Unit,
     capturePhotoStarted: Boolean,
-    imageToDisplay: PlatformImage? = null
 )

@@ -18,7 +18,6 @@ actual fun savePhoto(imageBitmap: ImageBitmap) {
     val bitmap: Bitmap = imageBitmap.asAndroidBitmap()
     val resolver = context.contentResolver
 
-
     val fileName = "shirmaz_${System.currentTimeMillis()}.jpg"
 
     val contentValues = ContentValues().apply {
@@ -31,7 +30,6 @@ actual fun savePhoto(imageBitmap: ImageBitmap) {
 
     val imageUri: Uri? =
         resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-
     if (imageUri != null) {
         resolver.openOutputStream(imageUri)?.use { out ->
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
@@ -39,11 +37,9 @@ actual fun savePhoto(imageBitmap: ImageBitmap) {
 
 
         val filePath: String? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-
             val dcimDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
             File(dcimDir, "Shirmaz/$fileName").absolutePath
         } else {
-
             getFilePathFromUri(imageUri, context)
         }
 

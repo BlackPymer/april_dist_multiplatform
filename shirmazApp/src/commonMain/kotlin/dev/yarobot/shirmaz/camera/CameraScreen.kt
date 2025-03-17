@@ -34,14 +34,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetectorOptions
@@ -96,6 +95,7 @@ internal fun ScreenContent(
                     onIntent = onIntent
                 )
             }
+
             CameraProvideState.NotGranted -> {
                 NotGrantedView(
                     onClick = { onIntent(CameraIntent.RequestCamera(permissionsController)) },
@@ -135,19 +135,24 @@ private fun BoxScope.GrantedView(
     val modelView = remember {
         createModelView(createPoseDetector(ShirmazPoseDetectorOptions.STREAM))
     }
-    val lastImageCaptured = remember { mutableStateOf<ImageBitmap?>(null) }
     CameraView(
         cameraType = remember(state.currentCamera) { state.currentCamera },
         onImageCaptured = { image ->
             modelView.updateModelPosition(image)
         },
         onPictureTaken = { image ->
-            lastImageCaptured.value = image
+            onIntent(CameraIntent.SetImage(image))
         },
         capturePhotoStarted = remember(state.saving) { state.saving }
     )
     if (state.saving) {
-        lastImageCaptured.value?.let { image -> Image(bitmap = image, contentDescription = "") }
+        state.capturedPhoto?.let { image ->
+            Image(
+                bitmap = image,
+                contentScale = ContentScale.FillBounds,
+                contentDescription = null
+            )
+        }
     }
     state.currentModel?.let { shirt ->
         modelView.ModelRendererInit(shirt)
@@ -161,8 +166,12 @@ private fun BoxScope.GrantedView(
             state = remember(state.currentShirt) { state },
             onIntent = onIntent,
         )
-        if (remember(state.saving) { state.saving }) {
-            SavingPanel(onIntent = onIntent, imageBitmap = lastImageCaptured.value)
+
+        if (state.saving) {
+            SavingPanel(
+                onIntent = onIntent,
+                state = state
+            )
         } else {
             ToolBar(onIntent = onIntent)
         }
@@ -327,7 +336,10 @@ private fun TakePictureButton(
 }
 
 @Composable
-private fun SavingPanel(onIntent: (CameraIntent) -> Unit,imageBitmap: ImageBitmap?) {
+private fun SavingPanel(
+    onIntent: (CameraIntent) -> Unit,
+    state: CameraScreenState
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -352,10 +364,10 @@ private fun SavingPanel(onIntent: (CameraIntent) -> Unit,imageBitmap: ImageBitma
         }
         ShirmazButton(
             onClick = {
-                if (imageBitmap != null) {
+                state.capturedPhoto?.let { imageBitmap ->
                     savePhoto(imageBitmap)
+                    onIntent(CameraIntent.SaveImage)
                 }
-                onIntent(CameraIntent.SaveImage)
             }
         ) {
             Text(
