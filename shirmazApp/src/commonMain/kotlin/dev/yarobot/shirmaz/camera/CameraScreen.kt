@@ -148,12 +148,14 @@ private fun BoxScope.GrantedView(
     if (state.saving) {
         state.capturedPhoto?.let { image ->
             Image(
+                modifier = Modifier.fillMaxSize(),
                 bitmap = image,
-                contentScale = ContentScale.FillBounds,
+                contentScale = ContentScale.FillHeight,
                 contentDescription = null
             )
         }
     }
+
     state.currentModel?.let { shirt ->
         modelView.ModelRendererInit(shirt)
     }
@@ -163,7 +165,7 @@ private fun BoxScope.GrantedView(
         verticalArrangement = Arrangement.Bottom,
     ) {
         Carousel(
-            state = remember(state.currentShirt) { state },
+            state = state,
             onIntent = onIntent,
         )
 
