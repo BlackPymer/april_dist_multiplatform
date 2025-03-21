@@ -147,12 +147,7 @@ private fun BoxScope.GrantedView(
     )
     if (state.saving) {
         state.capturedPhoto?.let { image ->
-            Image(
-                modifier = Modifier.fillMaxSize(),
-                bitmap = image,
-                contentScale = ContentScale.FillHeight,
-                contentDescription = null
-            )
+            RenderImage(image = image)
         }
     }
 
