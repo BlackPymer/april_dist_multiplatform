@@ -24,6 +24,8 @@ data class ShirmazDimension(
 
     val savingButtonsHeight: Dp,
     val savingButtonsWidth: Dp,
+
+    val mirrorHeight: Dp
 )
 
 internal val shirmazDimension = ShirmazDimension(
@@ -47,5 +49,7 @@ internal val shirmazDimension = ShirmazDimension(
 
     savingButtonsHeight = 54.dp,
     savingButtonsWidth = 182.dp,
+
+    mirrorHeight = 480.dp
 )
 

@@ -31,6 +31,11 @@ import io.github.sceneview.rememberOnGestureListener
 import java.nio.ByteBuffer
 import kotlin.math.PI
 import kotlin.math.atan
+import android.graphics.PixelFormat
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.zIndex
+
 
 actual fun createModelView(
     poseDetector: ShirmazPoseDetector
@@ -44,7 +49,7 @@ private class AndroidModelView(
 
     private val leftArmDefaultRotation = Rotation(0f, 0f, -90f)
     private val rightArmDefaultRotation = Rotation(0f, 0f, 90f)
-    private val defaultModelScale = Scale(x = 0.0065205214f, y = 0.0065205214f, z = 0.0065205214f)
+    private val defaultModelScale = Scale(x = 0.0065205214f, y = 0.0065205214f, z = 0.003f)
     private val defaultShoulderDistance = 145f
     private val defaultHeight = 230f
 
@@ -74,7 +79,9 @@ private class AndroidModelView(
         )
         modelNode.position = Position(x = -0.42f, y = 1.05f, z = 0f)
         Scene(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Transparent),
             engine = engine,
             isOpaque = false,
             modelLoader = modelLoader,
@@ -85,6 +92,8 @@ private class AndroidModelView(
             ),
             onViewCreated = {
                 setZOrderOnTop(false)
+                setZOrderMediaOverlay(true)
+                holder.setFormat(PixelFormat.TRANSLUCENT)
             },
             childNodes = listOf(
                 centerNode,
@@ -171,7 +180,7 @@ private class AndroidModelView(
         )
 
     private fun PointF3D.toPosition(): Position {
-        val maxValue = Position(2.8f, -6.8f, 0f)
+        val maxValue = Position(2.8f, -7.2f, 0f)
         return Position(
             maxValue.x * this.x / CameraSize.HEIGHT * defaultModelScale.x / modelScale.x,
             maxValue.y * this.y / CameraSize.WIDTH * defaultModelScale.y / modelScale.y,
