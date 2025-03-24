@@ -40,7 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetectorOptions
@@ -146,13 +146,21 @@ private fun BoxScope.GrantedView(
         capturePhotoStarted = remember(state.saving) { state.saving }
     )
     if (state.saving) {
+        state.currentModel?.let { shirt ->
+            TakeShirtPicture(shirt, modelView) { shirtBitmap ->
+                state.capturedPhoto?.let { image ->
+                    onIntent(CameraIntent.SetImage(image.overlayAlphaPixels(shirtBitmap)))
+                }
+            }
+        }
+
         state.capturedPhoto?.let { image ->
             RenderImage(image = image)
         }
-    }
-
-    state.currentModel?.let { shirt ->
-        modelView.ModelRendererInit(shirt)
+    } else {
+        state.currentModel?.let { shirt ->
+            modelView.ModelRendererInit(shirt, Modifier)
+        }
     }
 
     Column(

@@ -1,5 +1,7 @@
 package dev.yarobot.shirmaz.render
 
+import android.graphics.Bitmap
+import android.graphics.Picture
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -32,8 +34,14 @@ import java.nio.ByteBuffer
 import kotlin.math.PI
 import kotlin.math.atan
 import android.graphics.PixelFormat
+import android.view.SurfaceView
 import androidx.compose.foundation.background
+import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.draw
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.zIndex
 
 
@@ -60,8 +68,12 @@ private class AndroidModelView(
     private var modelScale = defaultModelScale
     private var isPoseValid = false
 
+    private var modelBitmap: Bitmap? = null
+
+    private var sceneViewRef: SurfaceView? = null
+
     @Composable
-    override fun ModelRendererInit(model: ThreeDModel) {
+    override fun ModelRendererInit(model: ThreeDModel, modifier: Modifier) {
         val engine = rememberEngine()
         val modelLoader = rememberModelLoader(engine)
         val environmentLoader = rememberEnvironmentLoader(engine)
@@ -79,9 +91,10 @@ private class AndroidModelView(
         )
         modelNode.position = Position(x = -0.42f, y = 1.05f, z = 0f)
         Scene(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .background(Color.Transparent),
+
             engine = engine,
             isOpaque = false,
             modelLoader = modelLoader,
@@ -180,7 +193,7 @@ private class AndroidModelView(
         )
 
     private fun PointF3D.toPosition(): Position {
-        val maxValue = Position(2.8f, -7.2f, 0f)
+        val maxValue = Position(3f, -7f, 0f)
         return Position(
             maxValue.x * this.x / CameraSize.HEIGHT * defaultModelScale.x / modelScale.x,
             maxValue.y * this.y / CameraSize.WIDTH * defaultModelScale.y / modelScale.y,
