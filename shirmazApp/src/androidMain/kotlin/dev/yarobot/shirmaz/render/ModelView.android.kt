@@ -143,9 +143,6 @@ private class AndroidModelView(
         poseDetector.processImage(image) { poses, error ->
             isPoseValid = !poses.isNullOrEmpty()
             if (!poses.isNullOrEmpty()) {
-                println(poses[RIGHT_SHOULDER].position3D)
-                println(poses[LEFT_SHOULDER].position3D)
-                println("!!!! ${image.width} w ${image.height} h")
                 modelScale = calculateScale(
                     leftShoulder = poses[RIGHT_SHOULDER].position3D,
                     rightShoulder = poses[LEFT_SHOULDER].position3D,

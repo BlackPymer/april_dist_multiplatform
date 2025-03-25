@@ -34,14 +34,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetectorOptions
 import dev.yarobot.shirmaz.posedetection.createPoseDetector
@@ -135,6 +141,7 @@ private fun BoxScope.GrantedView(
     val modelView = remember {
         createModelView(createPoseDetector(ShirmazPoseDetectorOptions.STREAM))
     }
+
     CameraView(
         cameraType = remember(state.currentCamera) { state.currentCamera },
         onImageCaptured = { image ->
@@ -145,43 +152,74 @@ private fun BoxScope.GrantedView(
         },
         capturePhotoStarted = remember(state.saving) { state.saving }
     )
-    if (state.saving) {
-        state.currentModel?.let { shirt ->
-            TakeShirtPicture(shirt, modelView) { shirtBitmap ->
-                state.capturedPhoto?.let { image ->
-                    onIntent(CameraIntent.SetImage(image.overlayAlphaPixels(shirtBitmap)))
-                }
-            }
-        }
 
-        state.capturedPhoto?.let { image ->
-            RenderImage(image = image)
-        }
-    } else {
-        state.currentModel?.let { shirt ->
-            modelView.ModelRendererInit(shirt, Modifier)
-        }
+    //needs to be saved
+    state.currentModel?.let { shirt ->
+        modelView.ModelRendererInit(shirt, Modifier)
     }
 
-    Column(
-        modifier = Modifier.align(Alignment.BottomCenter),
-        verticalArrangement = Arrangement.Bottom,
-    ) {
-        Carousel(
-            state = state,
-            onIntent = onIntent,
-        )
-
+    Box(modifier = Modifier.fillMaxSize()) {
         if (state.saving) {
-            SavingPanel(
+            var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
+            var modelSize by remember { mutableStateOf(IntSize.Zero) }
+
+            Bitmappable(
+                modifier = Modifier
+                    .onGloballyPositioned { layoutCoordinates ->
+                        modelSize = layoutCoordinates.size
+                    }
+                    .fillMaxSize()
+            ) {
+                if (modelSize.width > 0 && modelSize.height > 0) {
+                    LaunchedEffect(Unit) {
+                        println("!!LaunchedEffect started")
+                        imageBitmap = convertContentToImageBitmap()
+                        println("!! imageBitmap: $imageBitmap")
+                        println("!! imageBitmap size: ${imageBitmap?.width}x${imageBitmap?.height}")
+                    }
+                }
+            }
+
+            state.capturedPhoto?.let { image ->
+                val scaledImageBitmap = imageBitmap?.resizeTo(image.width, image.height)
+
+                if (scaledImageBitmap != null) {
+                    val overlaidImage = image.overlayAlphaPixels(scaledImageBitmap)
+                    println("!! after overlay: $overlaidImage")
+                    onIntent(CameraIntent.SetImage(overlaidImage))
+                } else {
+                    println("!! Failed to scale imageBitmap")
+                }
+            }
+
+            state.capturedPhoto?.let { image ->
+                RenderImage(image = image)
+            }
+        }
+        //doesn't need to be saved
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .zIndex(1f)
+        ) {
+            Carousel(
+                state = state,
                 onIntent = onIntent,
-                state = state
             )
-        } else {
-            ToolBar(onIntent = onIntent)
+
+            if (state.saving) {
+                SavingPanel(
+                    onIntent = onIntent,
+                    state = state
+                )
+            } else {
+                ToolBar(onIntent = onIntent)
+            }
         }
     }
 }
+
+
 
 @Composable
 private fun Carousel(
