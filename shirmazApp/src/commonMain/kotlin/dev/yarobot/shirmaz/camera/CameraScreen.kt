@@ -37,13 +37,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -59,6 +59,7 @@ import dev.yarobot.shirmaz.ui.icons.Cloth
 import dev.yarobot.shirmaz.ui.icons.PhotoSearch
 import dev.yarobot.shirmaz.ui.icons.RefreshDot
 import dev.yarobot.shirmaz.ui.icons.ShirmazIcons
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import shirmaz.shirmazapp.generated.resources.Res
@@ -141,7 +142,8 @@ private fun BoxScope.GrantedView(
     val modelView = remember {
         createModelView(createPoseDetector(ShirmazPoseDetectorOptions.STREAM))
     }
-
+    val isSaving =
+        remember((state.savingState != CameraSavingState.Saving)) { (state.savingState != CameraSavingState.Saving) }
     CameraView(
         cameraType = remember(state.currentCamera) { state.currentCamera },
         onImageCaptured = { image ->
@@ -150,16 +152,23 @@ private fun BoxScope.GrantedView(
         onPictureTaken = { image ->
             onIntent(CameraIntent.SetImage(image))
         },
-        capturePhotoStarted = remember(state.saving) { state.saving }
+        capturePhotoStarted = state.savingState != CameraSavingState.Saving
     )
 
     //needs to be saved
-    state.currentModel?.let { shirt ->
-        modelView.ModelRendererInit(shirt, Modifier)
+    if (state.savingState == CameraSavingState.CreatingImage) {
+        state.currentModel?.let { shirt ->
+            modelView.ModelRendererInit(shirt, Modifier.zIndex(1f))
+        }
+    } else {
+        state.currentModel?.let { shirt ->
+            modelView.ModelRendererInit(shirt, Modifier)
+        }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        if (state.saving) {
+
+    when (state.savingState) {
+        is CameraSavingState.CreatingImage -> {
             var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
             var modelSize by remember { mutableStateOf(IntSize.Zero) }
 
@@ -180,45 +189,62 @@ private fun BoxScope.GrantedView(
                 }
             }
 
-            state.capturedPhoto?.let { image ->
-                val scaledImageBitmap = imageBitmap?.resizeTo(image.width, image.height)
-
-                if (scaledImageBitmap != null) {
-                    val overlaidImage = image.overlayAlphaPixels(scaledImageBitmap)
-                    println("!! after overlay: $overlaidImage")
-                    onIntent(CameraIntent.SetImage(overlaidImage))
-                } else {
-                    println("!! Failed to scale imageBitmap")
+            LaunchedEffect(state.capturedPhoto) {
+                state.capturedPhoto?.let { image ->
+                    println("!Everything is good")
+                    val scaledImageBitmap = imageBitmap?.resizeTo(image.width, image.height)
+                    if (scaledImageBitmap != null) {
+                        val overlaidImage = image.overlayAlphaPixels(scaledImageBitmap)
+                        onIntent(CameraIntent.SetImage(overlaidImage))
+                        onIntent(CameraIntent.OnImageCreated)
+                    } else {
+                        println("!! Failed to scale imageBitmap")
+                    }
+                }?: run{
+                    println("!!capturedPhoto is null")
                 }
             }
 
-            state.capturedPhoto?.let { image ->
-                RenderImage(image = image)
-            }
-        }
-        //doesn't need to be saved
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .zIndex(1f)
-        ) {
-            Carousel(
-                state = state,
-                onIntent = onIntent,
-            )
 
-            if (state.saving) {
+        }
+
+        is CameraSavingState.Saving -> {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .zIndex(1f)
+            ) {
+                Carousel(
+                    state = state,
+                    onIntent = onIntent,
+                )
+
                 SavingPanel(
                     onIntent = onIntent,
                     state = state
                 )
-            } else {
+            }
+            state.capturedPhoto?.let { image ->
+                RenderImage(image = image)
+            }
+        }
+
+        else -> {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .zIndex(1f)
+            ) {
+                Carousel(
+                    state = state,
+                    onIntent = onIntent,
+                )
+
                 ToolBar(onIntent = onIntent)
             }
         }
     }
 }
-
 
 
 @Composable

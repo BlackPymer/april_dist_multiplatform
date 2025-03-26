@@ -8,7 +8,7 @@ data class CameraScreenState(
     val cameraProvideState: CameraProvideState,
     val currentModel: ThreeDModel?,
     val currentShirt: Shirt?,
-    val saving: Boolean,
+    val savingState: CameraSavingState,
     val currentCamera: CameraType,
     val capturedPhoto: ImageBitmap?
 )

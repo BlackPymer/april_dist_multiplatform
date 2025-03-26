@@ -15,7 +15,7 @@ private fun PreviewGranted() {
                 currentModel = null,
                 currentShirt = null,
                 currentCamera = CameraType.FRONT,
-                saving = false,
+                savingState = CameraSavingState.NotSaving,
                 capturedPhoto = null,
             ),
             onIntent = {}
@@ -33,7 +33,7 @@ private fun PreviewDenied() {
                 currentModel = null,
                 currentShirt = null,
                 currentCamera = CameraType.FRONT,
-                saving = false,
+                savingState = CameraSavingState.NotSaving,
                 capturedPhoto = null,
             ),
             onIntent = {}
@@ -50,7 +50,7 @@ private fun PreviewSaving() {
                 cameraProvideState = CameraProvideState.Granted,
                 currentModel = null,
                 currentShirt = null,
-                saving = true,
+                savingState = CameraSavingState.CreatingImage,
                 currentCamera = CameraType.FRONT,
                 capturedPhoto = null,
             ),
@@ -69,7 +69,7 @@ private fun PreviewWithShirts() {
                 currentModel = null,
                 currentShirt = null,
                 currentCamera = CameraType.FRONT,
-                saving = false,
+                savingState = CameraSavingState.NotSaving,
                 capturedPhoto = null,
             ),
             onIntent = {}

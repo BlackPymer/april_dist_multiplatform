@@ -24,7 +24,7 @@ class CameraViewModel : ViewModel() {
             cameraProvideState = CameraProvideState.NotGranted,
             currentShirt = null,
             currentModel = null,
-            saving = false,
+            savingState = CameraSavingState.NotSaving,
             currentCamera = CameraType.FRONT,
             capturedPhoto = null
         )
@@ -42,6 +42,7 @@ class CameraViewModel : ViewModel() {
             is CameraIntent.SaveImage -> saveImage()
             is CameraIntent.ChangeCamera -> changeCamera()
             is CameraIntent.SetImage -> setImage(intent.imageBitmap)
+            is CameraIntent.OnImageCreated -> onImageCreated()
         }
     }
 
@@ -53,13 +54,13 @@ class CameraViewModel : ViewModel() {
 
     private fun backToToolbar() {
         _state.update {
-            it.copy(saving = false)
+            it.copy(savingState = CameraSavingState.NotSaving)
         }
     }
 
     private fun takePicture() {
         _state.update {
-            it.copy(saving = true)
+            it.copy(savingState = CameraSavingState.CreatingImage)
         }
     }
 
@@ -129,9 +130,14 @@ class CameraViewModel : ViewModel() {
     private fun saveImage(){
         _state.update {
             it.copy(
-                saving = false,
+                savingState = CameraSavingState.NotSaving,
                 capturedPhoto = null
             )
+        }
+    }
+    private fun onImageCreated(){
+        _state.update{
+            it.copy(savingState = CameraSavingState.Saving)
         }
     }
 }
