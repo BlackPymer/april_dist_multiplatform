@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.drawscope.draw
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.zIndex
+import dev.yarobot.shirmaz.camera.CameraIntent
 
 
 actual fun createModelView(
@@ -73,7 +74,11 @@ private class AndroidModelView(
     private var sceneViewRef: SurfaceView? = null
 
     @Composable
-    override fun ModelRendererInit(model: ThreeDModel, modifier: Modifier) {
+    override fun ModelRendererInit(
+        model: ThreeDModel,
+        modifier: Modifier,
+        onIntent: (CameraIntent) -> Unit
+    ) {
         val engine = rememberEngine()
         val modelLoader = rememberModelLoader(engine)
         val environmentLoader = rememberEnvironmentLoader(engine)
@@ -128,6 +133,7 @@ private class AndroidModelView(
                     }
                 }
                 cameraNode.lookAt(centerNode)
+                onIntent(CameraIntent.ViewCreated)
             },
             onGestureListener = rememberOnGestureListener(
                 creator = { SimpleOnGestureListener() }

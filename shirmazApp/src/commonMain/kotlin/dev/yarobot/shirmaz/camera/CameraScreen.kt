@@ -143,26 +143,27 @@ private fun BoxScope.GrantedView(
         createModelView(createPoseDetector(ShirmazPoseDetectorOptions.STREAM))
     }
     val isSaving =
-        remember((state.savingState != CameraSavingState.Saving)) { (state.savingState != CameraSavingState.Saving) }
+        remember((state.savingState == CameraSavingState.CreatingImage)) { (state.savingState == CameraSavingState.CreatingImage) }
     CameraView(
         cameraType = remember(state.currentCamera) { state.currentCamera },
         onImageCaptured = { image ->
             modelView.updateModelPosition(image)
         },
         onPictureTaken = { image ->
+            println("!!!Picture si taken")
             onIntent(CameraIntent.SetImage(image))
         },
-        capturePhotoStarted = state.savingState != CameraSavingState.Saving
+        capturePhotoStarted = isSaving
     )
 
     //needs to be saved
     if (state.savingState == CameraSavingState.CreatingImage) {
         state.currentModel?.let { shirt ->
-            modelView.ModelRendererInit(shirt, Modifier.zIndex(1f))
+            modelView.ModelRendererInit(shirt, Modifier.zIndex(1f), onIntent)
         }
     } else {
         state.currentModel?.let { shirt ->
-            modelView.ModelRendererInit(shirt, Modifier)
+            modelView.ModelRendererInit(shirt, Modifier, onIntent)
         }
     }
 
@@ -180,31 +181,33 @@ private fun BoxScope.GrantedView(
                     .fillMaxSize()
             ) {
                 if (modelSize.width > 0 && modelSize.height > 0) {
-                    LaunchedEffect(Unit) {
-                        println("!!LaunchedEffect started")
-                        imageBitmap = convertContentToImageBitmap()
-                        println("!! imageBitmap: $imageBitmap")
-                        println("!! imageBitmap size: ${imageBitmap?.width}x${imageBitmap?.height}")
+                    LaunchedEffect(state.viewCreated) {
+                        if (state.viewCreated) {
+                            imageBitmap = convertContentToImageBitmap()
+                            println("!!LaunchedEffect started")
+                            println("!! imageBitmap: $imageBitmap")
+                            println("!! imageBitmap size: ${imageBitmap?.width}x${imageBitmap?.height}")
+                        }
                     }
                 }
             }
 
+
             LaunchedEffect(state.capturedPhoto) {
                 state.capturedPhoto?.let { image ->
-                    println("!Everything is good")
+                    println("!! Everything is good")
                     val scaledImageBitmap = imageBitmap?.resizeTo(image.width, image.height)
                     if (scaledImageBitmap != null) {
                         val overlaidImage = image.overlayAlphaPixels(scaledImageBitmap)
-                        onIntent(CameraIntent.SetImage(overlaidImage))
+                        onIntent(CameraIntent.SetImage(scaledImageBitmap))
                         onIntent(CameraIntent.OnImageCreated)
                     } else {
                         println("!! Failed to scale imageBitmap")
                     }
-                }?: run{
+                } ?: run {
                     println("!!capturedPhoto is null")
                 }
             }
-
 
         }
 
@@ -227,6 +230,7 @@ private fun BoxScope.GrantedView(
             state.capturedPhoto?.let { image ->
                 RenderImage(image = image)
             }
+
         }
 
         else -> {

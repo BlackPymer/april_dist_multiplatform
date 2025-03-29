@@ -12,7 +12,8 @@ sealed interface CameraIntent {
     data class ChooseShirt(val shirt: Shirt?) : CameraIntent
     data object BackToToolbar : CameraIntent
     data object SaveImage : CameraIntent
-    data object OnImageCreated: CameraIntent
+    data object OnImageCreated : CameraIntent
+    data object ViewCreated : CameraIntent
 
     data class SetImage(val imageBitmap: ImageBitmap) : CameraIntent
 }

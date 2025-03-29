@@ -10,5 +10,6 @@ data class CameraScreenState(
     val currentShirt: Shirt?,
     val savingState: CameraSavingState,
     val currentCamera: CameraType,
-    val capturedPhoto: ImageBitmap?
+    val capturedPhoto: ImageBitmap?,
+    val viewCreated: Boolean
 )

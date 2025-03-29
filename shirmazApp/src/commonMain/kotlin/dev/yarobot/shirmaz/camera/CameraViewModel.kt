@@ -26,7 +26,8 @@ class CameraViewModel : ViewModel() {
             currentModel = null,
             savingState = CameraSavingState.NotSaving,
             currentCamera = CameraType.FRONT,
-            capturedPhoto = null
+            capturedPhoto = null,
+            viewCreated = false
         )
     )
 
@@ -43,6 +44,7 @@ class CameraViewModel : ViewModel() {
             is CameraIntent.ChangeCamera -> changeCamera()
             is CameraIntent.SetImage -> setImage(intent.imageBitmap)
             is CameraIntent.OnImageCreated -> onImageCreated()
+            is CameraIntent.ViewCreated -> viewCreated()
         }
     }
 
@@ -127,17 +129,29 @@ class CameraViewModel : ViewModel() {
         }
     }
 
-    private fun saveImage(){
+    private fun saveImage() {
         _state.update {
             it.copy(
                 savingState = CameraSavingState.NotSaving,
-                capturedPhoto = null
+                capturedPhoto = null,
+                viewCreated = false
             )
         }
     }
-    private fun onImageCreated(){
-        _state.update{
+
+    private fun onImageCreated() {
+        _state.update {
             it.copy(savingState = CameraSavingState.Saving)
+        }
+    }
+
+    private fun viewCreated() {
+        if (_state.value.savingState == CameraSavingState.CreatingImage && !_state.value.viewCreated) {
+            _state.update {
+                it.copy(
+                    viewCreated = true
+                )
+            }
         }
     }
 }
