@@ -199,7 +199,7 @@ private fun BoxScope.GrantedView(
                     val scaledImageBitmap = imageBitmap?.resizeTo(image.width, image.height)
                     if (scaledImageBitmap != null) {
                         val overlaidImage = image.overlayAlphaPixels(scaledImageBitmap)
-                        onIntent(CameraIntent.SetImage(scaledImageBitmap))
+                        onIntent(CameraIntent.SetImage(overlaidImage))
                         onIntent(CameraIntent.OnImageCreated)
                     } else {
                         println("!! Failed to scale imageBitmap")
