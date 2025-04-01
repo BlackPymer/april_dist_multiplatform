@@ -34,13 +34,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetectorOptions
 import dev.yarobot.shirmaz.posedetection.createPoseDetector
@@ -52,6 +59,7 @@ import dev.yarobot.shirmaz.ui.icons.Cloth
 import dev.yarobot.shirmaz.ui.icons.PhotoSearch
 import dev.yarobot.shirmaz.ui.icons.RefreshDot
 import dev.yarobot.shirmaz.ui.icons.ShirmazIcons
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import shirmaz.shirmazapp.generated.resources.Res
@@ -80,8 +88,9 @@ fun CameraScreen() {
 @Composable
 internal fun ScreenContent(
     onIntent: (CameraIntent) -> Unit,
-    state: CameraScreenState
+    state: CameraScreenState,
 ) {
+    val permissionsController = LocalPermissionsController.current
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -95,25 +104,32 @@ internal fun ScreenContent(
             }
 
             CameraProvideState.NotGranted -> {
-                NotGrantedView(onIntent)
+                NotGrantedView(
+                    onClick = { onIntent(CameraIntent.RequestCamera(permissionsController)) },
+                    messageText = stringResource(Res.string.camera_not_granted),
+                    buttonText = stringResource(Res.string.camera_request)
+                )
             }
         }
     }
 }
 
 @Composable
-fun NotGrantedView(onIntent: (CameraIntent) -> Unit) {
-    val permissionsController = LocalPermissionsController.current
+fun NotGrantedView(
+    onClick: () -> Unit,
+    messageText: String,
+    buttonText: String
+) {
     Column(
         modifier = Modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = stringResource(Res.string.camera_not_granted))
+        Text(text = messageText)
         TextButton(
-            onClick = { onIntent(CameraIntent.RequestCamera(permissionsController)) }
+            onClick = onClick
         ) {
-            Text(text = stringResource(Res.string.camera_request))
+            Text(text = buttonText)
         }
     }
 }
@@ -126,33 +142,114 @@ private fun BoxScope.GrantedView(
     val modelView = remember {
         createModelView(createPoseDetector(ShirmazPoseDetectorOptions.STREAM))
     }
+    val isSaving =
+        remember((state.savingState == CameraSavingState.CreatingImage)) { (state.savingState == CameraSavingState.CreatingImage) }
     CameraView(
         cameraType = remember(state.currentCamera) { state.currentCamera },
-        onImageCaptured = {
-            modelView.updateModelPosition(it)
+        onImageCaptured = { image ->
+            modelView.updateModelPosition(image)
         },
-        modelView = {
-            state.currentModel?.let {
-                modelView.ModelRendererInit(state.currentModel)
-            }
+        onPictureTaken = { image ->
+            println("!!!Picture si taken")
+            onIntent(CameraIntent.SetImage(image))
         },
+        capturePhotoStarted = isSaving
     )
 
-    Column(
-        modifier = Modifier.align(Alignment.BottomCenter),
-        verticalArrangement = Arrangement.Bottom,
-    ) {
-        Carousel(
-            state = remember(state.currentShirt) { state },
-            onIntent = onIntent,
-        )
-        if (remember(state.saving) { state.saving }) {
-            SavingPanel(onIntent = onIntent)
-        } else {
-            ToolBar(onIntent = onIntent)
+    //needs to be saved
+    if (state.savingState == CameraSavingState.CreatingImage) {
+        state.currentModel?.let { shirt ->
+            modelView.ModelRendererInit(shirt, Modifier.zIndex(1f), onIntent)
+        }
+    } else {
+        state.currentModel?.let { shirt ->
+            modelView.ModelRendererInit(shirt, Modifier, onIntent)
+        }
+    }
+
+
+    when (state.savingState) {
+        is CameraSavingState.CreatingImage -> {
+            var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
+            var modelSize by remember { mutableStateOf(IntSize.Zero) }
+
+            Bitmappable(
+                modifier = Modifier
+                    .onGloballyPositioned { layoutCoordinates ->
+                        modelSize = layoutCoordinates.size
+                    }
+                    .fillMaxSize()
+            ) {
+                if (modelSize.width > 0 && modelSize.height > 0) {
+                    LaunchedEffect(state.viewCreated) {
+                        if (state.viewCreated) {
+                            imageBitmap = convertContentToImageBitmap()
+                            println("!!LaunchedEffect started")
+                            println("!! imageBitmap: $imageBitmap")
+                            println("!! imageBitmap size: ${imageBitmap?.width}x${imageBitmap?.height}")
+                        }
+                    }
+                }
+            }
+
+
+            LaunchedEffect(state.capturedPhoto) {
+                state.capturedPhoto?.let { image ->
+                    println("!! Everything is good")
+                    val scaledImageBitmap = imageBitmap?.resizeTo(image.width, image.height)
+                    if (scaledImageBitmap != null) {
+                        val overlaidImage = image.overlayAlphaPixels(scaledImageBitmap)
+                        onIntent(CameraIntent.SetImage(overlaidImage))
+                        onIntent(CameraIntent.OnImageCreated)
+                    } else {
+                        println("!! Failed to scale imageBitmap")
+                    }
+                } ?: run {
+                    println("!!capturedPhoto is null")
+                }
+            }
+
+        }
+
+        is CameraSavingState.Saving -> {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .zIndex(1f)
+            ) {
+                Carousel(
+                    state = state,
+                    onIntent = onIntent,
+                )
+
+                SavingPanel(
+                    onIntent = onIntent,
+                    state = state
+                )
+            }
+            state.capturedPhoto?.let { image ->
+                RenderImage(image = image)
+            }
+
+        }
+
+        else -> {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .zIndex(1f)
+            ) {
+                Carousel(
+                    state = state,
+                    onIntent = onIntent,
+                )
+
+                ToolBar(onIntent = onIntent)
+            }
         }
     }
 }
+
 
 @Composable
 private fun Carousel(
@@ -233,7 +330,10 @@ private fun CarouselElement(
             .width(ShirmazTheme.dimension.shirtButtonWidth)
             .clip(RoundedCornerShape(ShirmazTheme.dimension.buttonCornerRadius))
             .background(ShirmazTheme.colors.shirtBackground)
-            .clickable { onIntent(CameraIntent.ChooseShirt(shirt)) }
+            .clickable {
+                if (isSelected) return@clickable
+                onIntent(CameraIntent.ChooseShirt(shirt))
+            }
             .border(
                 width = ShirmazTheme.dimension.borderThikness,
                 color = if (isSelected) ShirmazTheme.colors.takePictureButton
@@ -309,7 +409,10 @@ private fun TakePictureButton(
 }
 
 @Composable
-private fun SavingPanel(onIntent: (CameraIntent) -> Unit) {
+private fun SavingPanel(
+    onIntent: (CameraIntent) -> Unit,
+    state: CameraScreenState
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -333,7 +436,12 @@ private fun SavingPanel(onIntent: (CameraIntent) -> Unit) {
             Spacer(Modifier.width(ShirmazIcons.ArrowBack.defaultWidth))
         }
         ShirmazButton(
-            onClick = { onIntent(CameraIntent.SaveImage) },
+            onClick = {
+                state.capturedPhoto?.let { imageBitmap ->
+                    savePhoto(imageBitmap)
+                    onIntent(CameraIntent.SaveImage)
+                }
+            }
         ) {
             Text(
                 text = stringResource(Res.string.save_cd),

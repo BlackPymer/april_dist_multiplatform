@@ -2,12 +2,12 @@ package dev.yarobot.shirmaz.camera
 
 import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.core.CameraSelector
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -20,14 +20,22 @@ actual fun CameraView(
     modifier: Modifier,
     cameraType: CameraType,
     onImageCaptured: (PlatformImage) -> Unit,
-    modelView: @Composable BoxScope.() -> Unit,
+    onPictureTaken: (ImageBitmap) -> Unit,
+    capturePhotoStarted: Boolean
 ) {
     val viewModel = viewModel { CameraXViewModel() }
     val context = LocalContext.current
+
     viewModel.setAnalyzeUseCase(onImageCaptured)
     val lifecycleOwner = LocalLifecycleOwner.current
     val surfaceRequest by viewModel.surfaceRequest.collectAsStateWithLifecycle()
-
+    LaunchedEffect(capturePhotoStarted) {
+        if (capturePhotoStarted) {
+            viewModel.takePicture { bitmap ->
+                onPictureTaken(bitmap.asImageBitmap())
+            }
+        }
+    }
     LaunchedEffect(lifecycleOwner, cameraType) {
         viewModel.bindToCamera(
             context.applicationContext,
@@ -38,10 +46,8 @@ actual fun CameraView(
             }
         )
     }
-    Box(modifier) {
-        surfaceRequest?.let { request ->
-            CameraXViewfinder(surfaceRequest = request)
-        }
-        modelView()
+    surfaceRequest?.let { request ->
+        CameraXViewfinder(surfaceRequest = request)
     }
 }
+

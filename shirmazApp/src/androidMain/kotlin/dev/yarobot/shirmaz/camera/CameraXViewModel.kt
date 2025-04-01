@@ -1,14 +1,19 @@
 package dev.yarobot.shirmaz.camera
 
 import android.content.Context
-import android.os.Handler
-import android.os.HandlerThread
+import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.util.Log
 import android.util.Size
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCapture.OnImageCapturedCallback
+import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.core.SurfaceRequest
+import androidx.camera.core.UseCaseGroup
 import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -17,31 +22,24 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import dev.yarobot.shirmaz.camera.model.CameraSize
 import dev.yarobot.shirmaz.platform.PlatformImage
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import java.util.concurrent.Executor
+import java.util.concurrent.Executors
+
+private val backgroundExecutor = Executors.newSingleThreadExecutor()
 
 class CameraXViewModel() : ViewModel() {
-    private var cameraProvider: ProcessCameraProvider? = null
-
-    private val handlerThread = HandlerThread("CameraXBackgroundThread").apply { start() }
-
-    private val backgroundExecutor = object : Executor {
-        private val handler = Handler(handlerThread.looper)
-        override fun execute(command: Runnable?) {
-            command?.let { handler.post(it) }
-        }
-    }
-
     private val _surfaceRequest = MutableStateFlow<SurfaceRequest?>(null)
     val surfaceRequest: StateFlow<SurfaceRequest?> = _surfaceRequest
 
-    private val cameraPreviewUseCase = Preview.Builder().build().apply {
-        setSurfaceProvider { newSurfaceRequest ->
-            _surfaceRequest.update { newSurfaceRequest }
+    private val cameraPreviewUseCase = Preview.Builder()
+        .build().apply {
+            setSurfaceProvider { newSurfaceRequest ->
+                _surfaceRequest.update { newSurfaceRequest }
+            }
         }
-    }
 
     private val resolutionSelector = ResolutionSelector.Builder()
         .setResolutionStrategy(
@@ -50,6 +48,10 @@ class CameraXViewModel() : ViewModel() {
                 ResolutionStrategy.FALLBACK_RULE_NONE
             )
         )
+        .build()
+
+    private val imageCaptureUseCase = ImageCapture.Builder()
+        .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
         .build()
 
     private val cameraAnalyzeUseCase = ImageAnalysis.Builder()
@@ -61,29 +63,60 @@ class CameraXViewModel() : ViewModel() {
         cameraAnalyzeUseCase.setAnalyzer(backgroundExecutor, analyzer)
     }
 
+    fun takePicture(onTakenPicture: (Bitmap) -> Unit) {
+        imageCaptureUseCase.takePicture(
+            backgroundExecutor,
+            object : OnImageCapturedCallback() {
+                override fun onCaptureSuccess(imageProxy: ImageProxy) {
+                    val rotationDegrees = imageProxy.imageInfo.rotationDegrees
+                    val rotatedImage = imageProxy.toBitmap().rotate(rotationDegrees)
+                    onTakenPicture(rotatedImage)
+                }
+
+                override fun onError(exception: ImageCaptureException) {
+                    Log.e(
+                        "CameraXViewModel",
+                        "Image capture failed: ${exception.message}",
+                        exception
+                    )
+                }
+            }
+        )
+    }
+
+    private fun Bitmap.rotate(degrees: Int): Bitmap {
+        return if (degrees != 0) {
+            val matrix = Matrix().apply {
+                postRotate(degrees.toFloat())
+            }
+            Bitmap.createBitmap(this, 0, 0, this.width, this.height, matrix, true)
+        } else {
+            this
+        }
+    }
+
+    private val useCaseGroup = UseCaseGroup.Builder()
+        .addUseCase(cameraPreviewUseCase)
+        .addUseCase(imageCaptureUseCase)
+        .addUseCase(cameraAnalyzeUseCase)
+        .build()
+
     suspend fun bindToCamera(
         appContext: Context,
         lifecycleOwner: LifecycleOwner,
         cameraSelector: CameraSelector
     ) {
-        ProcessCameraProvider.awaitInstance(appContext).apply {
-            cameraProvider = this
-            try {
-                unbindAll()
-                bindToLifecycle(
-                    lifecycleOwner,
-                    cameraSelector,
-                    cameraPreviewUseCase,
-                    cameraAnalyzeUseCase
-                )
-            } catch (e: Exception) {
-                Log.e("Camera", "Use case binding failed", e)
-            }
-        }
-    }
+        val processCameraProvider = ProcessCameraProvider.awaitInstance(appContext)
 
-    override fun onCleared() {
-        super.onCleared()
-        handlerThread.quitSafely()
+        processCameraProvider.bindToLifecycle(
+            lifecycleOwner,
+            cameraSelector,
+            useCaseGroup
+        )
+        try {
+            awaitCancellation()
+        } finally {
+            processCameraProvider.unbindAll()
+        }
     }
 }

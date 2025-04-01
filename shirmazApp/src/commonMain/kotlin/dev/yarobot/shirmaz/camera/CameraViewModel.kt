@@ -1,5 +1,6 @@
 package dev.yarobot.shirmaz.camera
 
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.icerock.moko.permissions.Permission
@@ -23,8 +24,10 @@ class CameraViewModel : ViewModel() {
             cameraProvideState = CameraProvideState.NotGranted,
             currentShirt = null,
             currentModel = null,
-            saving = false,
-            currentCamera = CameraType.FRONT
+            savingState = CameraSavingState.NotSaving,
+            currentCamera = CameraType.FRONT,
+            capturedPhoto = null,
+            viewCreated = false
         )
     )
 
@@ -37,20 +40,29 @@ class CameraViewModel : ViewModel() {
             is CameraIntent.OpenGallery -> {}
             is CameraIntent.ChooseShirt -> intent.shirt.chooseAsCurrent()
             is CameraIntent.BackToToolbar -> backToToolbar()
-            is CameraIntent.SaveImage -> {}
-            CameraIntent.ChangeCamera -> changeCamera()
+            is CameraIntent.SaveImage -> saveImage()
+            is CameraIntent.ChangeCamera -> changeCamera()
+            is CameraIntent.SetImage -> setImage(intent.imageBitmap)
+            is CameraIntent.OnImageCreated -> onImageCreated()
+            is CameraIntent.ViewCreated -> viewCreated()
+        }
+    }
+
+    private fun setImage(imageBitmap: ImageBitmap) {
+        _state.update {
+            it.copy(capturedPhoto = imageBitmap)
         }
     }
 
     private fun backToToolbar() {
         _state.update {
-            it.copy(saving = false)
+            it.copy(savingState = CameraSavingState.NotSaving)
         }
     }
 
     private fun takePicture() {
         _state.update {
-            it.copy(saving = true)
+            it.copy(savingState = CameraSavingState.CreatingImage)
         }
     }
 
@@ -112,6 +124,32 @@ class CameraViewModel : ViewModel() {
                     currentModel = ThreeDModel(
                         Res.readBytes("files/$modelName")
                     )
+                )
+            }
+        }
+    }
+
+    private fun saveImage() {
+        _state.update {
+            it.copy(
+                savingState = CameraSavingState.NotSaving,
+                capturedPhoto = null,
+                viewCreated = false
+            )
+        }
+    }
+
+    private fun onImageCreated() {
+        _state.update {
+            it.copy(savingState = CameraSavingState.Saving)
+        }
+    }
+
+    private fun viewCreated() {
+        if (_state.value.savingState == CameraSavingState.CreatingImage && !_state.value.viewCreated) {
+            _state.update {
+                it.copy(
+                    viewCreated = true
                 )
             }
         }

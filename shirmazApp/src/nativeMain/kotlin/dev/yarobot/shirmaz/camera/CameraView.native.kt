@@ -6,11 +6,13 @@ import androidx.compose.ui.graphics.ImageBitmap
 import dev.yarobot.shirmaz.camera.model.CameraType
 import dev.yarobot.shirmaz.platform.PlatformImage
 
+
 @Composable
-expect fun CameraView(
-    modifier: Modifier = Modifier,
+actual fun CameraView(
+    modifier: Modifier,
     cameraType: CameraType,
     onImageCaptured: (image: PlatformImage) -> Unit,
     onPictureTaken: (image: ImageBitmap) -> Unit,
-    capturePhotoStarted: Boolean,
-)
+    capturePhotoStarted: Boolean
+) {
+}
