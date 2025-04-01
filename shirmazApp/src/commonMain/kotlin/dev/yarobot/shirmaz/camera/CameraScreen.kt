@@ -139,6 +139,10 @@ private fun BoxScope.GrantedView(
     state: CameraScreenState,
     onIntent: (CameraIntent) -> Unit
 ) {
+    val galleryWorker = remember { GalleryWorker() }
+    if (!galleryWorker.wasInitializer) {
+        galleryWorker.Init()
+    }
     val modelView = remember {
         createModelView(createPoseDetector(ShirmazPoseDetectorOptions.STREAM))
     }
@@ -156,17 +160,14 @@ private fun BoxScope.GrantedView(
             },
             capturePhotoStarted = isSaving
         )
-    }
-    else if (state.appMode==AppMode.GalleryMode){
-        if(state.galleryPicture==null){
-            onOpenGalleryButton(state = state, onIntent = onIntent)
-        }
-        else{
-            RenderImage(state.galleryPicture)
+    } else if (state.appMode == AppMode.GalleryMode) {
+        if (state.galleryPicture == null) {
+            onOpenGalleryButton(state = state, onIntent = onIntent,galleryWorker=galleryWorker)
+        } else {
+            RenderImage(image = state.galleryPicture)
             modelView.updateModelPosition(state.galleryPicture.toInputImage())
         }
     }
-    //needs to be saved
     if (state.savingState == CameraSavingState.CreatingImage) {
         state.currentModel?.let { shirt ->
             modelView.ModelRendererInit(shirt, Modifier.zIndex(1f), onIntent)
@@ -483,9 +484,10 @@ fun ShirmazButton(
 }
 
 @Composable
-fun onOpenGalleryButton(state: CameraScreenState, onIntent: (CameraIntent) -> Unit) {
+fun onOpenGalleryButton(state: CameraScreenState, onIntent: (CameraIntent) -> Unit,galleryWorker: GalleryWorker) {
+    println("!!onOpenGallery fun")
     if (state.galleryPicture == null) {
-        onIntent(CameraIntent.OpenGallery(openImageFromGallery()))
+        onIntent(CameraIntent.OpenGallery(galleryWorker.openImageFromGallery()))
     } else {
         onIntent(CameraIntent.OpenGallery(null))
     }

@@ -7,3 +7,14 @@ import androidx.compose.ui.graphics.ImageBitmap
 actual fun  openImageFromGallery(): ImageBitmap?{
     TODO("Not yet implemented")
 }
+
+actual class GalleryWorker actual constructor() {
+    @Composable
+    actual fun openImageFromGallery(): ImageBitmap? {
+        TODO("Not yet implemented")
+    }
+
+    @Composable
+    actual fun Init() {
+    }
+}
