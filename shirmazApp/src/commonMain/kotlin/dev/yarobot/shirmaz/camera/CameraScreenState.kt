@@ -11,5 +11,7 @@ data class CameraScreenState(
     val savingState: CameraSavingState,
     val currentCamera: CameraType,
     val capturedPhoto: ImageBitmap?,
-    val viewCreated: Boolean
+    val viewCreated: Boolean,
+    val galleryPicture: ImageBitmap?,
+    val appMode: AppMode
 )

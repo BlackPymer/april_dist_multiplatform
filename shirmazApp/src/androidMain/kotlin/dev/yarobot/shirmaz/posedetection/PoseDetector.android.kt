@@ -29,17 +29,13 @@ private class AndroidPoseDetector(override val options: ShirmazPoseDetectorOptio
         image: PlatformImage,
         onProcess: (List<PlatformLandmark>?, PlatformError?) -> Unit
     ) {
-        val inputImage =
-            InputImage.fromMediaImage(image.image!!, image.imageInfo.rotationDegrees)
+        val inputImage = image
         poseDetector.process(inputImage)
             .addOnSuccessListener { pose ->
                 onProcess(pose.allPoseLandmarks, null)
             }
             .addOnFailureListener { error ->
                 onProcess(null, error)
-            }
-            .addOnCompleteListener {
-                image.close()
             }
     }
 }

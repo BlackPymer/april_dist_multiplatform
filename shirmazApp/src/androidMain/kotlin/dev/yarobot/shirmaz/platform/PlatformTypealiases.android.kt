@@ -5,7 +5,7 @@ package dev.yarobot.shirmaz.platform
 actual typealias PlatformError = Throwable
 
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
-actual typealias PlatformImage = androidx.camera.core.ImageProxy
+actual typealias PlatformImage = com.google.mlkit.vision.common.InputImage
 
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 actual typealias PlatformLandmark = com.google.mlkit.vision.pose.PoseLandmark

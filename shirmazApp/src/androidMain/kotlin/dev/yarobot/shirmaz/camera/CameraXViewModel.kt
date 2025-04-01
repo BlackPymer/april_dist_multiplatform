@@ -5,7 +5,9 @@ import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.util.Log
 import android.util.Size
+import androidx.annotation.OptIn
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCapture.OnImageCapturedCallback
@@ -20,6 +22,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.lifecycle.awaitInstance
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
+import com.google.mlkit.vision.common.InputImage
 import dev.yarobot.shirmaz.camera.model.CameraSize
 import dev.yarobot.shirmaz.platform.PlatformImage
 import kotlinx.coroutines.awaitCancellation
@@ -59,8 +62,14 @@ class CameraXViewModel() : ViewModel() {
         .setResolutionSelector(resolutionSelector)
         .build()
 
+    @OptIn(ExperimentalGetImage::class)
     fun setAnalyzeUseCase(analyzer: (PlatformImage) -> Unit) {
-        cameraAnalyzeUseCase.setAnalyzer(backgroundExecutor, analyzer)
+        cameraAnalyzeUseCase.setAnalyzer(backgroundExecutor, ImageAnalysis.Analyzer { imageProxy ->
+            val mediaImage = imageProxy.image
+            if (mediaImage != null) {
+                analyzer(InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees))
+            }
+        })
     }
 
     fun takePicture(onTakenPicture: (Bitmap) -> Unit) {

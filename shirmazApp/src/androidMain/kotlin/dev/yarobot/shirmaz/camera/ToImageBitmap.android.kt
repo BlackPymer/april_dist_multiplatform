@@ -48,12 +48,6 @@ fun Image.toBitmap(): Bitmap {
 }
 
 
-@OptIn(ExperimentalGetImage::class)
-@Composable
-actual fun PlatformImage.toImageBitmap(): ImageBitmap {
-    val bitmap = image?.toBitmap()
-    return bitmap?.asImageBitmap() ?: ImageBitmap(1, 1)
-}
 private fun capturePhoto(
     context: android.content.Context,
     imageCapture: ImageCapture,

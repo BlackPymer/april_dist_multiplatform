@@ -144,18 +144,28 @@ private fun BoxScope.GrantedView(
     }
     val isSaving =
         remember((state.savingState == CameraSavingState.CreatingImage)) { (state.savingState == CameraSavingState.CreatingImage) }
-    CameraView(
-        cameraType = remember(state.currentCamera) { state.currentCamera },
-        onImageCaptured = { image ->
-            modelView.updateModelPosition(image)
-        },
-        onPictureTaken = { image ->
-            println("!!!Picture si taken")
-            onIntent(CameraIntent.SetImage(image))
-        },
-        capturePhotoStarted = isSaving
-    )
-
+    if (state.appMode == AppMode.CameraMode) {
+        CameraView(
+            cameraType = remember(state.currentCamera) { state.currentCamera },
+            onImageCaptured = { image ->
+                modelView.updateModelPosition(image)
+            },
+            onPictureTaken = { image ->
+                println("!!!Picture si taken")
+                onIntent(CameraIntent.SetImage(image))
+            },
+            capturePhotoStarted = isSaving
+        )
+    }
+    else if (state.appMode==AppMode.GalleryMode){
+        if(state.galleryPicture==null){
+            onOpenGalleryButton(state = state, onIntent = onIntent)
+        }
+        else{
+            RenderImage(state.galleryPicture)
+            modelView.updateModelPosition(state.galleryPicture.toInputImage())
+        }
+    }
     //needs to be saved
     if (state.savingState == CameraSavingState.CreatingImage) {
         state.currentModel?.let { shirt ->
@@ -356,7 +366,9 @@ private fun ToolBar(onIntent: (CameraIntent) -> Unit) {
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = { onIntent(CameraIntent.OpenGallery) }) {
+        IconButton(onClick = {
+            onIntent(CameraIntent.SetAppMode(AppMode.GalleryMode))
+        }) {
             Icon(
                 modifier = Modifier.size(ShirmazTheme.dimension.sideCarouselButtonSize),
                 imageVector = ShirmazIcons.PhotoSearch,
@@ -467,6 +479,15 @@ fun ShirmazButton(
         onClick = onClick
     ) {
         content()
+    }
+}
+
+@Composable
+fun onOpenGalleryButton(state: CameraScreenState, onIntent: (CameraIntent) -> Unit) {
+    if (state.galleryPicture == null) {
+        onIntent(CameraIntent.OpenGallery(openImageFromGallery()))
+    } else {
+        onIntent(CameraIntent.OpenGallery(null))
     }
 }
 

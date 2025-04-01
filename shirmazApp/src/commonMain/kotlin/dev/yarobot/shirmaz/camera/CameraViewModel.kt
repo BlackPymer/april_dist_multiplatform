@@ -27,7 +27,9 @@ class CameraViewModel : ViewModel() {
             savingState = CameraSavingState.NotSaving,
             currentCamera = CameraType.FRONT,
             capturedPhoto = null,
-            viewCreated = false
+            viewCreated = false,
+            galleryPicture = null,
+            appMode = AppMode.CameraMode
         )
     )
 
@@ -37,7 +39,7 @@ class CameraViewModel : ViewModel() {
         when (intent) {
             is CameraIntent.RequestCamera -> requestCamera(intent.permissionsController)
             is CameraIntent.TakePicture -> takePicture()
-            is CameraIntent.OpenGallery -> {}
+            is CameraIntent.OpenGallery -> onGalleryButton(intent.imageBitmap)
             is CameraIntent.ChooseShirt -> intent.shirt.chooseAsCurrent()
             is CameraIntent.BackToToolbar -> backToToolbar()
             is CameraIntent.SaveImage -> saveImage()
@@ -45,6 +47,7 @@ class CameraViewModel : ViewModel() {
             is CameraIntent.SetImage -> setImage(intent.imageBitmap)
             is CameraIntent.OnImageCreated -> onImageCreated()
             is CameraIntent.ViewCreated -> viewCreated()
+            is CameraIntent.SetAppMode -> setAppMode(intent.appMode)
         }
     }
 
@@ -150,6 +153,35 @@ class CameraViewModel : ViewModel() {
             _state.update {
                 it.copy(
                     viewCreated = true
+                )
+            }
+        }
+    }
+
+    private fun setAppMode(appMode: AppMode){
+        _state.update {
+            it.copy(
+                appMode = appMode
+            )
+        }
+    }
+
+    private fun onGalleryButton(imageBitmap: ImageBitmap?) {
+        if (imageBitmap == null) {
+            _state.update {
+                it.copy(
+                    appMode = AppMode.GalleryMode,
+                    galleryPicture = imageBitmap,
+                    capturedPhoto = imageBitmap
+                )
+            }
+        }
+        else{
+            _state.update {
+                it.copy(
+                    appMode = AppMode.CameraMode,
+                    galleryPicture = null,
+                    capturedPhoto = null
                 )
             }
         }
