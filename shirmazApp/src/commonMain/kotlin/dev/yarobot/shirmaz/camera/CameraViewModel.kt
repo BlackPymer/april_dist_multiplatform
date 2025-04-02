@@ -39,7 +39,7 @@ class CameraViewModel : ViewModel() {
         when (intent) {
             is CameraIntent.RequestCamera -> requestCamera(intent.permissionsController)
             is CameraIntent.TakePicture -> takePicture()
-            is CameraIntent.OpenGallery -> onGalleryButton(intent.imageBitmap)
+            is CameraIntent.OpenGallery -> openGallery(intent.imageBitmap)
             is CameraIntent.ChooseShirt -> intent.shirt.chooseAsCurrent()
             is CameraIntent.BackToToolbar -> backToToolbar()
             is CameraIntent.SaveImage -> saveImage()
@@ -47,7 +47,7 @@ class CameraViewModel : ViewModel() {
             is CameraIntent.SetImage -> setImage(intent.imageBitmap)
             is CameraIntent.OnImageCreated -> onImageCreated()
             is CameraIntent.ViewCreated -> viewCreated()
-            is CameraIntent.SetAppMode -> setAppMode(intent.appMode)
+            is CameraIntent.OnGalleryButton -> onGalleryButton()
         }
     }
 
@@ -158,25 +158,24 @@ class CameraViewModel : ViewModel() {
         }
     }
 
-    private fun setAppMode(appMode: AppMode){
+    private fun openGallery(imageBitmap: ImageBitmap?) {
         _state.update {
             it.copy(
-                appMode = appMode
+                galleryPicture = imageBitmap,
+                capturedPhoto = imageBitmap
             )
         }
+
     }
 
-    private fun onGalleryButton(imageBitmap: ImageBitmap?) {
-        if (imageBitmap == null) {
+    private fun onGalleryButton() {
+        if (_state.value.appMode == AppMode.CameraMode) {
             _state.update {
                 it.copy(
-                    appMode = AppMode.GalleryMode,
-                    galleryPicture = imageBitmap,
-                    capturedPhoto = imageBitmap
+                    appMode = AppMode.GalleryMode
                 )
             }
-        }
-        else{
+        } else {
             _state.update {
                 it.copy(
                     appMode = AppMode.CameraMode,

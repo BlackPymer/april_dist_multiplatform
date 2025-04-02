@@ -8,6 +8,7 @@ import com.google.mlkit.vision.pose.PoseDetector
 import com.google.mlkit.vision.pose.defaults.PoseDetectorOptions
 import dev.yarobot.shirmaz.platform.PlatformError
 import dev.yarobot.shirmaz.platform.PlatformImage
+import dev.yarobot.shirmaz.platform.PlatformInputImage
 import dev.yarobot.shirmaz.platform.PlatformLandmark
 
 private class AndroidPoseDetector(override val options: ShirmazPoseDetectorOptions) :
@@ -29,8 +30,25 @@ private class AndroidPoseDetector(override val options: ShirmazPoseDetectorOptio
         image: PlatformImage,
         onProcess: (List<PlatformLandmark>?, PlatformError?) -> Unit
     ) {
-        val inputImage = image
+        val inputImage =
+            InputImage.fromMediaImage(image.image!!, image.imageInfo.rotationDegrees)
         poseDetector.process(inputImage)
+            .addOnSuccessListener { pose ->
+                onProcess(pose.allPoseLandmarks, null)
+            }
+            .addOnFailureListener { error ->
+                onProcess(null, error)
+            }
+            .addOnCompleteListener {
+                image.close()
+            }
+    }
+
+    override fun processImage(
+        image: PlatformInputImage,
+        onProcess: (List<PlatformLandmark>?, PlatformError?) -> Unit
+    ) {
+        poseDetector.process(image)
             .addOnSuccessListener { pose ->
                 onProcess(pose.allPoseLandmarks, null)
             }

@@ -1,13 +1,11 @@
 package dev.yarobot.shirmaz.camera
 
-import androidx.camera.core.ImageProxy
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import com.google.mlkit.vision.common.InputImage
-import dev.yarobot.shirmaz.platform.PlatformImage
+import dev.yarobot.shirmaz.platform.PlatformInputImage
 
 
-
-actual fun ImageBitmap.toInputImage(): PlatformImage {
+actual fun ImageBitmap.toPlatformImage(): PlatformInputImage {
     return InputImage.fromBitmap(this.asAndroidBitmap(), 0)
 }

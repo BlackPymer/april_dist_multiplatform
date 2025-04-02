@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.zIndex
 import dev.yarobot.shirmaz.camera.CameraIntent
+import dev.yarobot.shirmaz.platform.PlatformInputImage
 
 
 actual fun createModelView(
@@ -139,6 +140,35 @@ private class AndroidModelView(
                 creator = { SimpleOnGestureListener() }
             )
         )
+    }
+
+    override fun updateModelPosition(image: PlatformInputImage) {
+        poseDetector.processImage(image) { poses, error ->
+            isPoseValid = !poses.isNullOrEmpty()
+            if (!poses.isNullOrEmpty()) {
+                modelScale = calculateScale(
+                    leftShoulder = poses[RIGHT_SHOULDER].position3D,
+                    rightShoulder = poses[LEFT_SHOULDER].position3D,
+                    spine = averageOf(poses[LEFT_HIP].position3D, poses[24].position3D),
+                )
+                spinePosition = averageOf(poses[LEFT_HIP].position3D, poses[RIGHT_HIP].position3D)
+                    .toPosition()
+                leftArmRotation = calculateAngle(
+                    poses[LEFT_SHOULDER].position3D,
+                    poses[LEFT_ELBOW].position3D,
+                    leftArmDefaultRotation
+                )
+                rightArmRotation = calculateAngle(
+                    poses[RIGHT_SHOULDER].position3D,
+                    poses[RIGHT_ELBOW].position3D,
+                    rightArmDefaultRotation
+                ) - Position(0f, 0f, 180f)
+                shoulderPosition = averageOf(
+                    poses[RIGHT_SHOULDER].position3D,
+                    poses[LEFT_SHOULDER].position3D
+                ).toPosition() - spinePosition
+            }
+        }
     }
 
     override fun updateModelPosition(image: PlatformImage) {

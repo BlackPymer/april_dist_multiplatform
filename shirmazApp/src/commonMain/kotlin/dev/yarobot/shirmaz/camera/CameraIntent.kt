@@ -14,7 +14,7 @@ sealed interface CameraIntent {
     data object SaveImage : CameraIntent
     data object OnImageCreated : CameraIntent
     data object ViewCreated : CameraIntent
-    data class SetAppMode(val appMode: AppMode):CameraIntent
+    data object OnGalleryButton : CameraIntent
 
     data class SetImage(val imageBitmap: ImageBitmap) : CameraIntent
 }

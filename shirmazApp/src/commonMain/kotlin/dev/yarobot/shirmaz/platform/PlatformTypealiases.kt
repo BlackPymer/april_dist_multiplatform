@@ -1,7 +1,7 @@
 package dev.yarobot.shirmaz.platform
 
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
-expect class PlatformImage
+expect interface PlatformImage
 
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 expect class PlatformError
@@ -20,3 +20,6 @@ expect class CaptureImage
 
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 expect class URI
+
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+expect class PlatformInputImage

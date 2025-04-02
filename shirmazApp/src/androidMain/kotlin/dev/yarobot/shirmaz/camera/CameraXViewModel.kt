@@ -64,12 +64,7 @@ class CameraXViewModel() : ViewModel() {
 
     @OptIn(ExperimentalGetImage::class)
     fun setAnalyzeUseCase(analyzer: (PlatformImage) -> Unit) {
-        cameraAnalyzeUseCase.setAnalyzer(backgroundExecutor, ImageAnalysis.Analyzer { imageProxy ->
-            val mediaImage = imageProxy.image
-            if (mediaImage != null) {
-                analyzer(InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees))
-            }
-        })
+        cameraAnalyzeUseCase.setAnalyzer(backgroundExecutor, analyzer)
     }
 
     fun takePicture(onTakenPicture: (Bitmap) -> Unit) {
