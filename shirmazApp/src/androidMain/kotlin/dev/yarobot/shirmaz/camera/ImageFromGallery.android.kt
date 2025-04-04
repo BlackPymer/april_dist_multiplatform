@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 
 @Composable
-actual fun getImageFromGallery(onReadyImage: (ImageBitmap) -> Unit) {
+fun getImageFromGallery(onReadyImage: (ImageBitmap) -> Unit) {
     val contentResolver = LocalContext.current.contentResolver
     val pickMedia = rememberLauncherForActivityResult(PickVisualMedia()) { uri ->
         uri?.let { it ->

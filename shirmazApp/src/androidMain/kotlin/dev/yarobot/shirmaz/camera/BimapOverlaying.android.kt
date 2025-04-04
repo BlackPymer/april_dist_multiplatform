@@ -8,7 +8,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.graphics.get
 import androidx.core.graphics.set
 
-actual fun ImageBitmap.overlayAlphaPixels(overlay: ImageBitmap): ImageBitmap {
+fun ImageBitmap.overlayAlphaPixels(overlay: ImageBitmap): ImageBitmap {
     require(this.width == overlay.width && this.height == overlay.height) {
         "Both image bitmaps must have the same size"
     }
