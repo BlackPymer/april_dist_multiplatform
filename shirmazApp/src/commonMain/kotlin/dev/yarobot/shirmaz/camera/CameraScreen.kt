@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,6 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -44,7 +44,6 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -139,132 +138,128 @@ private fun BoxScope.GrantedView(
     state: CameraScreenState,
     onIntent: (CameraIntent) -> Unit
 ) {
-    val galleryWorker = remember { GalleryWorker() }
-    if (!galleryWorker.wasInitializer) {
-        galleryWorker.Init()
-    }
     val modelView = remember {
         createModelView(createPoseDetector(ShirmazPoseDetectorOptions.STREAM))
     }
-    val isSaving =
-        remember((state.savingState == CameraSavingState.CreatingImage)) { (state.savingState == CameraSavingState.CreatingImage) }
-    if (state.appMode == AppMode.CameraMode) {
-        CameraView(
-            cameraType = remember(state.currentCamera) { state.currentCamera },
-            onImageCaptured = { image ->
-                modelView.updateModelPosition(image)
-            },
-            onPictureTaken = { image ->
-                println("!!!Picture si taken")
-                onIntent(CameraIntent.SetImage(image))
-            },
-            capturePhotoStarted = isSaving
-        )
-    } else if (state.appMode == AppMode.GalleryMode) {
-        if (state.galleryPicture == null) {
-            onOpenGalleryButton(state = state, onIntent = onIntent, galleryWorker = galleryWorker)
-            println("!!galleryPicture ${state.galleryPicture}")
 
-        } else {
-            state.galleryPicture.let {
-                println("!!rendering")
-                RenderImage(image = it)
-                modelView.updateModelPosition(it.toPlatformImage())
-            } ?: run {
-                println("!!still null")
+    when (state.appMode) {
+        AppMode.CameraMode -> {
+            CameraView(
+                cameraType = remember(state.currentCamera) { state.currentCamera },
+                onImageCaptured = { image ->
+                    modelView.updateModelPosition(image)
+                },
+                onPictureTaken = { image ->
+                    println("!!!Picture si taken")
+                    onIntent(CameraIntent.SetImage(image))
+                },
+                capturePhotoStarted = state.isSaving && state.appMode == AppMode.CameraMode
+            )
+
+            ToolBarPanel(
+                onIntent = onIntent,
+                state = state
+            )
+        }
+
+        AppMode.StaticImage -> {
+            state.staticImage?.let { imageBitmap ->
+                RenderImage(imageBitmap)
+            } ?: CircularProgressIndicator(Modifier.align(Alignment.Center))
+            SavingBarPanel(
+                state = state,
+                onIntent = onIntent
+            )
+        }
+
+        AppMode.SavingImage -> {
+            SavingImage(
+                state = state,
+                onIntent = onIntent
+            )
+        }
+    }
+    modelView.ModelRendererInit(state, Modifier, onIntent)
+}
+
+@Composable
+private fun SavingImage(
+    state: CameraScreenState,
+    onIntent: (CameraIntent) -> Unit
+) {
+    var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
+    var modelSize by remember { mutableStateOf(IntSize.Zero) }
+    Bitmappable(
+        modifier = Modifier
+            .onGloballyPositioned { layoutCoordinates ->
+                modelSize = layoutCoordinates.size
+            }
+            .fillMaxSize()
+    ) {
+        if (modelSize.width > 0 && modelSize.height > 0) {
+            LaunchedEffect(state.viewCreated) {
+                if (state.viewCreated) {
+                    imageBitmap = convertContentToImageBitmap()
+                }
             }
         }
     }
-    if (state.savingState == CameraSavingState.CreatingImage) {
-        state.currentModel?.let { shirt ->
-            modelView.ModelRendererInit(shirt, Modifier.zIndex(1f), onIntent)
-        }
-    } else {
-        state.currentModel?.let { shirt ->
-            modelView.ModelRendererInit(shirt, Modifier, onIntent)
-        }
-    }
 
-
-    when (state.savingState) {
-        is CameraSavingState.CreatingImage -> {
-            var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
-            var modelSize by remember { mutableStateOf(IntSize.Zero) }
-
-            Bitmappable(
-                modifier = Modifier
-                    .onGloballyPositioned { layoutCoordinates ->
-                        modelSize = layoutCoordinates.size
-                    }
-                    .fillMaxSize()
-            ) {
-                if (modelSize.width > 0 && modelSize.height > 0) {
-                    LaunchedEffect(state.viewCreated) {
-                        if (state.viewCreated) {
-                            imageBitmap = convertContentToImageBitmap()
-                        }
-                    }
-                }
+    LaunchedEffect(state.staticImage) {
+        state.staticImage?.let { image ->
+            val scaledImageBitmap = imageBitmap?.resizeTo(image.width, image.height)
+            if (scaledImageBitmap != null) {
+                val overlaidImage = image.overlayAlphaPixels(scaledImageBitmap)
+                onIntent(CameraIntent.SetImage(overlaidImage))
+                onIntent(CameraIntent.OnImageCreated)
+            } else {
+                onIntent(CameraIntent.SetImage(state.staticImage))
+                onIntent(CameraIntent.OnImageCreated)
             }
-
-
-            LaunchedEffect(state.capturedPhoto) {
-                state.capturedPhoto?.let { image ->
-                    val scaledImageBitmap = imageBitmap?.resizeTo(image.width, image.height)
-                    if (scaledImageBitmap != null) {
-                        val overlaidImage = image.overlayAlphaPixels(scaledImageBitmap)
-                        onIntent(CameraIntent.SetImage(overlaidImage))
-                        onIntent(CameraIntent.OnImageCreated)
-                    } else {
-                        onIntent(CameraIntent.SetImage(state.capturedPhoto))
-                        onIntent(CameraIntent.OnImageCreated)
-                    }
-                } ?: run {
-                    println("!!capturedPhoto is null")
-                }
-            }
-
-        }
-
-        is CameraSavingState.Saving -> {
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .zIndex(1f)
-            ) {
-                Carousel(
-                    state = state,
-                    onIntent = onIntent,
-                )
-
-                SavingPanel(
-                    onIntent = onIntent,
-                    state = state
-                )
-            }
-            state.capturedPhoto?.let { image ->
-                RenderImage(image = image)
-            }
-
-        }
-
-        else -> {
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .zIndex(1f)
-            ) {
-                Carousel(
-                    state = state,
-                    onIntent = onIntent,
-                )
-
-                ToolBar(onIntent = onIntent)
-            }
+        } ?: run {
+            println("!!capturedPhoto is null")
         }
     }
 }
 
+@Composable
+private fun BoxScope.ToolBarPanel(
+    state: CameraScreenState,
+    onIntent: (CameraIntent) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .zIndex(1f)
+    ) {
+        Carousel(
+            state = state,
+            onIntent = onIntent,
+        )
+        ToolBar(onIntent = onIntent)
+    }
+}
+
+@Composable
+private fun BoxScope.SavingBarPanel(
+    state: CameraScreenState,
+    onIntent: (CameraIntent) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .zIndex(1f)
+    ) {
+        Carousel(
+            state = state,
+            onIntent = onIntent,
+        )
+        SavingPanel(
+            state = state,
+            onIntent = onIntent,
+        )
+    }
+}
 
 @Composable
 private fun Carousel(
@@ -363,6 +358,7 @@ private fun CarouselElement(
 
 @Composable
 private fun ToolBar(onIntent: (CameraIntent) -> Unit) {
+    var isSelectingImage by remember { mutableStateOf(false) }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -371,9 +367,12 @@ private fun ToolBar(onIntent: (CameraIntent) -> Unit) {
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = {
-            onIntent(CameraIntent.OnGalleryButton)
-        }) {
+        if (isSelectingImage) {
+            getImageFromGallery { imageFromGallery ->
+                onIntent(CameraIntent.SetImage(imageFromGallery))
+            }
+        }
+        IconButton(onClick = { isSelectingImage = true }) {
             Icon(
                 modifier = Modifier.size(ShirmazTheme.dimension.sideCarouselButtonSize),
                 imageVector = ShirmazIcons.PhotoSearch,
@@ -438,7 +437,7 @@ private fun SavingPanel(
         verticalAlignment = Alignment.Top
     ) {
         ShirmazButton(
-            onClick = { onIntent(CameraIntent.BackToToolbar) },
+            onClick = { onIntent(CameraIntent.BackToCamera) },
         ) {
             Icon(
                 imageVector = ShirmazIcons.ArrowBack,
@@ -454,7 +453,7 @@ private fun SavingPanel(
         }
         ShirmazButton(
             onClick = {
-                state.capturedPhoto?.let { imageBitmap ->
+                state.staticImage?.let { imageBitmap ->
                     savePhoto(imageBitmap)
                     onIntent(CameraIntent.SaveImage)
                 }
@@ -486,16 +485,3 @@ fun ShirmazButton(
         content()
     }
 }
-
-@Composable
-fun onOpenGalleryButton(
-    state: CameraScreenState,
-    onIntent: (CameraIntent) -> Unit,
-    galleryWorker: GalleryWorker
-) {
-    println("!!onOpenGallery fun")
-    if (state.galleryPicture == null) {
-        onIntent(CameraIntent.OpenGallery(galleryWorker.openImageFromGallery()))
-    }
-}
-

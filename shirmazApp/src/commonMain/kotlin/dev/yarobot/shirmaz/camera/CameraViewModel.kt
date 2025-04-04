@@ -24,11 +24,10 @@ class CameraViewModel : ViewModel() {
             cameraProvideState = CameraProvideState.NotGranted,
             currentShirt = null,
             currentModel = null,
-            savingState = CameraSavingState.NotSaving,
+            isSaving = false,
             currentCamera = CameraType.FRONT,
-            capturedPhoto = null,
+            staticImage = null,
             viewCreated = false,
-            galleryPicture = null,
             appMode = AppMode.CameraMode
         )
     )
@@ -39,33 +38,39 @@ class CameraViewModel : ViewModel() {
         when (intent) {
             is CameraIntent.RequestCamera -> requestCamera(intent.permissionsController)
             is CameraIntent.TakePicture -> takePicture()
-            is CameraIntent.OpenGallery -> openGallery(intent.imageBitmap)
             is CameraIntent.ChooseShirt -> intent.shirt.chooseAsCurrent()
-            is CameraIntent.BackToToolbar -> backToToolbar()
+            is CameraIntent.BackToCamera -> backToCamera()
             is CameraIntent.SaveImage -> saveImage()
             is CameraIntent.ChangeCamera -> changeCamera()
             is CameraIntent.SetImage -> setImage(intent.imageBitmap)
             is CameraIntent.OnImageCreated -> onImageCreated()
             is CameraIntent.ViewCreated -> viewCreated()
-            is CameraIntent.OnGalleryButton -> onGalleryButton()
         }
     }
 
     private fun setImage(imageBitmap: ImageBitmap) {
         _state.update {
-            it.copy(capturedPhoto = imageBitmap)
+            it.copy(
+                appMode = AppMode.StaticImage,
+                isSaving = true,
+                staticImage = imageBitmap
+            )
         }
     }
 
-    private fun backToToolbar() {
+    private fun backToCamera() {
         _state.update {
-            it.copy(savingState = CameraSavingState.NotSaving)
+            it.copy(
+                isSaving = false,
+                staticImage = null,
+                appMode = AppMode.CameraMode
+            )
         }
     }
 
     private fun takePicture() {
         _state.update {
-            it.copy(savingState = CameraSavingState.CreatingImage)
+            it.copy(isSaving = true)
         }
     }
 
@@ -135,8 +140,9 @@ class CameraViewModel : ViewModel() {
     private fun saveImage() {
         _state.update {
             it.copy(
-                savingState = CameraSavingState.NotSaving,
-                capturedPhoto = null,
+                appMode = AppMode.CameraMode,
+                isSaving = false,
+                staticImage = null,
                 viewCreated = false
             )
         }
@@ -144,44 +150,14 @@ class CameraViewModel : ViewModel() {
 
     private fun onImageCreated() {
         _state.update {
-            it.copy(savingState = CameraSavingState.Saving)
+            it.copy(isSaving = true)
         }
     }
 
     private fun viewCreated() {
-        if (_state.value.savingState == CameraSavingState.CreatingImage && !_state.value.viewCreated) {
+        if (_state.value.isSaving && !_state.value.viewCreated) {
             _state.update {
-                it.copy(
-                    viewCreated = true
-                )
-            }
-        }
-    }
-
-    private fun openGallery(imageBitmap: ImageBitmap?) {
-        _state.update {
-            it.copy(
-                galleryPicture = imageBitmap,
-                capturedPhoto = imageBitmap
-            )
-        }
-
-    }
-
-    private fun onGalleryButton() {
-        if (_state.value.appMode == AppMode.CameraMode) {
-            _state.update {
-                it.copy(
-                    appMode = AppMode.GalleryMode
-                )
-            }
-        } else {
-            _state.update {
-                it.copy(
-                    appMode = AppMode.CameraMode,
-                    galleryPicture = null,
-                    capturedPhoto = null
-                )
+                it.copy(viewCreated = true)
             }
         }
     }

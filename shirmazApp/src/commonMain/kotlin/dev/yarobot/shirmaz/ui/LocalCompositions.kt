@@ -2,6 +2,7 @@ package dev.yarobot.shirmaz.ui
 
 import androidx.compose.runtime.compositionLocalOf
 import dev.icerock.moko.permissions.PermissionsController
+import dev.yarobot.shirmaz.platform.ActualContext
 
 val LocalPermissionsController = compositionLocalOf<PermissionsController> {
     error("No Permissions Controller provided")
@@ -12,5 +13,9 @@ val LocalShirmazColors = compositionLocalOf<ShirmazColors> {
 }
 
 val LocalShirmazDimension = compositionLocalOf<ShirmazDimension> {
-    error("No provided colors")
+    error("No provided dimensions")
+}
+
+val LocalActualContext = compositionLocalOf<ActualContext> {
+    error("No provided actual context")
 }

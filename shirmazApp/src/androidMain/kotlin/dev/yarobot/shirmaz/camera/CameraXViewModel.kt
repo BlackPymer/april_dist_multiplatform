@@ -22,7 +22,6 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.lifecycle.awaitInstance
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
-import com.google.mlkit.vision.common.InputImage
 import dev.yarobot.shirmaz.camera.model.CameraSize
 import dev.yarobot.shirmaz.platform.PlatformImage
 import kotlinx.coroutines.awaitCancellation

@@ -3,7 +3,6 @@ package dev.yarobot.shirmaz.camera
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
-import android.graphics.Bitmap
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -25,6 +24,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.math.roundToInt
+import androidx.core.graphics.createBitmap
 
 fun Context.getActivity(): Activity? = when (this) {
     is Activity -> this
@@ -43,7 +43,7 @@ class BitmappableScopeImpl(
             val width = bounds.width.roundToInt()
             val height = bounds.height.roundToInt()
 
-            val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            val bmp = createBitmap(width, height)
             val activity = view.context.getActivity() ?: error("Activity not found")
 
             val rect = android.graphics.Rect(

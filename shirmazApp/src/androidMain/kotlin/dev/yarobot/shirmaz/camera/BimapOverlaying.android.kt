@@ -5,6 +5,8 @@ import android.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.core.graphics.get
+import androidx.core.graphics.set
 
 actual fun ImageBitmap.overlayAlphaPixels(overlay: ImageBitmap): ImageBitmap {
     require(this.width == overlay.width && this.height == overlay.height) {
@@ -15,10 +17,10 @@ actual fun ImageBitmap.overlayAlphaPixels(overlay: ImageBitmap): ImageBitmap {
 
     for (y in 0 until height) {
         for (x in 0 until width) {
-            val pixel = bitmap.getPixel(x, y)
+            val pixel = bitmap[x, y]
             val alpha = Color.alpha(pixel)
             if (alpha != 0) {
-                result.setPixel(x, y, pixel)
+                result[x, y] = pixel
             }
         }
     }

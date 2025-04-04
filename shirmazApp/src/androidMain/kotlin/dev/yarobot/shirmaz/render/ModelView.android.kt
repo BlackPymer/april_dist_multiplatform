@@ -1,18 +1,22 @@
 package dev.yarobot.shirmaz.render
 
-import android.graphics.Bitmap
-import android.graphics.Picture
+import android.graphics.PixelFormat
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import com.google.mlkit.vision.common.PointF3D
 import dev.yarobot.shirmaz.camera.Bones
+import dev.yarobot.shirmaz.camera.CameraIntent
+import dev.yarobot.shirmaz.camera.CameraScreenState
 import dev.yarobot.shirmaz.camera.model.CameraSize
-import dev.yarobot.shirmaz.camera.model.ThreeDModel
 import dev.yarobot.shirmaz.platform.LEFT_ELBOW
 import dev.yarobot.shirmaz.platform.LEFT_HIP
 import dev.yarobot.shirmaz.platform.LEFT_SHOULDER
 import dev.yarobot.shirmaz.platform.PlatformImage
+import dev.yarobot.shirmaz.platform.PlatformInputImage
 import dev.yarobot.shirmaz.platform.RIGHT_ELBOW
 import dev.yarobot.shirmaz.platform.RIGHT_HIP
 import dev.yarobot.shirmaz.platform.RIGHT_SHOULDER
@@ -33,18 +37,6 @@ import io.github.sceneview.rememberOnGestureListener
 import java.nio.ByteBuffer
 import kotlin.math.PI
 import kotlin.math.atan
-import android.graphics.PixelFormat
-import android.view.SurfaceView
-import androidx.compose.foundation.background
-import androidx.compose.runtime.remember
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.draw
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.zIndex
-import dev.yarobot.shirmaz.camera.CameraIntent
-import dev.yarobot.shirmaz.platform.PlatformInputImage
 
 
 actual fun createModelView(
@@ -70,13 +62,10 @@ private class AndroidModelView(
     private var modelScale = defaultModelScale
     private var isPoseValid = false
 
-    private var modelBitmap: Bitmap? = null
-
-    private var sceneViewRef: SurfaceView? = null
 
     @Composable
     override fun ModelRendererInit(
-        model: ThreeDModel,
+        state: CameraScreenState,
         modifier: Modifier,
         onIntent: (CameraIntent) -> Unit
     ) {
@@ -91,55 +80,60 @@ private class AndroidModelView(
             centerNode.addChildNode(this)
         }
 
-        val modelNode = ModelNode(
-            modelInstance = modelLoader.createModelInstance(ByteBuffer.wrap(model.bytes)),
-            scaleToUnits = 18f
-        )
-        modelNode.position = Position(x = -0.42f, y = 1.05f, z = 0f)
-        Scene(
-            modifier = modifier
-                .fillMaxSize()
-                .background(Color.Transparent),
-
-            engine = engine,
-            isOpaque = false,
-            modelLoader = modelLoader,
-            cameraNode = cameraNode,
-            cameraManipulator = rememberCameraManipulator(
-                orbitHomePosition = cameraNode.worldPosition,
-                targetPosition = centerNode.worldPosition
-            ),
-            onViewCreated = {
-                setZOrderOnTop(false)
-                setZOrderMediaOverlay(true)
-                holder.setFormat(PixelFormat.TRANSLUCENT)
-            },
-            childNodes = listOf(
-                centerNode,
-                rememberNode { modelNode }
-            ),
-            environmentLoader = environmentLoader,
-            onFrame = {
-                modelNode.apply {
-                    isVisible = isPoseValid
-                    scale = modelScale
-                    nodes.forEach { node ->
-                        when (node.name) {
-                            Bones.leftArm -> node.rotation = leftArmRotation
-                            Bones.rightArm -> node.rotation = rightArmRotation
-                            Bones.leftShoulder -> node.position = shoulderPosition
-                            Bones.rightShoulder -> node.position = shoulderPosition
-                            Bones.spine -> node.position = spinePosition
+        val modelNode = remember(state.currentModel){
+            state.currentModel?.let { threeDModel ->
+                ModelNode(
+                    modelInstance = modelLoader.createModelInstance(ByteBuffer.wrap(threeDModel.bytes)),
+                    scaleToUnits = 18f
+                )
+            }
+        }
+        if (modelNode != null){
+            modelNode.position = Position(x = -0.42f, y = 1.05f, z = 0f)
+            Scene(
+                modifier = modifier
+                    .fillMaxSize()
+                    .background(Color.Transparent),
+                engine = engine,
+                isOpaque = false,
+                modelLoader = modelLoader,
+                cameraNode = cameraNode,
+                cameraManipulator = rememberCameraManipulator(
+                    orbitHomePosition = cameraNode.worldPosition,
+                    targetPosition = centerNode.worldPosition
+                ),
+                onViewCreated = {
+                    setZOrderOnTop(false)
+                    setZOrderMediaOverlay(true)
+                    holder.setFormat(PixelFormat.TRANSLUCENT)
+                },
+                childNodes = listOf(
+                    centerNode,
+                    rememberNode { modelNode }
+                ),
+                environmentLoader = environmentLoader,
+                onFrame = {
+                    modelNode.apply {
+                        isVisible = isPoseValid
+                        scale = modelScale
+                        nodes.forEach { node ->
+                            when (node.name) {
+                                Bones.leftArm -> node.rotation = leftArmRotation
+                                Bones.rightArm -> node.rotation = rightArmRotation
+                                Bones.leftShoulder -> node.position = shoulderPosition
+                                Bones.rightShoulder -> node.position = shoulderPosition
+                                Bones.spine -> node.position = spinePosition
+                            }
                         }
                     }
-                }
-                cameraNode.lookAt(centerNode)
-                onIntent(CameraIntent.ViewCreated)
-            },
-            onGestureListener = rememberOnGestureListener(
-                creator = { SimpleOnGestureListener() }
+                    cameraNode.lookAt(centerNode)
+                    onIntent(CameraIntent.ViewCreated)
+                },
+                onGestureListener = rememberOnGestureListener(
+                    creator = { SimpleOnGestureListener() }
+                )
             )
-        )
+        }
     }
 
     override fun updateModelPosition(image: PlatformInputImage) {

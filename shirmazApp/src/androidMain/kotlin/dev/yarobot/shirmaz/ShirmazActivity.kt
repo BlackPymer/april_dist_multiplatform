@@ -3,9 +3,11 @@ package dev.yarobot.shirmaz
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.google.android.filament.utils.Utils
 import dev.yarobot.shirmaz.camera.initAppContext
+import dev.yarobot.shirmaz.platform.ActualContext
+import dev.yarobot.shirmaz.ui.LocalActualContext
 
 class ShirmazActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -13,7 +15,11 @@ class ShirmazActivity : ComponentActivity() {
         initAppContext(this)
         installSplashScreen()
         setContent {
-            App()
+            CompositionLocalProvider(
+                LocalActualContext provides ActualContext(this)
+            ) {
+                App()
+            }
         }
     }
 }

@@ -15,10 +15,9 @@ private fun PreviewGranted() {
                 currentModel = null,
                 currentShirt = null,
                 currentCamera = CameraType.FRONT,
-                savingState = CameraSavingState.NotSaving,
-                capturedPhoto = null,
+                isSaving = false,
+                staticImage = null,
                 viewCreated = false,
-                galleryPicture = null,
                 appMode = AppMode.CameraMode
             ),
             onIntent = {}
@@ -36,10 +35,9 @@ private fun PreviewDenied() {
                 currentModel = null,
                 currentShirt = null,
                 currentCamera = CameraType.FRONT,
-                savingState = CameraSavingState.NotSaving,
-                capturedPhoto = null,
+                isSaving = false,
+                staticImage = null,
                 viewCreated = false,
-                galleryPicture = null,
                 appMode = AppMode.CameraMode
             ),
             onIntent = {}
@@ -56,11 +54,10 @@ private fun PreviewSaving() {
                 cameraProvideState = CameraProvideState.Granted,
                 currentModel = null,
                 currentShirt = null,
-                savingState = CameraSavingState.CreatingImage,
+                isSaving = false,
                 currentCamera = CameraType.FRONT,
-                capturedPhoto = null,
+                staticImage = null,
                 viewCreated = false,
-                galleryPicture = null,
                 appMode = AppMode.CameraMode
             ),
             onIntent = {}
@@ -78,10 +75,9 @@ private fun PreviewWithShirts() {
                 currentModel = null,
                 currentShirt = null,
                 currentCamera = CameraType.FRONT,
-                savingState = CameraSavingState.NotSaving,
-                capturedPhoto = null,
+                isSaving = false,
+                staticImage = null,
                 viewCreated = false,
-                galleryPicture = null,
                 appMode = AppMode.CameraMode
             ),
             onIntent = {}
