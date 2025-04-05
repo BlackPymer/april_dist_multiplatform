@@ -90,7 +90,7 @@ private class AndroidModelView(
             centerNode.addChildNode(this)
         }
 
-        val modelNode = remember(state.currentShirt){
+        val modelNode = remember(state.currentShirt) {
             state.currentShirt?.let { shirt ->
                 ModelNode(
                     modelInstance = modelLoader.createModelInstance(
@@ -100,7 +100,7 @@ private class AndroidModelView(
                 )
             }
         }
-        if (modelNode != null){
+        if (modelNode != null) {
             modelNode.position = Position(x = -0.42f, y = 1.05f, z = 0f)
             Scene(
                 modifier = modifier.fillMaxSize(),
@@ -147,6 +147,7 @@ private class AndroidModelView(
     }
 
     override fun updateModelPosition(image: PlatformInputImage) {
+        println("!! width: ${image.width}, height: ${image.height}")
         poseDetector.processImage(image) { poses, error ->
             isPoseValid = !poses.isNullOrEmpty()
             if (!poses.isNullOrEmpty()) {
@@ -154,9 +155,10 @@ private class AndroidModelView(
                     leftShoulder = poses[RIGHT_SHOULDER].position3D,
                     rightShoulder = poses[LEFT_SHOULDER].position3D,
                     spine = averageOf(poses[LEFT_HIP].position3D, poses[24].position3D),
+                    cameraHeight = image.height, cameraWidth = image.width
                 )
                 spinePosition = averageOf(poses[LEFT_HIP].position3D, poses[RIGHT_HIP].position3D)
-                    .toPosition()
+                    .toPosition(cameraHeight = image.height, cameraWidth = image.width)
                 leftArmRotation = calculateAngle(
                     poses[LEFT_SHOULDER].position3D,
                     poses[LEFT_ELBOW].position3D,
@@ -170,7 +172,7 @@ private class AndroidModelView(
                 shoulderPosition = averageOf(
                     poses[RIGHT_SHOULDER].position3D,
                     poses[LEFT_SHOULDER].position3D
-                ).toPosition() - spinePosition
+                ).toPosition(cameraHeight = image.height, cameraWidth = image.width) - spinePosition
             }
         }
     }
@@ -187,9 +189,11 @@ private class AndroidModelView(
                     leftShoulder = poses[RIGHT_SHOULDER].position3D,
                     rightShoulder = poses[LEFT_SHOULDER].position3D,
                     spine = averageOf(poses[LEFT_HIP].position3D, poses[24].position3D),
+                    cameraHeight = CameraSize.WIDTH,
+                    cameraWidth =  CameraSize.HEIGHT
                 )
                 spinePosition = averageOf(poses[LEFT_HIP].position3D, poses[RIGHT_HIP].position3D)
-                    .toPosition()
+                    .toPosition(cameraHeight = CameraSize.WIDTH, cameraWidth = CameraSize.HEIGHT)
                 leftArmRotation = calculateAngle(
                     poses[LEFT_SHOULDER].position3D,
                     poses[LEFT_ELBOW].position3D,
@@ -203,7 +207,7 @@ private class AndroidModelView(
                 shoulderPosition = averageOf(
                     poses[RIGHT_SHOULDER].position3D,
                     poses[LEFT_SHOULDER].position3D
-                ).toPosition() - spinePosition
+                ).toPosition(cameraHeight = CameraSize.WIDTH, cameraWidth = CameraSize.HEIGHT) - spinePosition
             }
         }
     }
@@ -212,12 +216,14 @@ private class AndroidModelView(
         leftShoulder: PointF3D,
         rightShoulder: PointF3D,
         spine: PointF3D,
+        cameraWidth: Int,
+        cameraHeight: Int
     ): Scale {
         val shoulderDistance = leftShoulder.x - rightShoulder.x
         val height = spine.y - averageOf(leftShoulder, rightShoulder).y
         return Scale(
-            x = -defaultModelScale.x * shoulderDistance / defaultShoulderDistance / CameraSize.WIDTH * CameraSize.WIDTH,
-            y = defaultModelScale.y * height / defaultHeight / CameraSize.HEIGHT * CameraSize.HEIGHT,
+            x = -defaultModelScale.x * shoulderDistance / defaultShoulderDistance / cameraWidth * cameraWidth,
+            y = defaultModelScale.y * height / defaultHeight / cameraHeight * cameraHeight,
             z = defaultModelScale.z
         )
     }
@@ -229,11 +235,11 @@ private class AndroidModelView(
             (firstPoint.z + secondPoint.z) / 2
         )
 
-    private fun PointF3D.toPosition(): Position {
+    private fun PointF3D.toPosition(cameraWidth: Int, cameraHeight: Int): Position {
         val maxValue = Position(3f, -7f, 0f)
         return Position(
-            maxValue.x * this.x / CameraSize.HEIGHT * defaultModelScale.x / modelScale.x,
-            maxValue.y * this.y / CameraSize.WIDTH * defaultModelScale.y / modelScale.y,
+            maxValue.x * this.x / cameraWidth * defaultModelScale.x / modelScale.x,
+            maxValue.y * this.y / cameraHeight * defaultModelScale.y / modelScale.y,
             0f
         )
     }

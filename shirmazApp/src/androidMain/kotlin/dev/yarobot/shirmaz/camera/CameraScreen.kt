@@ -411,7 +411,7 @@ private fun ToolBar(onIntent: (CameraIntent) -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (isSelectingImage) {
-            getImageFromGallery { imageFromGallery ->
+            GetImageFromGallery { imageFromGallery ->
                 onIntent(CameraIntent.SetImage(imageFromGallery))
             }
         }
