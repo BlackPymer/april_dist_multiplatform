@@ -20,7 +20,6 @@ import dev.yarobot.shirmaz.platform.RIGHT_HIP
 import dev.yarobot.shirmaz.platform.RIGHT_SHOULDER
 import dev.yarobot.shirmaz.posedetection.ShirmazPoseDetector
 import io.github.sceneview.Scene
-import io.github.sceneview.gesture.GestureDetector.SimpleOnGestureListener
 import io.github.sceneview.math.Position
 import io.github.sceneview.math.Rotation
 import io.github.sceneview.math.Scale
@@ -31,7 +30,6 @@ import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberEnvironmentLoader
 import io.github.sceneview.rememberModelLoader
 import io.github.sceneview.rememberNode
-import io.github.sceneview.rememberOnGestureListener
 import kotlin.math.PI
 import kotlin.math.atan
 
@@ -93,15 +91,15 @@ private class AndroidModelView(
         val modelNode = remember(state.currentShirt) {
             state.currentShirt?.let { shirt ->
                 ModelNode(
-                    modelInstance = modelLoader.createModelInstance(
-                        assetFileLocation = shirt.modelName,
-                    ),
+                    modelInstance = modelLoader.createModelInstance(assetFileLocation = shirt.modelName),
                     scaleToUnits = 18f
-                )
+                ).apply {
+                    position = Position(x = -0.42f, y = 1.05f, z = 0f)
+                }
             }
         }
+
         if (modelNode != null) {
-            modelNode.position = Position(x = -0.42f, y = 1.05f, z = 0f)
             Scene(
                 modifier = modifier.fillMaxSize(),
                 engine = engine,
@@ -116,11 +114,9 @@ private class AndroidModelView(
                     setZOrderOnTop(false)
                     setZOrderMediaOverlay(true)
                     holder.setFormat(PixelFormat.TRANSLUCENT)
+                    setOnTouchListener { _, _ -> true }
                 },
-                childNodes = listOf(
-                    centerNode,
-                    rememberNode { modelNode }
-                ),
+                childNodes = listOf(centerNode, modelNode),
                 environmentLoader = environmentLoader,
                 onFrame = {
                     modelNode.apply {
@@ -138,10 +134,7 @@ private class AndroidModelView(
                     }
                     cameraNode.lookAt(centerNode)
                     onIntent(CameraIntent.ViewCreated)
-                },
-                onGestureListener = rememberOnGestureListener(
-                    creator = { SimpleOnGestureListener() }
-                )
+                }
             )
         }
     }
@@ -190,7 +183,7 @@ private class AndroidModelView(
                     rightShoulder = poses[LEFT_SHOULDER].position3D,
                     spine = averageOf(poses[LEFT_HIP].position3D, poses[24].position3D),
                     cameraHeight = CameraSize.WIDTH,
-                    cameraWidth =  CameraSize.HEIGHT
+                    cameraWidth = CameraSize.HEIGHT
                 )
                 spinePosition = averageOf(poses[LEFT_HIP].position3D, poses[RIGHT_HIP].position3D)
                     .toPosition(cameraHeight = CameraSize.WIDTH, cameraWidth = CameraSize.HEIGHT)
@@ -207,7 +200,10 @@ private class AndroidModelView(
                 shoulderPosition = averageOf(
                     poses[RIGHT_SHOULDER].position3D,
                     poses[LEFT_SHOULDER].position3D
-                ).toPosition(cameraHeight = CameraSize.WIDTH, cameraWidth = CameraSize.HEIGHT) - spinePosition
+                ).toPosition(
+                    cameraHeight = CameraSize.WIDTH,
+                    cameraWidth = CameraSize.HEIGHT
+                ) - spinePosition
             }
         }
     }
