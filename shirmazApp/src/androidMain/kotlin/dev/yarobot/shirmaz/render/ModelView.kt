@@ -1,11 +1,11 @@
 package dev.yarobot.shirmaz.render
 
-import android.graphics.PixelFormat
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.google.mlkit.vision.common.PointF3D
+import dev.yarobot.shirmaz.camera.AppMode
 import dev.yarobot.shirmaz.camera.Bones
 import dev.yarobot.shirmaz.camera.CameraIntent
 import dev.yarobot.shirmaz.camera.CameraScreenState
@@ -98,7 +98,7 @@ private class AndroidModelView(
                 }
             }
         }
-
+        val isOnTop = remember(state.appMode) { state.appMode == AppMode.StaticImage }
         if (modelNode != null) {
             Scene(
                 modifier = modifier.fillMaxSize(),
@@ -111,9 +111,7 @@ private class AndroidModelView(
                     targetPosition = centerNode.worldPosition
                 ),
                 onViewCreated = {
-                    setZOrderOnTop(false)
-                    setZOrderMediaOverlay(true)
-                    holder.setFormat(PixelFormat.TRANSLUCENT)
+                    setZOrderOnTop(isOnTop)
                     setOnTouchListener { _, _ -> true }
                 },
                 childNodes = listOf(centerNode, modelNode),

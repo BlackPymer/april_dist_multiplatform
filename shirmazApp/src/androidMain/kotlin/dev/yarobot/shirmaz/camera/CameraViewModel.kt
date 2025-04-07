@@ -56,6 +56,7 @@ class CameraViewModel : ViewModel() {
             it.copy(
                 isSaving = false,
                 staticImage = null,
+                currentShirt = null,
                 appMode = AppMode.CameraMode
             )
         }
