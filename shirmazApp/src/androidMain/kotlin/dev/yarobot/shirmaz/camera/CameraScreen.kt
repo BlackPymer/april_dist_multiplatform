@@ -172,6 +172,7 @@ private fun BoxScope.GrantedView(
                     contentDescription = null,
                     contentScale = ContentScale.Crop
                 )
+                modelView.updateModelPosition(imageBitmap.toPlatformInputImage())
             } ?: CircularProgressIndicator(Modifier.align(Alignment.Center))
             SavingBarPanel(
                 state = state,
@@ -412,6 +413,7 @@ private fun ToolBar(onIntent: (CameraIntent) -> Unit) {
         if (isSelectingImage) {
             GetImageFromGallery { imageFromGallery ->
                 onIntent(CameraIntent.SetImage(imageFromGallery))
+                isSelectingImage = false
             }
         }
         IconButton(onClick = { isSelectingImage = true }) {
