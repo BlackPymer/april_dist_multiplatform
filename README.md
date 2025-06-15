@@ -1,1 +1,1 @@
-# april_dist_multiplatform
+This is a Kotlin Multiplatform project targeting Android and iOS

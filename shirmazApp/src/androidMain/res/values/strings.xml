@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Shirtly</string>
+
+    <string name="camera_not_granted">Camera permission not granted</string>
+    <string name="camera_request">Allow access to camera</string>
+    <string name="gallery_cd">Open gallery</string>
+    <string name="carousel_cd">Open carousel</string>
+    <string name="back_cd">Back</string>
+    <string name="save_cd">Save</string>
+    <string name="deselect_shirt_cd">Deselect shirt</string>
+    <string name="null_shirt">No shirt</string>
+
+    <string name="mia_name">Mia</string>
+    <string name="jacket_name">Jacket</string>
+    <string name="red_t_shirt_name">Red T-Shirt</string>
+    <string name="dark_t_shirt_name">Dark T-Shirt</string>
+    <string name="white_t_shirt_name">White T-Shirt</string>
+    <string name="yellow_t_shirt_name">Yellow T-Shirt</string>
+    <string name="blue_t_shirt_name">Blue T-Shirt</string>
+    <string name="gray_t_shirt_name">Gray T-Shirt</string>
+    <string name="green_t_shirt_name">Green T-Shirt</string>
+</resources>
