@@ -12,12 +12,12 @@ private fun PreviewGranted() {
         ScreenContent(
             state = CameraScreenState(
                 cameraProvideState = CameraProvideState.Granted,
-                currentModel = null,
                 currentShirt = null,
                 currentCamera = CameraType.FRONT,
-                savingState = CameraSavingState.NotSaving,
-                capturedPhoto = null,
-                viewCreated = false
+                isSaving = false,
+                staticImage = null,
+                viewCreated = false,
+                appMode = AppMode.CameraMode
             ),
             onIntent = {}
         )
@@ -31,12 +31,12 @@ private fun PreviewDenied() {
         ScreenContent(
             state = CameraScreenState(
                 cameraProvideState = CameraProvideState.NotGranted,
-                currentModel = null,
                 currentShirt = null,
                 currentCamera = CameraType.FRONT,
-                savingState = CameraSavingState.NotSaving,
-                capturedPhoto = null,
-                viewCreated = false
+                isSaving = false,
+                staticImage = null,
+                viewCreated = false,
+                appMode = AppMode.CameraMode
             ),
             onIntent = {}
         )
@@ -50,12 +50,12 @@ private fun PreviewSaving() {
         ScreenContent(
             state = CameraScreenState(
                 cameraProvideState = CameraProvideState.Granted,
-                currentModel = null,
                 currentShirt = null,
-                savingState = CameraSavingState.CreatingImage,
+                isSaving = false,
                 currentCamera = CameraType.FRONT,
-                capturedPhoto = null,
-                viewCreated = false
+                staticImage = null,
+                viewCreated = false,
+                appMode = AppMode.CameraMode
             ),
             onIntent = {}
         )
@@ -69,12 +69,12 @@ private fun PreviewWithShirts() {
         ScreenContent(
             state = CameraScreenState(
                 cameraProvideState = CameraProvideState.Granted,
-                currentModel = null,
                 currentShirt = null,
                 currentCamera = CameraType.FRONT,
-                savingState = CameraSavingState.NotSaving,
-                capturedPhoto = null,
-                viewCreated = false
+                isSaving = false,
+                staticImage = null,
+                viewCreated = false,
+                appMode = AppMode.CameraMode
             ),
             onIntent = {}
         )

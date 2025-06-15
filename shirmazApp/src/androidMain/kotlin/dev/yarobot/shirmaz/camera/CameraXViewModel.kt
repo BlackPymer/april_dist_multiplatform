@@ -5,7 +5,9 @@ import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.util.Log
 import android.util.Size
+import androidx.annotation.OptIn
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCapture.OnImageCapturedCallback
@@ -59,6 +61,7 @@ class CameraXViewModel() : ViewModel() {
         .setResolutionSelector(resolutionSelector)
         .build()
 
+    @OptIn(ExperimentalGetImage::class)
     fun setAnalyzeUseCase(analyzer: (PlatformImage) -> Unit) {
         cameraAnalyzeUseCase.setAnalyzer(backgroundExecutor, analyzer)
     }

@@ -5,55 +5,12 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.kotlinCocoapods)
 }
 
 kotlin {
     androidTarget {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
-        }
-    }
-
-    listOf(
-        iosX64(),
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
-            baseName = "ShirmazApp"
-            isStatic = true
-        }
-    }
-
-    cocoapods {
-        summary = "Some description for a Kotlin/Native module"
-        homepage = "Link to a Kotlin/Native module homepage"
-        version = "1.0"
-        ios.deploymentTarget = "15.5"
-        podfile = project.file("../iosApp/Podfile")
-        framework {
-            baseName = "ShirmazApp"
-            isStatic = true
-        }
-
-        pod("MLKitVision"){
-            version = libs.versions.mlkit.pod.vision.get()
-        }
-        pod("MLImage"){
-            version = libs.versions.mlkit.pod.image.get()
-        }
-        pod("MLKitCommon"){
-            version = libs.versions.mlkit.pod.common.get()
-        }
-        pod("MLKitPoseDetection"){
-            version = libs.versions.mlkit.pod.posedetection.get()
-        }
-        pod("MLKitPoseDetectionCommon"){
-            version = libs.versions.mlkit.pod.posedetection.get()
-        }
-        pod("MLKitPoseDetectionAccurate"){
-            version = libs.versions.mlkit.pod.posedetection.get()
         }
     }
 
@@ -68,8 +25,7 @@ kotlin {
             implementation(libs.androidx.splashscreen)
             implementation(libs.sceneview.base)
             implementation(libs.sceneview.ar)
-        }
-        commonMain.dependencies {
+
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
@@ -109,10 +65,5 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-}
-
-dependencies {
-    implementation(libs.androidx.window)
-    debugImplementation(compose.uiTooling)
 }
 

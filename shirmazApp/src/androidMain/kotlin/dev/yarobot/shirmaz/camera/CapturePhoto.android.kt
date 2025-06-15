@@ -12,8 +12,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import java.io.File
 
-
-actual fun savePhoto(imageBitmap: ImageBitmap) {
+fun savePhoto(imageBitmap: ImageBitmap) {
     val context = provideAppContext()
     val bitmap: Bitmap = imageBitmap.asAndroidBitmap()
     val resolver = context.contentResolver
